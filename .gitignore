@@ -23,10 +23,12 @@ Thumbs.db
 .config
 .env
 .firebase
+.firebaserc
 .next
+.static
 config
 coverage
 dist/**/*
 node_modules
-public
+precache.*.*.js
 sw.*

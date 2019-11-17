@@ -7,8 +7,8 @@
         "paths": {
             "*": ["node_modules/@types/*", "src/@types/*"]
         },
-        "types": ["@types/node", "@types/jest"]
+        "types": ["@types/node", "@types/jest", "@emotion/core"]
     },
-    "include": ["src/**/*"],
+    "include": ["src", "server", "learn", "tmp"],
     "exclude": ["node_modules"]
 }

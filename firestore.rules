@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function adminPath() {
+      return /databases/$(database)/documents/admin/$(request.auth.uid)
+    }
+
+    function isAdmin() {
+      return exists(adminPath());
+    }
+
+    match /{path=**}/schedules/{schedule} {
+      allow read;
+      allow write: if isAdmin();
+    }
+
+    // match /sources/{source}/posts/{post} {
+    //   allow read: if isAdmin();
+    //   allow update: if isAdmin();
+    // }
+  }
+}

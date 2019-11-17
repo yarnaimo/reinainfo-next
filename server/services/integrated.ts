@@ -1,0 +1,28 @@
+import { getUrlOfTweet } from '@yarnaimo/twimo'
+import { prray } from 'prray'
+import { dbAdmin } from './firebase-admin'
+import { TwimoClient } from './twitter'
+import { sendMessageToAllWebhooks } from './webhook'
+
+export const retweetWithLoggingAndNotification = async (
+    twimo: TwimoClient,
+    ids: string[],
+) => {
+    const retweetResults = await twimo.retweet(ids)
+
+    await prray(retweetResults).mapAsync(({ retweeted_status }) =>
+        dbAdmin.tweetLogs.create(null, {
+            type: 'retweet',
+            tweetId: retweeted_status!.id_str,
+        }),
+    )
+
+    const webhookResults = await sendMessageToAllWebhooks({
+        text: [
+            `⚡ ${retweetResults.length} 件のツイートをリツイートしました`,
+            ...retweetResults.map(r => getUrlOfTweet(r)),
+        ].join('\n'),
+    })
+
+    return { retweetResults, webhookResults }
+}
