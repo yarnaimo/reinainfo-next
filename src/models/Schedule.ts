@@ -139,7 +139,7 @@ export type ISchedule = Blue.Interface<{
 
     category: CategoryKey
     customIcon: string | null
-    customColor: string | null
+    ribbonColors: string[] | null
 
     title: string
     url: string

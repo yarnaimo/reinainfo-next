@@ -31,7 +31,7 @@ beforeEach(() => {
 const o = {
     category: 'live' as const,
     customIcon: null,
-    customColor: null,
+    ribbonColors: null,
     hasTime: true,
     url,
     parts: [],
@@ -46,9 +46,10 @@ beforeEach(async () => {
         date: scheduleDate.toDate(),
         ...o,
     }
-    const { id: scheduleId } = await dbInstanceAdmin
+    const scheduleDoc = await dbInstanceAdmin
         .collection('schedules')
         .add(schedule)
+    const { id: scheduleId } = scheduleDoc
 
     const tickets = prray<ITicket['_E']>([
         {
@@ -77,7 +78,7 @@ beforeEach(async () => {
         },
     ])
 
-    await tickets.mapAsync(t => dbInstanceAdmin.collection('tickets').add(t))
+    await tickets.mapAsync(t => scheduleDoc.collection('tickets').add(t))
 })
 
 test('daily', async () => {

@@ -31,7 +31,7 @@ beforeEach(() => {
 const o = {
     category: 'live' as const,
     customIcon: null,
-    customColor: null,
+    ribbonColors: null,
     hasTime: true,
     url,
     parts: [],

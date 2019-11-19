@@ -14,7 +14,7 @@ export const Title: FC<Props> = ({ title }) => {
             <title>
                 {is.undefined(title)
                     ? env.appName
-                    : `${title} - ${env.appName}`}
+                    : `${title} | ${env.appName}`}
             </title>
         </Head>
     )

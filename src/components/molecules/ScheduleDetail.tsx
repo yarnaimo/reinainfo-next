@@ -102,7 +102,7 @@ export const ScheduleDetailModal = memo<ModalProps>(
                         }}
                     >
                         <Icon
-                            icon={micon(category.micon)}
+                            icon={micon(s.customIcon ?? category.micon)}
                             css={{
                                 fontSize: iconSize,
                             }}

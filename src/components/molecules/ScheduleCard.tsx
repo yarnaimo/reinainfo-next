@@ -22,12 +22,11 @@ export const ScheduleCard = memo(
 
         const [textColor, background, boxShadow] = useMemo(
             () => [
-                category.textColor ? category.textColor() : color.white(),
+                category.textColor?.() ?? color.white(),
                 cardGradient(category.color[0], category.color[1]),
                 cardShadow(category.color[0](0.4)),
-                // cardShadowHovered(category.color[0](0.5)),
             ],
-            [s.category],
+            [category, s.ribbonColors],
         )
 
         const sidePadding = 18
@@ -62,17 +61,45 @@ export const ScheduleCard = memo(
                     }}
                 >
                     <Solid ai="center">
-                        <Icon
-                            icon={micon(category.micon)}
+                        <Solid
                             css={{
+                                position: 'relative',
                                 ...margin({
                                     x: iconNegativeMargin,
                                     y: iconNegativeMargin / 2,
                                 }),
                                 ...size(iconBoxSize, iconBoxSize),
-                                fontSize: iconSize,
                             }}
-                        ></Icon>
+                        >
+                            <Icon
+                                icon={micon(s.customIcon ?? category.micon)}
+                                css={{
+                                    zIndex: 1,
+                                    fontSize: iconSize,
+                                }}
+                            ></Icon>
+
+                            {s.ribbonColors && (
+                                <SolidColumn
+                                    css={{
+                                        position: 'absolute',
+                                        transform:
+                                            'translate(-50%, -50%) rotate(-45deg)',
+                                        width: 96,
+                                        height: 15,
+                                        top: '50%',
+                                        left: '50%',
+                                    }}
+                                >
+                                    {s.ribbonColors.map((c, i) => (
+                                        <Liquid
+                                            key={i}
+                                            css={{ background: c }}
+                                        ></Liquid>
+                                    ))}
+                                </SolidColumn>
+                            )}
+                        </Solid>
 
                         <div
                             css={{

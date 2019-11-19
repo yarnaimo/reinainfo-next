@@ -77,7 +77,7 @@ a {
 
 h1,
 h2 {
-    font-family: 'Cabin';
+    font-family: 'Cabin', $mdc-typography-font-family;
     font-weight: 600;
     letter-spacing: 0.75px;
 }
