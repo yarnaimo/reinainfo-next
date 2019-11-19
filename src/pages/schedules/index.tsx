@@ -1,8 +1,8 @@
 import { ComponentProps } from '@rmwc/types'
 import dayjs from 'dayjs'
+import { motion, Variants } from 'framer-motion'
 import { NextPage } from 'next'
 import React, { FC, Fragment, useContext } from 'react'
-import { animated, useSpring, useTransition } from 'react-spring'
 import { useEffectOnce } from 'react-use'
 import { MainContainer } from '../../components/blocks/Container'
 import { Liquid, Solid } from '../../components/blocks/Flex'
@@ -11,61 +11,59 @@ import { ScheduleCard } from '../../components/molecules/ScheduleCard'
 import { Store } from '../../components/templates/Store'
 import { Title } from '../../components/templates/Title'
 import {
+    filterByTimestamp,
     IScheduleSerialized,
     IScheduleWithDayjs,
     MSchedule,
 } from '../../models/Schedule'
 import { db } from '../../services/firebase'
 import { color } from '../../utils/color'
-import { margin } from '../../utils/css'
+import { margin, transition } from '../../utils/css'
 import { useBool } from '../../utils/hooks'
+import { cardVariants } from '../../utils/variants'
 
 type Props = { schedules?: IScheduleSerialized[] }
 
 const getGSchedulesSerialized = () =>
-    db.gSchedulesActive.getQuery(undefined, MSchedule.serialize)
+    db.gSchedulesActive.getQuery({
+        q: filterByTimestamp('date'),
+        decoder: MSchedule.serialize,
+    })
 
-// const variants: Variants = {
-//     initial: {
-//         transition: { staggerChildren: 0.0125, staggerDirection: -1 },
-//     },
-//     enter: {
-//         transition: { staggerChildren: 0.0125, delayChildren: 0 },
-//     },
-//     exit: {
-//         transition: { staggerChildren: 0.0125, staggerDirection: -1 },
-//     },
-// }
+const variants: Variants = {
+    initial: {
+        transition: { staggerChildren: 0.0125, staggerDirection: -1 },
+    },
+    enter: {
+        transition: { staggerChildren: 0.0125, delayChildren: 0 },
+    },
+    exit: {
+        transition: { staggerChildren: 0.0125, staggerDirection: -1 },
+    },
+}
 
-// const filterLabelStyle:CSSObject = {
-//     fontSize: 12,
-//     lineHeight: '24px',
-//     cursor: 'pointer',
-//     userSelect: 'none',
-// }
+const filterLabelMotion = transition('std', ['color'])
 
 const FilterLabel: FC<ComponentProps & { active: boolean; label: string }> = ({
     active,
     label,
     ...props
 }) => {
-    const spring = useSpring({
-        color: active ? color.blue(1) : color.black(0.4),
-    })
-
     return (
-        <animated.div
-            style={spring}
+        <div
+            {...props}
             css={{
                 fontSize: 12,
                 lineHeight: '24px',
                 cursor: 'pointer',
                 userSelect: 'none',
+
+                ...filterLabelMotion,
+                color: active ? color.blue(1) : color.black(0.4),
             }}
-            {...(props as any)}
         >
             {label}
-        </animated.div>
+        </div>
     )
 }
 
@@ -77,56 +75,37 @@ type ScheduleChunks = {
 const ScheduleList: FC<{ chunkedSchedules: ScheduleChunks }> = ({
     chunkedSchedules,
 }) => {
-    const transitions = useTransition(chunkedSchedules, s => s.label, {
-        trail: 12,
-        from: {
-            transform: 'translateY(8px) scale(0.98)',
-            opacity: 0,
-        },
-        enter: {
-            transform: 'translateY(0px) scale(1)',
-            opacity: 1,
-        },
-        leave: {
-            transform: 'translateY(8px) scale(0.98)',
-            opacity: 0,
-        },
-    })
-
     return (
-        <>
-            {transitions.map(({ item: chunk, props, key }) => (
-                <Fragment key={key}>
-                    <animated.h5
-                        style={props}
+        <motion.div initial="initial" animate="enter" variants={variants}>
+            {chunkedSchedules.map(chunk => (
+                <Fragment key={chunk.label}>
+                    <motion.h5
+                        // style={props}
+                        variants={cardVariants}
                         css={{
                             ...margin({ top: 24, bottom: 12 }),
                             color: color.brown(0.75),
                         }}
                     >
                         {chunk.label}
-                    </animated.h5>
+                    </motion.h5>
 
                     {chunk.schedules.map(s => (
                         <ScheduleCard
                             key={s._id}
-                            style={props}
+                            // style={props}
+                            variants={cardVariants}
                             schedule={s}
                         ></ScheduleCard>
                     ))}
                 </Fragment>
             ))}
-        </>
+        </motion.div>
     )
 }
 
 const SchedulesPage: NextPage<Props> = ({ schedules: pSchedules }) => {
     const { globalState, setGlobalState } = useContext(Store)
-
-    // const {
-    //     params: { id },
-    //     router,
-    // } = useQueryParams<{ id?: string }>({})
 
     // const modalSchedule = useMemo(
     //     () => (is.string(id) ? globalState.gSchedules.map?.get(id) : undefined),
@@ -167,19 +146,7 @@ const SchedulesPage: NextPage<Props> = ({ schedules: pSchedules }) => {
         <MainContainer>
             <Title title="Schedules"></Title>
 
-            {/* <ScheduleDetail
-                schedule={modalSchedule}
-                // open={modalBool.state}
-                onClose={() => router.back()}
-            ></ScheduleDetail> */}
-
-            <Solid
-                ai="center"
-                css={{ ...margin({ y: 24 }) }}
-                // variants={cardVariants}
-                // initial="initial"
-                // animate="enter"
-            >
+            <Solid ai="center" css={{ ...margin({ y: 24 }) }}>
                 <Solid>
                     <h2
                         css={{

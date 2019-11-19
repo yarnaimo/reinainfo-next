@@ -16,7 +16,7 @@ export const sendWebhookMessage = async (
 export const sendMessageToAllWebhooks = async (
     message: IncomingWebhookSendArguments,
 ) => {
-    const { array: webhooks } = await dbAdmin.webhooks.getQuery()
+    const { array: webhooks } = await dbAdmin.webhooks.getQuery({})
 
     const results = await prray(webhooks).mapAsync(
         async webhook => {

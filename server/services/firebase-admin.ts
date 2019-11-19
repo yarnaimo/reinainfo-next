@@ -23,7 +23,7 @@ export const dbInstanceAdmin = appAdmin.firestore()
 export const dbAdmin = createCollections(dbInstanceAdmin)
 
 export const getEnv = async () => {
-    const env = await dbAdmin.appEnvs.getDoc('default')
+    const env = await dbAdmin.appEnvs.getDoc({ doc: 'default' })
     if (!env) {
         throw new Error('env not found')
     }

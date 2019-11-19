@@ -1,4 +1,5 @@
 import { ComponentProps } from '@rmwc/types'
+import { motion, MotionProps } from 'framer-motion'
 import React, { forwardRef, memo, useMemo, useState } from 'react'
 import { Icon, Ripple } from 'rmwc'
 import { IScheduleSerialized, MSchedule } from '../../models/Schedule'
@@ -8,9 +9,10 @@ import { micon } from '../../utils/icon'
 import { Liquid, Solid, SolidColumn } from '../blocks/Flex'
 import { ScheduleDetail } from './ScheduleDetail'
 
-type Props = ComponentProps & {
-    schedule: IScheduleSerialized
-}
+type Props = ComponentProps &
+    MotionProps & {
+        schedule: IScheduleSerialized
+    }
 
 export const ScheduleCard = memo(
     forwardRef<any, Props>(({ schedule: s, ...props }, ref) => {
@@ -133,13 +135,13 @@ export const ScheduleCard = memo(
                     }}
                 ></ScheduleDetail>
 
-                <a
+                <motion.a
                     href={`/schedules/${s._id}`}
                     onClick={e => {
                         setModalOpen(true)
                         e.preventDefault()
                     }}
-                    ref={ref}
+                    ref={ref as any}
                     {...props}
                     css={{
                         display: 'block',
@@ -169,7 +171,7 @@ export const ScheduleCard = memo(
                         {Content_}
                     </Ripple>
                     {/* </Link> */}
-                </a>
+                </motion.a>
             </>
         )
     }),

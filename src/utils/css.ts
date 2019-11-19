@@ -174,7 +174,7 @@ export class Motion {
     }
 }
 
-export const motion = (
+export const transition = (
     easingType: keyof typeof curve,
     properties: (keyof Properties)[],
     durations?: number[],

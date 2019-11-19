@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Router, { useRouter } from 'next/router'
 import React, { FC, memo, ReactNode } from 'react'
@@ -19,10 +18,16 @@ import {
 import { env } from '../../env'
 import { logout } from '../../services/firebase'
 import { appbarShadow, color } from '../../utils/color'
-import { appbarHeight, important, margin, responsive } from '../../utils/css'
+import {
+    appbarHeight,
+    important,
+    margin,
+    responsive,
+    size,
+    transition,
+} from '../../utils/css'
 import { useBool } from '../../utils/hooks'
 import { micon } from '../../utils/icon'
-import { tabItemVariants } from '../../utils/variants'
 import { AppBarSection } from '../blocks/AppBarSection'
 import { Container } from '../blocks/Container'
 import { Liquid, Solid } from '../blocks/Flex'
@@ -38,7 +43,15 @@ const tabs = [
     { path: '/info', label: 'Info', icon: 'information-outline' },
 ]
 
-const AppBar: FC<{ openDrawer: () => void }> = memo(({ openDrawer }) => {
+const tabTransition = transition('std', ['color', 'transform'], [0.35], [0.05])
+const tabBarTransition = transition(
+    'std',
+    ['opacity', 'transform'],
+    [0.4],
+    [0, 0],
+)
+
+const Tabs = () => {
     const router = useRouter()
     const currentTabIndex = tabs.findIndex(
         t =>
@@ -46,6 +59,63 @@ const AppBar: FC<{ openDrawer: () => void }> = memo(({ openDrawer }) => {
             router.pathname.startsWith(t.path + '/'),
     )
 
+    return (
+        <Container css={{ ...margin({ y: 0 }) }}>
+            <Liquid ai="center" jc="space-around">
+                {tabs.map((tab, i) => {
+                    const active = currentTabIndex === i
+
+                    return (
+                        // <div key={i}>
+                        <Link href={tab.path} passHref key={i}>
+                            <Solid
+                                tag="a"
+                                jc="center"
+                                ai="center"
+                                css={{
+                                    // color: 'inherit',
+                                    position: 'relative',
+                                    ...size(40, 40),
+                                }}
+                            >
+                                <Icon
+                                    icon={micon(tab.icon)}
+                                    css={{
+                                        ...tabTransition,
+                                        color: active
+                                            ? color.blue(0.75)
+                                            : color.black(0.3),
+                                        transform: active
+                                            ? 'scale(1)'
+                                            : 'scale(0.8)',
+                                    }}
+                                ></Icon>
+                                <div
+                                    css={{
+                                        position: 'absolute',
+                                        bottom: 0,
+                                        height: 2,
+                                        width: 22,
+
+                                        ...tabBarTransition,
+                                        background: color.blue(0.75),
+                                        opacity: active ? 1 : 0,
+                                        transform: active
+                                            ? 'scaleX(1)'
+                                            : 'scaleX(0.25)',
+                                    }}
+                                ></div>
+                            </Solid>
+                        </Link>
+                        // </div>
+                    )
+                })}
+            </Liquid>
+        </Container>
+    )
+}
+
+const AppBar: FC<{ openDrawer: () => void }> = memo(({ openDrawer }) => {
     return (
         <TopAppBar
             fixed
@@ -102,40 +172,11 @@ const AppBar: FC<{ openDrawer: () => void }> = memo(({ openDrawer }) => {
                     </Solid>
 
                     <Liquid tag={AppBarSection} ai="center" jc="center">
-                        <Container css={{ ...margin({ y: 0 }) }}>
-                            <Liquid ai="center" jc="space-around">
-                                {tabs.map((tab, i) => {
-                                    const animate =
-                                        currentTabIndex === i ? 'on' : 'off'
-
-                                    return (
-                                        <motion.div
-                                            key={i}
-                                            variants={tabItemVariants}
-                                            initial={animate}
-                                            animate={animate}
-                                        >
-                                            <Link href={tab.path} passHref>
-                                                <a
-                                                    css={{
-                                                        color: 'inherit',
-                                                    }}
-                                                >
-                                                    <Icon
-                                                        icon={micon(tab.icon)}
-                                                    ></Icon>
-                                                </a>
-                                            </Link>
-                                        </motion.div>
-                                    )
-                                })}
-                            </Liquid>
-                        </Container>
+                        <Tabs></Tabs>
                     </Liquid>
 
                     <Solid tag={AppBarSection} ai="center">
                         <TopAppBarActionItem
-                            css={{}}
                             icon={micon('twitter')}
                             onClick={() => {}}
                         />

@@ -3,17 +3,17 @@ import dayjs, { Dayjs } from 'dayjs'
 import { Status } from 'twitter-d'
 import { dbAdmin } from '../services/firebase-admin'
 import { retweetWithLoggingAndNotification } from '../services/integrated'
-import { getTwimoClient } from '../services/twitter'
+import { TwimoClient } from '../services/twitter'
 
 export const _retweetPickedTweets = async (
+    twimo: TwimoClient,
     now: Dayjs,
     tweetClassifier: (t: Status) => boolean,
 ) => {
-    const twimo = await getTwimoClient()
     const mutedIds = await twimo.getMutedIds()
     const isMuted = (t: Status) => mutedIds.has(t.user.id_str)
 
-    const search = await dbAdmin.twitterSearches.getDoc('default')
+    const search = await dbAdmin.twitterSearches.getDoc({ doc: 'default' })
     if (!search) {
         throw new Error('twitter search settings not found')
     }

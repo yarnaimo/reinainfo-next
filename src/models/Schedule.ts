@@ -5,7 +5,8 @@ import dayjs, { Dayjs } from 'dayjs'
 import { Merge } from 'type-fest'
 import { hsl } from '../utils/color'
 import { stringifyTime, stringifyWDate } from '../utils/date'
-import { serializeTimestamp } from '../utils/firebase'
+import { serializeTimestamp, timestampToDayjs } from '../utils/firebase'
+import { ITicket } from './Ticket'
 
 const colorSet = {
     pink: {
@@ -76,7 +77,7 @@ export const categories = {
         emoji: '📺',
         name: 'テレビ',
         micon: 'television-classic',
-        ...colorSet.aqua,
+        ...colorSet.purple,
     },
     radio: {
         emoji: '📻',
@@ -88,7 +89,7 @@ export const categories = {
         emoji: '🆙',
         name: 'Web配信',
         micon: 'update',
-        ...colorSet.brown,
+        ...colorSet.aqua,
     },
 
     music: {
@@ -135,7 +136,11 @@ export interface IPart extends BlueObject {
 export type ISchedule = Blue.Interface<{
     active: boolean
     isSerial: boolean
+
     category: CategoryKey
+    customIcon: string | null
+    customColor: string | null
+
     title: string
     url: string
     date: Blue.IO<Blue.Timestamp, Date>
@@ -154,29 +159,40 @@ export type IScheduleSerialized = Merge<
 
 export type IScheduleWithDayjs = Merge<IScheduleSerialized, { dayjs: Dayjs }>
 
-export const Schedule = Spark<ISchedule>()(false, parent =>
-    parent.collection('schedules'),
-)
-export const GScheduleActive = SparkQuery<ISchedule>()(true, db =>
-    db
-        .collectionGroup('schedules')
-        .where('active', '==', true)
-        .orderBy('date'),
-)
+export const Schedule = Spark<ISchedule>()({
+    root: false,
+    collection: parent => parent.collection('schedules'),
+})
+export const GScheduleActive = SparkQuery<ISchedule>()({
+    root: true,
+    query: db => db.collectionGroup('schedules').where('active', '==', true),
+})
 
-export const whereDateBetween = (since: Dayjs, until: Dayjs) => {
-    return (q: Blue.Query) =>
-        q
-            .where('date', '>=', since.toDate())
-            .where('date', '<', until.toDate())
-            .orderBy('date', 'asc')
+export const filterByTimestamp = (
+    field: string,
+    since?: Dayjs,
+    until?: Dayjs,
+) => {
+    return <Q extends Blue.Query>(q: Q) => {
+        let _q = q as Blue.Query
+        since && (_q = _q.where(field, '>=', since.toDate()))
+        until && (_q = _q.where(field, '<', until.toDate()))
+
+        return _q.orderBy(field, 'asc') as Q
+    }
 }
 
-export const MSchedule = (() => {
-    const isSame = (a?: IScheduleSerialized, b?: IScheduleSerialized) =>
-        a?._id === b?._id && a?._updatedAt === b?._updatedAt
+export type ITicketSchedulePair = {
+    schedule: ISchedule['_D']
+    ticket: ITicket['_D']
+}
 
-    const serialize = (schedule: ISchedule['_D']): IScheduleSerialized => {
+export class MSchedule {
+    static isSame(a?: IScheduleSerialized, b?: IScheduleSerialized) {
+        return a?._id === b?._id && a?._updatedAt === b?._updatedAt
+    }
+
+    static serialize(schedule: ISchedule['_D']): IScheduleSerialized {
         delete schedule._ref
 
         const date = serializeTimestamp(schedule.date)
@@ -185,13 +201,15 @@ export const MSchedule = (() => {
             _createdAt: serializeTimestamp(schedule._createdAt),
             _updatedAt: serializeTimestamp(schedule._updatedAt),
             date,
-            formattedDate: formatDate(schedule),
+            formattedDate: MSchedule.formatDate(schedule),
         }
     }
 
-    const getCategory = (key: CategoryKey) => categories[key]
+    static getCategory(key: CategoryKey) {
+        return categories[key]
+    }
 
-    const stringifyParts = (parts: IPart[]) => {
+    static stringifyParts(parts: IPart[]) {
         const withSuffix = (time: string | null, suffix: string) => {
             return time ? time + suffix : null
         }
@@ -215,13 +233,13 @@ export const MSchedule = (() => {
         }
     }
 
-    const stringifyTimeFromParts = (parts: IPart[]) => {
+    static stringifyTimeFromParts(parts: IPart[]) {
         return parts
             .map(p => (p.name ? `${p.name} ${p.startsAt}` : p.startsAt))
             .join(' / ')
     }
 
-    const formatDate = (s: ISchedule['_D'] | IScheduleSerialized) => {
+    static formatDate(s: ISchedule['_D'] | IScheduleSerialized) {
         const date = dayjs(is.string(s.date) ? s.date : s.date.toDate())
         const wdateString = stringifyWDate(date)
 
@@ -230,8 +248,8 @@ export const MSchedule = (() => {
                 ? {
                       //   type: 'withParts' as const,
                       wdateString,
-                      timeString: stringifyTimeFromParts(s.parts),
-                      partsString: stringifyParts(s.parts).string,
+                      timeString: MSchedule.stringifyTimeFromParts(s.parts),
+                      partsString: MSchedule.stringifyParts(s.parts).string,
                   }
                 : {
                       //   type: 'withTime' as const,
@@ -246,12 +264,12 @@ export const MSchedule = (() => {
         }
     }
 
-    const buildTweetText = (
+    static buildTweetText(
         s: ISchedule['_D'],
         header: string,
         withDate: boolean,
-    ) => {
-        const formattedDate = formatDate(s)
+    ) {
+        const formattedDate = MSchedule.formatDate(s)
 
         return Rstring.joinOnlyStrings()([
             header,
@@ -262,7 +280,7 @@ export const MSchedule = (() => {
                 !formattedDate.partsString && formattedDate.timeString,
             ]),
             Rstring.joinOnlyStrings(' ')([
-                getCategory(s.category).emoji,
+                MSchedule.getCategory(s.category).emoji,
                 s.title,
                 s.venue && `@ ${s.venue}`,
             ]),
@@ -274,5 +292,139 @@ export const MSchedule = (() => {
         ])!
     }
 
-    return { isSame, getCategory, serialize, formatDate, buildTweetText }
-})()
+    static buildTweetTextOfTicketEvent(
+        { schedule, ticket }: ITicketSchedulePair,
+        event: 'open' | 'close',
+        header: string,
+    ) {
+        const formattedDate = MSchedule.formatDate(schedule)
+
+        const [openTime, closeTime] = [
+            ticket.opensAt && stringifyTime(timestampToDayjs(ticket.opensAt)),
+            ticket.closesAt && stringifyTime(timestampToDayjs(ticket.closesAt)),
+        ]
+
+        return Rstring.joinOnlyStrings()([
+            header,
+            '',
+
+            event === 'open'
+                ? `[明日 ${openTime} から / ${ticket.label}]`
+                : `[明日 ${closeTime} まで / ${ticket.label}]`,
+
+            Rstring.joinOnlyStrings(' ')([
+                formattedDate.wdateString,
+                '|',
+                schedule.title,
+            ]),
+            '',
+
+            schedule.url,
+        ])!
+    }
+}
+
+// export const MSchedule = (() => {
+//     const isSame = (a?: IScheduleSerialized, b?: IScheduleSerialized) =>
+//         a?._id === b?._id && a?._updatedAt === b?._updatedAt
+
+//     const serialize = (schedule: ISchedule['_D']): IScheduleSerialized => {
+//         delete schedule._ref
+
+//         const date = serializeTimestamp(schedule.date)
+//         return {
+//             ...schedule,
+//             _createdAt: serializeTimestamp(schedule._createdAt),
+//             _updatedAt: serializeTimestamp(schedule._updatedAt),
+//             date,
+//             formattedDate: formatDate(schedule),
+//         }
+//     }
+
+//     const getCategory = (key: CategoryKey) => categories[key]
+
+//     const stringifyParts = (parts: IPart[]) => {
+//         const withSuffix = (time: string | null, suffix: string) => {
+//             return time ? time + suffix : null
+//         }
+
+//         const array = parts.map((p, i) => {
+//             const timesStr = Rstring.joinOnlyStrings(' ')([
+//                 withSuffix(p.gatherBy, '集合'),
+//                 withSuffix(p.opensAt, '開場'),
+//                 withSuffix(p.startsAt, '開始'),
+//             ])!
+//             return { name: p.name || String(i + 1), timesOfPart: timesStr }
+//         })
+
+//         return {
+//             array,
+//             string: array
+//                 .map(({ name, timesOfPart }) =>
+//                     1 < array.length ? `[${name}] ${timesOfPart}` : timesOfPart,
+//                 )
+//                 .join('\n'),
+//         }
+//     }
+
+//     const stringifyTimeFromParts = (parts: IPart[]) => {
+//         return parts
+//             .map(p => (p.name ? `${p.name} ${p.startsAt}` : p.startsAt))
+//             .join(' / ')
+//     }
+
+//     const formatDate = (s: ISchedule['_D'] | IScheduleSerialized) => {
+//         const date = dayjs(is.string(s.date) ? s.date : s.date.toDate())
+//         const wdateString = stringifyWDate(date)
+
+//         if (s.hasTime) {
+//             return s.parts.length
+//                 ? {
+//                       //   type: 'withParts' as const,
+//                       wdateString,
+//                       timeString: stringifyTimeFromParts(s.parts),
+//                       partsString: stringifyParts(s.parts).string,
+//                   }
+//                 : {
+//                       //   type: 'withTime' as const,
+//                       wdateString,
+//                       timeString: stringifyTime(date),
+//                   }
+//         } else {
+//             return {
+//                 // type: null,
+//                 wdateString,
+//             }
+//         }
+//     }
+
+//     const buildTweetText = (
+//         s: ISchedule['_D'],
+//         header: string,
+//         withDate: boolean,
+//     ) => {
+//         const formattedDate = formatDate(s)
+
+//         return Rstring.joinOnlyStrings()([
+//             header,
+//             '',
+
+//             Rstring.joinOnlyStrings(' ')([
+//                 withDate && formattedDate.wdateString,
+//                 !formattedDate.partsString && formattedDate.timeString,
+//             ]),
+//             Rstring.joinOnlyStrings(' ')([
+//                 getCategory(s.category).emoji,
+//                 s.title,
+//                 s.venue && `@ ${s.venue}`,
+//             ]),
+//             formattedDate.partsString,
+//             '',
+
+//             // s.way && `参加方法 » ${s.way}`,
+//             s.url,
+//         ])!
+//     }
+
+//     return { isSame, getCategory, serialize, formatDate, buildTweetText }
+// })()

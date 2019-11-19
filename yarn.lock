@@ -3153,7 +3153,7 @@
   resolved "https://registry.yarnpkg.com/@yarnaimo/firebase-testing/-/firebase-testing-0.0.6.tgz#84154b6c1b1d5044c5f9574be8f5407291b2ef43"
   integrity sha512-TrHztaBcVm5xOR94lf2xyXrJzCOnRGiUfbCWQXhrORgvp99v+3FD7a9SK1q3Z/Q8qyZjUOM/rv6Ik7l+XO/L6A==
 
-"@yarnaimo/rain@^0.4.0", "@yarnaimo/rain@^0.4.1":
+"@yarnaimo/rain@^0.4.1":
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/@yarnaimo/rain/-/rain-0.4.1.tgz#2a8497329a5a7142aebc980fe68a467f6c91aa25"
   integrity sha512-mpktN3waJcshBlo5+L7EjC/iZANsNv6PyEWSNjcsPfMCYzFavpKUQM2g5Bhag9uP824rDkCswUCEka9K2bmJbQ==
@@ -4395,13 +4395,14 @@ bluebird@^3.5.0, bluebird@^3.5.5:
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.7.1.tgz#df70e302b471d7473489acf26a93d63b53f874de"
   integrity sha512-DdmyoGCleJnkbp3nkbxTLJ18rjDsE4yCggEwKNXkeV123sPNfOCYeDoeuOY+F2FrSjO1YXcTU+dsy96KMy+gcg==
 
-bluespark@^2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/bluespark/-/bluespark-2.0.4.tgz#5bd3f1db7596800c6c65c919bb236fd6b75fd26d"
-  integrity sha512-ZpDxjZEynhQwtlMIdb6LA+jzoa6BJi1Sf6/cQ5PiG+uoICpBkJAfwPCemAdXl3MCef9F7uK63Y0xC98r3BOUVQ==
+bluespark@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/bluespark/-/bluespark-2.1.1.tgz#e9db50ab3f17d21a68976ffe05039a7f062f996e"
+  integrity sha512-MNHRoyMRQpmO1QphXHhaop+ilLlE3WVVAageNT0TywWb1XAx1ysalBb46ZuHneIyw2Y1dP5Vu0/pXmoWX2Tl+w==
   dependencies:
-    "@yarnaimo/rain" "^0.4.0"
-    react-firebase-hooks "^2.1.0"
+    "@yarnaimo/rain" "^0.4.2"
+    prray "^0.6.2"
+    react-firebase-hooks "^2.1.1"
 
 bn.js@^4.0.0, bn.js@^4.1.0, bn.js@^4.1.1, bn.js@^4.4.0:
   version "4.11.8"
@@ -11083,10 +11084,10 @@ react-fast-compare@^2.0.4:
   resolved "https://registry.yarnpkg.com/react-fast-compare/-/react-fast-compare-2.0.4.tgz#e84b4d455b0fec113e0402c329352715196f81f9"
   integrity sha512-suNP+J1VU1MWFKcyt7RtjiSWUjvidmQSlqu+eHslq+342xCbGTYmC0mEhPCOHxlW0CywylOC1u2DFAT+bv4dBw==
 
-react-firebase-hooks@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/react-firebase-hooks/-/react-firebase-hooks-2.1.0.tgz#c7228cbfec9e886a2b5de1ec63a74c0095506a96"
-  integrity sha512-b5o09O0OnVh5hFOEmEhiYRTqRe67I4mGk9zX+admBI6rwVWOYytrsTwXV5RhSfsAtmcvsbsRxI0VBJ6M45vXBw==
+react-firebase-hooks@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/react-firebase-hooks/-/react-firebase-hooks-2.1.1.tgz#7180b86e4bd8e33699003a41e6d33f280a54319a"
+  integrity sha512-6ZvAUa5q1JJrTQxCEKCXrP6S/en3B65RAYRYHbbjUh9f1BgKPsxkdaGGBPhGKuVSLUrVqTm8PtpZ/LCtAFogKA==
 
 react-is@16.8.6:
   version "16.8.6"

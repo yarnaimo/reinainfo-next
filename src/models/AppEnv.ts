@@ -9,4 +9,7 @@ export type IAppEnv = Blue.Interface<{
     }
 }>
 
-export const AppEnv = Spark<IAppEnv>()(true, db => db.collection('appEnvs'))
+export const AppEnv = Spark<IAppEnv>()({
+    root: true,
+    collection: db => db.collection('appEnvs'),
+})

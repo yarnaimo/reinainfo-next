@@ -3,12 +3,12 @@ import { prray } from 'prray'
 import { Status } from 'twitter-d'
 import { _morningRetweet } from '../../api/morningRetweet'
 import { dbInstanceAdmin } from '../../services/firebase-admin'
-import { spyOnTwimo } from '../utils'
+import { mockTwimo } from '../utils'
 
 const now = dayjs('2018-08-03T09:00')
 
 test('morningRetweet', async () => {
-    spyOnTwimo({
+    const twimo = mockTwimo({
         retweet: async (ids: string[]) => {
             return ids.map(
                 id => ({ retweeted_status: { id_str: id } } as Status),
@@ -36,7 +36,7 @@ test('morningRetweet', async () => {
 
     // start
 
-    const result = await _morningRetweet(now)
+    const result = await _morningRetweet(twimo, now)
 
     // end
 

@@ -5,6 +5,7 @@ export type ITweetLog = Blue.Interface<{
     type: 'retweet' | 'upcomingSchedule'
 }>
 
-export const TweetLog = Spark<ITweetLog>()(true, db =>
-    db.collection('tweetLogs'),
-)
+export const TweetLog = Spark<ITweetLog>()({
+    root: true,
+    collection: db => db.collection('tweetLogs'),
+})

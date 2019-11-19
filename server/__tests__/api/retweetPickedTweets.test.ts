@@ -3,7 +3,7 @@ import { Status } from 'twitter-d'
 import { _retweetPickedTweets } from '../../api/retweetPickedTweets'
 import { dbAdmin } from '../../services/firebase-admin'
 import * as webhookModule from '../../services/webhook'
-import { spyOnTwimo } from '../utils'
+import { mockTwimo } from '../utils'
 
 const webhookMock = jest
     .spyOn(webhookModule, 'sendWebhookMessage')
@@ -41,7 +41,7 @@ const tweets = [
 ] as Status[]
 
 test('retweetPickedTweets', async () => {
-    spyOnTwimo({
+    const twimo = mockTwimo({
         getMutedIds: async () => new Set(['91']),
         searchTweets: jest
             .fn()
@@ -78,7 +78,11 @@ test('retweetPickedTweets', async () => {
 
     // start
 
-    const result1 = await _retweetPickedTweets(now, t => t.id_str !== '3')
+    const result1 = await _retweetPickedTweets(
+        twimo,
+        now,
+        t => t.id_str !== '3',
+    )
 
     // end
 
@@ -91,12 +95,16 @@ test('retweetPickedTweets', async () => {
         { text: expectedMessages[0] },
     )
 
-    const search1 = await dbAdmin.twitterSearches.getDoc('default')
+    const search1 = await dbAdmin.twitterSearches.getDoc({ doc: 'default' })
     expect(search1).toMatchObject({ query, prevTweetId: '1' })
 
     // start
 
-    const result2 = await _retweetPickedTweets(now, t => t.id_str !== '3')
+    const result2 = await _retweetPickedTweets(
+        twimo,
+        now,
+        t => t.id_str !== '3',
+    )
 
     // end
 
@@ -109,6 +117,6 @@ test('retweetPickedTweets', async () => {
         { text: expectedMessages[1] },
     )
 
-    const search2 = await dbAdmin.twitterSearches.getDoc('default')
+    const search2 = await dbAdmin.twitterSearches.getDoc({ doc: 'default' })
     expect(search2).toMatchObject({ query, prevTweetId: '3' })
 })

@@ -1,6 +1,10 @@
 import is from '@sindresorhus/is/dist'
 import React, { createContext, FC, useEffect, useReducer } from 'react'
-import { IScheduleSerialized, MSchedule } from '../../models/Schedule'
+import {
+    filterByTimestamp,
+    IScheduleSerialized,
+    MSchedule,
+} from '../../models/Schedule'
 import { db } from '../../services/firebase'
 
 type NewStateAction = Partial<S> | ((prevState: S) => Partial<S>)
@@ -39,8 +43,13 @@ export const Provider: FC<{}> = ({ children }) => {
         ) {
             setGlobalState({ gSchedulesListening: true })
 
-            db.gSchedulesActive.cRef.onSnapshot(snapshot => {
+            const query = filterByTimestamp('date')(
+                db.gSchedulesActive.collectionRef,
+            )
+
+            return query.onSnapshot(snapshot => {
                 const schedules = db.schedules._decodeQuerySnapshot(
+                    query,
                     snapshot,
                     MSchedule.serialize,
                 )
@@ -48,6 +57,8 @@ export const Provider: FC<{}> = ({ children }) => {
                 setGlobalState({ gSchedules: schedules })
             })
         }
+
+        return
     }, [globalState.schedulesPageAccessed])
 
     return (

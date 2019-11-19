@@ -6,9 +6,9 @@ import {
     ellipsis,
     fixedFit,
     margin,
-    motion,
     padding,
     size,
+    transition,
 } from '../../utils/css'
 import { micon } from '../../utils/icon'
 import { Container } from '../blocks/Container'
@@ -81,8 +81,9 @@ export const ScheduleDetailModal = memo<ModalProps>(
                         ...padding({ y: 4 }),
                     }}
                 >
-                    <Icon
-                        icon={micon(category.micon)}
+                    <Solid
+                        jc="center"
+                        ai="center"
                         css={{
                             // ...margin({
                             //     x: iconNegativeMargin,
@@ -93,15 +94,20 @@ export const ScheduleDetailModal = memo<ModalProps>(
                             left: -leftPadding - 2,
 
                             ...size(iconBoxSize, iconBoxSize),
-                            fontSize: iconSize,
 
                             borderRadius: '50%',
                             background: _color.iconBackground,
                             boxShadow: _color.iconBoxShadow,
                             color: _color.icon,
                         }}
-                    ></Icon>
-                    {/* <Solid ai="center"> */}
+                    >
+                        <Icon
+                            icon={micon(category.micon)}
+                            css={{
+                                fontSize: iconSize,
+                            }}
+                        ></Icon>
+                    </Solid>
 
                     <div
                         css={{
@@ -181,9 +187,9 @@ export const ScheduleDetailModal = memo<ModalProps>(
     (a, b) => MSchedule.isSame(a.schedule, b.schedule),
 )
 
-const fadeMotion = motion('std', ['opacity', 'visibility'])
-const cardMotionIn = motion('dec', ['transform'])
-const cardMotionOut = motion('acc', ['transform'])
+const fadeMotion = transition('std', ['opacity', 'visibility'])
+const cardMotionIn = transition('dec', ['transform'])
+const cardMotionOut = transition('acc', ['transform'])
 
 export const ScheduleDetail = memo(
     forwardRef<any, Props>(

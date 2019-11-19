@@ -1,5 +1,4 @@
 import { Variants } from 'framer-motion'
-import { color } from './color'
 
 export const pageFadeVariants: Variants = {
     hidden: {
@@ -12,56 +11,45 @@ export const pageFadeVariants: Variants = {
     },
 }
 
-// export const cardVariants: Variants = {
-//     initial: {
-//         y: 8,
-//         opacity: 0,
-//         scale: 0.98,
-//         transition: {
-//             y: { stiffness: 100 },
-//         },
-//     },
-//     enter: {
-//         y: 0,
-//         opacity: 1,
-//         scale: 1,
-//         transition: {
-//             y: { stiffness: 100, velocity: -100 },
-//         },
-//     },
-//     exit: {
-//         y: 8,
-//         opacity: 0,
-//         scale: 0.98,
-//         transition: {
-//             y: { stiffness: 100 },
-//         },
-//     },
-// }
-
-// export const toggleVariants: Variants = {
-//     off: {
-//         color: color.black(0.4),
-//         transition: { duration: 0.15 },
-//     },
-//     on: {
-//         color: color.blue(1),
-//         transition: { duration: 0.15 },
-//     },
-// }
-
-export const tabItemVariants: Variants = {
-    off: {
-        color: color.black(0.3),
-        scale: 0.8,
-        transition: { duration: 0.25 },
+export const cardVariants: Variants = {
+    initial: {
+        y: 8,
+        opacity: 0,
+        scale: 0.98,
+        transition: {
+            y: { stiffness: 100 },
+        },
     },
-    on: {
-        color: color.blue(0.75),
+    enter: {
+        y: 0,
+        opacity: 1,
         scale: 1,
-        transition: { duration: 0.25 },
+        transition: {
+            y: { stiffness: 100, velocity: -100 },
+        },
+    },
+    exit: {
+        y: 8,
+        opacity: 0,
+        scale: 0.98,
+        transition: {
+            y: { stiffness: 100 },
+        },
     },
 }
+
+// export const tabItemVariants: Variants = {
+//     off: {
+//         color: color.black(0.3),
+//         scale: 0.8,
+//         transition: { duration: 0.25 },
+//     },
+//     on: {
+//         color: color.blue(0.75),
+//         scale: 1,
+//         transition: { duration: 0.25 },
+//     },
+// }
 
 // export const modalBaseVariants: Variants = {
 //     hidden: {

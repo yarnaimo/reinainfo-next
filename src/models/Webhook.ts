@@ -5,4 +5,7 @@ export type IWebhook = Blue.Interface<{
     url: string
 }>
 
-export const Webhook = Spark<IWebhook>()(true, db => db.collection('webhooks'))
+export const Webhook = Spark<IWebhook>()({
+    root: true,
+    collection: db => db.collection('webhooks'),
+})

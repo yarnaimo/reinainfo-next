@@ -1,6 +1,6 @@
 import { NextPage } from 'next'
 import React, { useContext, useEffect, useState } from 'react'
-import {} from 'rmwc'
+import { } from 'rmwc'
 import { MainContainer } from '../../components/blocks/Container'
 import { ScheduleDetail } from '../../components/molecules/ScheduleDetail'
 import { Store } from '../../components/templates/Store'
@@ -12,7 +12,7 @@ import { useQueryParams } from '../../utils/hooks'
 type Props = { schedule?: IScheduleSerialized }
 
 const getSchedule = async (id: string) =>
-    db.schedules.getDoc(id, MSchedule.serialize)
+    db.schedules.getDoc({ doc: id, decoder: MSchedule.serialize })
 
 const SchedulePage: NextPage<Props> = ({ schedule: pSchedule }) => {
     const { globalState } = useContext(Store)
