@@ -86,8 +86,8 @@ const Tabs = () => {
                                             ? color.blue(0.75)
                                             : color.black(0.3),
                                         transform: active
-                                            ? 'scale(1)'
-                                            : 'scale(0.8)',
+                                            ? 'scale(1) translateX(0.5px)'
+                                            : 'scale(0.8) translateX(0.5px)',
                                     }}
                                 ></Icon>
                                 <div

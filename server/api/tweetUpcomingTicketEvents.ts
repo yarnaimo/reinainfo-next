@@ -41,14 +41,14 @@ export const _tweetUpcomingTicketEvents = async (
     const clTickets = await getTickets('closesAt', since, until)
 
     const opTextsToTweet = opTickets.map((pair, i) => {
-        const header = `🚩 チケットの受付が始まります <${i + 1}>`
+        // const header = `🚩 チケットの受付が始まります <${i + 1}>`
 
-        return MSchedule.buildTweetTextOfTicketEvent(pair, 'open', header)
+        return MSchedule.buildTweetTextOfTicketEvent(pair, 'open')
     })
     const clTextsToTweet = clTickets.map((pair, i) => {
-        const header = `⚠ チケットの申込期限が近づいています <${i + 1}>`
+        // const header = `⚠ チケットの申込期限が近づいています <${i + 1}>`
 
-        return MSchedule.buildTweetTextOfTicketEvent(pair, 'close', header)
+        return MSchedule.buildTweetTextOfTicketEvent(pair, 'close')
     })
 
     const thread = await twimo.postThread([

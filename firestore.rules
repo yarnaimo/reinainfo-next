@@ -9,12 +9,17 @@ service cloud.firestore {
       return exists(adminPath());
     }
 
+    match /serials/{serial} {
+      allow read;
+      allow write: if isAdmin();
+    }
+
     match /{path=**}/schedules/{schedule} {
       allow read;
       allow write: if isAdmin();
     }
 
-    match /serials/{serial} {
+    match /{path=**}/tickets/{ticket} {
       allow read;
       allow write: if isAdmin();
     }

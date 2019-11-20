@@ -3,6 +3,7 @@ import { Rstring } from '@yarnaimo/rain'
 import { Blue, BlueObject, Spark, SparkQuery } from 'bluespark'
 import dayjs, { Dayjs } from 'dayjs'
 import { Merge } from 'type-fest'
+import { env } from '../env'
 import { hsl } from '../utils/color'
 import { stringifyTime, stringifyWDate } from '../utils/date'
 import { serializeTimestamp, timestampToDayjs } from '../utils/firebase'
@@ -62,7 +63,7 @@ export const categories = {
         ...colorSet.orange,
     },
     event: {
-        emoji: '🎤',
+        emoji: '🎈',
         name: 'イベント',
         micon: 'microphone-variant',
         ...colorSet.darkBrown,
@@ -147,12 +148,14 @@ export type ISchedule = Blue.Interface<{
     hasTime: boolean
     parts: IPart[]
     venue: string | null
-    way: string | null
+    // way: string | null
+    hasTickets: boolean
 }>
 
 export type IScheduleSerialized = Merge<
     ISchedule['_D'],
     Record<'_createdAt' | '_updatedAt' | 'date', string> & {
+        _ref: undefined
         formattedDate: ReturnType<typeof MSchedule['formatDate']>
     }
 >
@@ -167,6 +170,9 @@ export const GScheduleActive = SparkQuery<ISchedule>()({
     root: true,
     query: db => db.collectionGroup('schedules').where('active', '==', true),
 })
+
+export const filterSchedulesAfterNow = () =>
+    filterByTimestamp('date', dayjs(env.isDev() ? 0 : undefined))
 
 export const filterByTimestamp = (
     field: string,
@@ -193,13 +199,12 @@ export class MSchedule {
     }
 
     static serialize(schedule: ISchedule['_D']): IScheduleSerialized {
-        delete schedule._ref
-
         const date = serializeTimestamp(schedule.date)
         return {
             ...schedule,
             _createdAt: serializeTimestamp(schedule._createdAt),
             _updatedAt: serializeTimestamp(schedule._updatedAt),
+            _ref: undefined,
             date,
             formattedDate: MSchedule.formatDate(schedule),
         }
@@ -209,28 +214,34 @@ export class MSchedule {
         return categories[key]
     }
 
-    static stringifyParts(parts: IPart[]) {
+    static formatParts(parts: IPart[]) {
         const withSuffix = (time: string | null, suffix: string) => {
             return time ? time + suffix : null
         }
 
         const array = parts.map((p, i) => {
-            const timesStr = Rstring.joinOnlyStrings(' ')([
+            const timesOfPart = Rstring.joinOnlyStrings(' ')([
                 withSuffix(p.gatherBy, '集合'),
                 withSuffix(p.opensAt, '開場'),
                 withSuffix(p.startsAt, '開始'),
             ])!
-            return { name: p.name || String(i + 1), timesOfPart: timesStr }
+
+            return {
+                name: p.name ?? (2 <= parts.length ? String(i + 1) : null),
+                timesOfPart,
+            }
         })
 
-        return {
-            array,
-            string: array
-                .map(({ name, timesOfPart }) =>
-                    1 < array.length ? `[${name}] ${timesOfPart}` : timesOfPart,
-                )
-                .join('\n'),
-        }
+        return array
+
+        // return {
+        //     array,
+        //     string: array
+        //         .map(({ name, timesOfPart }) =>
+        //             1 < array.length ? `[${name}] ${timesOfPart}` : timesOfPart,
+        //         )
+        //         .join('\n'),
+        // }
     }
 
     static stringifyTimeFromParts(parts: IPart[]) {
@@ -244,18 +255,15 @@ export class MSchedule {
         const wdateString = stringifyWDate(date)
 
         if (s.hasTime) {
-            return s.parts.length
-                ? {
-                      //   type: 'withParts' as const,
-                      wdateString,
-                      timeString: MSchedule.stringifyTimeFromParts(s.parts),
-                      partsString: MSchedule.stringifyParts(s.parts).string,
-                  }
-                : {
-                      //   type: 'withTime' as const,
-                      wdateString,
-                      timeString: stringifyTime(date),
-                  }
+            return {
+                wdateString,
+
+                timeString: s.parts.length
+                    ? MSchedule.stringifyTimeFromParts(s.parts)
+                    : stringifyTime(date),
+
+                parts: s.parts.length ? MSchedule.formatParts(s.parts) : null,
+            }
         } else {
             return {
                 // type: null,
@@ -277,14 +285,12 @@ export class MSchedule {
 
             Rstring.joinOnlyStrings(' ')([
                 withDate && formattedDate.wdateString,
-                !formattedDate.partsString && formattedDate.timeString,
+                formattedDate.timeString,
             ]),
             Rstring.joinOnlyStrings(' ')([
                 MSchedule.getCategory(s.category).emoji,
                 s.title,
-                s.venue && `@ ${s.venue}`,
             ]),
-            formattedDate.partsString,
             '',
 
             // s.way && `参加方法 » ${s.way}`,
@@ -295,7 +301,6 @@ export class MSchedule {
     static buildTweetTextOfTicketEvent(
         { schedule, ticket }: ITicketSchedulePair,
         event: 'open' | 'close',
-        header: string,
     ) {
         const formattedDate = MSchedule.formatDate(schedule)
 
@@ -305,18 +310,21 @@ export class MSchedule {
         ]
 
         return Rstring.joinOnlyStrings()([
-            header,
+            Rstring.joinOnlyStrings(' ')([
+                event === 'open'
+                    ? '🚩 チケットの受付が始まります'
+                    : '⚠ チケットの申込期限が近づいています',
+                event === 'open'
+                    ? `[明日 ${openTime} から]`
+                    : `[明日 ${closeTime} まで]`,
+            ]),
             '',
-
-            event === 'open'
-                ? `[明日 ${openTime} から / ${ticket.label}]`
-                : `[明日 ${closeTime} まで / ${ticket.label}]`,
 
             Rstring.joinOnlyStrings(' ')([
                 formattedDate.wdateString,
-                '|',
                 schedule.title,
             ]),
+            `📌 ${ticket.label}`,
             '',
 
             schedule.url,

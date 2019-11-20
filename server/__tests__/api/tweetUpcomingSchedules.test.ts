@@ -36,7 +36,8 @@ const o = {
     url,
     parts: [],
     venue: null,
-    way: null,
+    // way: null,
+    hasTickets: false,
 }
 const schedules = prray<ISchedule['_E']>([
     {

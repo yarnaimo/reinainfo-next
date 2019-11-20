@@ -11,7 +11,7 @@ import { ScheduleCard } from '../../components/molecules/ScheduleCard'
 import { Store } from '../../components/templates/Store'
 import { Title } from '../../components/templates/Title'
 import {
-    filterByTimestamp,
+    filterSchedulesAfterNow,
     IScheduleSerialized,
     IScheduleWithDayjs,
     MSchedule,
@@ -26,7 +26,7 @@ type Props = { schedules?: IScheduleSerialized[] }
 
 const getGSchedulesSerialized = () =>
     db.gSchedulesActive.getQuery({
-        q: filterByTimestamp('date'),
+        q: filterSchedulesAfterNow(),
         decoder: MSchedule.serialize,
     })
 

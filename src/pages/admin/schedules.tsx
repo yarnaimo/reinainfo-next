@@ -4,6 +4,7 @@ import { SimpleDataTable } from 'rmwc'
 import { MainContainer } from '../../components/blocks/Container'
 import { Section } from '../../components/blocks/Section'
 import { Title } from '../../components/templates/Title'
+import { ISerial } from '../../models/Serial'
 import { db } from '../../services/firebase'
 
 type Props = {}
@@ -11,6 +12,12 @@ type Props = {}
 const AdminSchedulesPage: NextPage<Props> = props => {
     const serials = db.serials.getQuery({
         q: q => q.where('active', '==', true),
+        decoder: (serial: ISerial['_D']) => {
+            return {
+                ...serial,
+                tableRow: [serial.active && 'active', serial.label],
+            }
+        },
     })
 
     return (

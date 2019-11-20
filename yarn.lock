@@ -4395,10 +4395,10 @@ bluebird@^3.5.0, bluebird@^3.5.5:
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.7.1.tgz#df70e302b471d7473489acf26a93d63b53f874de"
   integrity sha512-DdmyoGCleJnkbp3nkbxTLJ18rjDsE4yCggEwKNXkeV123sPNfOCYeDoeuOY+F2FrSjO1YXcTU+dsy96KMy+gcg==
 
-bluespark@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/bluespark/-/bluespark-2.1.1.tgz#e9db50ab3f17d21a68976ffe05039a7f062f996e"
-  integrity sha512-MNHRoyMRQpmO1QphXHhaop+ilLlE3WVVAageNT0TywWb1XAx1ysalBb46ZuHneIyw2Y1dP5Vu0/pXmoWX2Tl+w==
+bluespark@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/bluespark/-/bluespark-2.1.2.tgz#b7b3320a69b97d7120e1be708dd1b0f0427712b2"
+  integrity sha512-6QrZ/YzLZB4JVVBpzu71+9SRfhWLQoVWEZQH+VMEpYwGtDqHrEXI0vMNQP5D5XuRjnlyxOLWLzoBLFF3fNj5UQ==
   dependencies:
     "@yarnaimo/rain" "^0.4.2"
     prray "^0.6.2"

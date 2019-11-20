@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is/dist'
 import React, { createContext, FC, useEffect, useReducer } from 'react'
 import {
-    filterByTimestamp,
+    filterSchedulesAfterNow,
     IScheduleSerialized,
     MSchedule,
 } from '../../models/Schedule'
@@ -43,7 +43,7 @@ export const Provider: FC<{}> = ({ children }) => {
         ) {
             setGlobalState({ gSchedulesListening: true })
 
-            const query = filterByTimestamp('date')(
+            const query = filterSchedulesAfterNow()(
                 db.gSchedulesActive.collectionRef,
             )
 

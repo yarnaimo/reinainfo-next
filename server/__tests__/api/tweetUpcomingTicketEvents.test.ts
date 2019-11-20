@@ -11,6 +11,7 @@ import { expectObjectArrayContaining, mockTwimo } from '../utils'
 const now = dayjs('2019-01-18T22:00')
 const day0End = now.endOf('day')
 const day1 = now.add(1, 'day')
+const day1Noon = day1.set('h', 12)
 const day2Start = now.add(2, 'day').startOf('day')
 const scheduleDate = dayjs('2019-02-27T18:00')
 
@@ -36,7 +37,8 @@ const o = {
     url,
     parts: [],
     venue: null,
-    way: null,
+    // way: null,
+    hasTickets: false,
 }
 beforeEach(async () => {
     const schedule: ISchedule['_E'] = {
@@ -61,7 +63,7 @@ beforeEach(async () => {
         {
             scheduleId,
             label: 'ticket1-open',
-            opensAt: day1.toDate(),
+            opensAt: day1Noon.toDate(),
             closesAt: day2Start.toDate(),
         },
         {
@@ -89,16 +91,16 @@ test('daily', async () => {
     // end
 
     const expectedTweets = [
-        `⚠ チケットの申込期限が近づいています <1>
+        `⚠ チケットの申込期限が近づいています [明日 22:00 まで]
 
-[明日 22:00 まで / ticket1-close]
-2/27 (水) | live0
+2/27 (水) live0
+📌 ticket1-close
 
 ${url}`,
-        `🚩 チケットの受付が始まります <1>
+        `🚩 チケットの受付が始まります [明日 12:00 から]
 
-[明日 22:00 から / ticket1-open]
-2/27 (水) | live0
+2/27 (水) live0
+📌 ticket1-open
 
 ${url}`,
     ].map(t => ({ full_text: t }))

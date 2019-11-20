@@ -4,6 +4,10 @@ $mdc-theme-on-primary: $mdc-theme-background;
 $mdc-theme-secondary: hsl(42, 97, 50);
 $mdc-theme-on-secondary: $mdc-theme-background;
 
+$black: rgba(black, 0.75);
+$mdc-theme-on-surface: $black;
+$mdc-chip-ink-color-default: $black;
+
 // 87,54,38
 $mdc-theme-text-colors: (
     dark: (
@@ -71,7 +75,8 @@ code {
 }
 
 a {
-    color: var(--md-brown-300);
+    color: hsl(211, 41, 57);
+    // color: var(--md-brown-300);
     text-decoration: none;
 }
 
