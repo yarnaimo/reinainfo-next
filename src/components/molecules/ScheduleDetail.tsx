@@ -1,8 +1,17 @@
-import styled from '@emotion/styled'
+import styled, { CSSObject } from '@emotion/styled'
 import { Rstring } from '@yarnaimo/rain'
 import dayjs, { Dayjs } from 'dayjs'
-import React, { forwardRef, memo, useEffect, useMemo, useState } from 'react'
+import React, {
+    ComponentProps,
+    FC,
+    forwardRef,
+    memo,
+    useEffect,
+    useMemo,
+    useState,
+} from 'react'
 import { Chip, Icon } from 'rmwc'
+import { env } from '../../env'
 import { IScheduleSerialized, MSchedule } from '../../models/Schedule'
 import { ITicket } from '../../models/Ticket'
 import { db, dbInstance } from '../../services/firebase'
@@ -19,7 +28,7 @@ import { stringifyWDate, stringifyWDateTime } from '../../utils/date'
 import { micon } from '../../utils/icon'
 import { ExternalLink } from '../atoms/ExternalLink'
 import { Container } from '../blocks/Container'
-import { Liquid, Solid, SolidColumn } from '../blocks/Flex'
+import { Liquid, LiquidColumn, Solid, SolidColumn } from '../blocks/Flex'
 
 const dateTimeOrDate = (withTime: boolean, date: Dayjs | null) => {
     return (
@@ -28,9 +37,17 @@ const dateTimeOrDate = (withTime: boolean, date: Dayjs | null) => {
     )
 }
 
-const blockStyle = padding({ y: 4 })
-const Block = styled(Solid)(blockStyle)
-const BlockColumn = styled(SolidColumn)(blockStyle)
+const Block: FC<ComponentProps<typeof Solid> & {
+    column?: boolean
+    compact: boolean
+}> = ({ column, compact, children, ...props }) => {
+    const Tag = column ? SolidColumn : Solid
+    return (
+        <Tag css={{ ...padding({ y: compact ? 2 : 4 }) }} {...props}>
+            {children}
+        </Tag>
+    )
+}
 
 const PartChip = styled(Chip)({
     height: 24,
@@ -42,7 +59,7 @@ const PartChip = styled(Chip)({
 const smallFontSize = 12
 
 const decodeTicket = (t: ITicket['_D']) => {
-    const now = dayjs('2019-07-25T00:00:00+0900')
+    const now = dayjs(env.isDev() ? '2019-07-25T00:00:00+0900' : undefined)
     const [openDate, closeDate] = [t.opensAt, t.closesAt].map(ts =>
         ts ? dayjs(ts.toDate()) : null,
     )
@@ -96,16 +113,29 @@ export const ScheduleDetailModal = memo<ModalProps>(
             [s?.category],
         )
 
-        const sidePadding = 18
+        const sidePadding = 16
         const iconNegativeMargin = -2
-        const iconSize = 14
-        const iconBoxSize = 24
-        const iconRightMargin = 12
+        const iconSize = compact ? 12 : 14
+        const iconBoxSize = compact ? 18 : 24
+        const iconRightMargin = 14
         const leftPadding =
             iconNegativeMargin * 2 + iconBoxSize + iconRightMargin
 
+        const containerStyle: CSSObject = {
+            position: 'relative',
+            ...padding({
+                y: 12,
+                left: compact ? sidePadding : sidePadding + leftPadding,
+                right: sidePadding,
+            }),
+            color: color.black(0.7),
+
+            margin: compact ? -4 : 0,
+        }
+
         const Header_ = (
             <Block
+                compact={compact}
                 ai="center"
                 css={{
                     position: 'relative',
@@ -114,16 +144,25 @@ export const ScheduleDetailModal = memo<ModalProps>(
                 <Solid
                     jc="center"
                     ai="center"
-                    css={{
-                        position: 'absolute',
-                        top: 2,
-                        left: -leftPadding - 2,
-                        ...size(iconBoxSize, iconBoxSize),
-                        borderRadius: '50%',
-                        background: _color.iconBackground,
-                        boxShadow: _color.iconBoxShadow,
-                        color: _color.icon,
-                    }}
+                    css={[
+                        {
+                            ...size(iconBoxSize, iconBoxSize),
+                            borderRadius: '50%',
+
+                            background: _color.iconBackground,
+                            boxShadow: _color.iconBoxShadow,
+                            color: _color.icon,
+                        },
+                        compact
+                            ? {
+                                  ...margin({ right: 8 }),
+                              }
+                            : {
+                                  position: 'absolute',
+                                  top: 2,
+                                  left: -leftPadding,
+                              },
+                    ]}
                 >
                     <Icon
                         icon={micon(s.customIcon ?? category.micon)}
@@ -158,14 +197,8 @@ export const ScheduleDetailModal = memo<ModalProps>(
         )
 
         const Date_ = (
-            <Block ai="baseline">
-                <div
-                    css={{
-                        fontSize: 14,
-                    }}
-                >
-                    {s.formattedDate.wdateString}
-                </div>
+            <Block compact={compact} ai="baseline">
+                <div css={{ fontSize: 14 }}>{s.formattedDate.wdateString}</div>
 
                 <div
                     css={{
@@ -180,21 +213,27 @@ export const ScheduleDetailModal = memo<ModalProps>(
 
         const Title_ = (
             <Block
-                css={{
-                    fontSize: 16,
-                    fontWeight: 'bold',
-                }}
+                compact={compact}
+                css={[
+                    {
+                        fontSize: compact ? 14 : 16,
+                        fontWeight: 'bold',
+                    },
+                    compact && {
+                        display: '-webkit-box',
+                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 2,
+                        overflow: 'hidden',
+                    },
+                ]}
             >
                 {s.title}
             </Block>
         )
 
-        const Link_ = (
-            <Block css={{ fontSize: smallFontSize }}>
-                <ExternalLink
-                    href={s.url}
-                    css={{ ...margin({ top: 1, bottom: 2 }) }}
-                >
+        const Link_ = !compact && (
+            <Block compact={compact} css={{ fontSize: smallFontSize }}>
+                <ExternalLink href={s.url}>
                     <Icon
                         icon={micon('open-in-new')}
                         css={{
@@ -208,20 +247,15 @@ export const ScheduleDetailModal = memo<ModalProps>(
             </Block>
         )
 
-        // const Divider_ = !compact && (s.formattedDate.parts || tickets) && (
-        //     <Block>
-        //         <div
-        //             css={{
-        //                 ...size('100%', 1),
-        //                 ...margin({ y: 3 }),
-        //                 background: color.black(0.1),
-        //             }}
-        //         ></div>
-        //     </Block>
-        // )
+        const Divider_ = !compact && (s.formattedDate.parts || tickets) && (
+            <Block compact={compact}></Block>
+        )
 
         const Parts_ = !compact && s.formattedDate.parts && (
-            <Block css={{ ...margin({ x: -3 }), flexWrap: 'wrap' }}>
+            <Block
+                compact={compact}
+                css={{ ...margin({ x: -3 }), flexWrap: 'wrap' }}
+            >
                 {s.formattedDate.parts.map((p, i) => (
                     <PartChip
                         key={i}
@@ -236,9 +270,13 @@ export const ScheduleDetailModal = memo<ModalProps>(
         )
 
         const Tickets_ = tickets && (
-            <BlockColumn>
+            <Block compact={compact} column>
                 {tickets.map((t, i) => (
-                    <Solid key={i} ai="start" css={{ ...padding({ y: 3 }) }}>
+                    <Solid
+                        key={i}
+                        ai="start"
+                        css={{ ...padding({ y: compact ? 2 : 3 }) }}
+                    >
                         <Solid>
                             <Icon
                                 icon={micon('tag-outline')}
@@ -254,44 +292,39 @@ export const ScheduleDetailModal = memo<ModalProps>(
                         <Liquid
                             css={{
                                 ...margin({ left: 4 }),
-                                fontSize: smallFontSize,
+                                fontSize: compact ? 11 : smallFontSize,
+                                letterSpacing: 0,
                             }}
                         >
-                            {t.closed ? <s>{t.text}</s> : t.text}
+                            {t.closed ? (
+                                <s css={{ color: color.black(0.4) }}>
+                                    {t.text}
+                                </s>
+                            ) : (
+                                t.text
+                            )}
                         </Liquid>
                     </Solid>
                 ))}
-            </BlockColumn>
+            </Block>
         )
 
         return (
-            <SolidColumn
-                // ref={ref}
-                {...props}
-                css={{
-                    ...margin({ x: -1 }),
-
-                    borderRadius: 11,
-                    position: 'relative',
-                    overflow: 'hidden',
-                    ...padding({
-                        y: 12,
-                        left: sidePadding + leftPadding,
-                        right: sidePadding,
-                    }),
-                    boxShadow: dialogShadow(color.black(0.2)),
-                    background: color.white(),
-                    color: color.black(0.7),
-                }}
-            >
-                {Header_}
-                {Date_}
-                {Title_}
-                {Link_}
-                {/* {Divider_} */}
-                {Parts_}
-                {Tickets_}
-            </SolidColumn>
+            <Solid css={compact && size(...env.twitterCardSize)} ai="center">
+                <LiquidColumn
+                    // ref={ref}
+                    {...props}
+                    css={containerStyle}
+                >
+                    {Header_}
+                    {Date_}
+                    {Title_}
+                    {Link_}
+                    {Divider_}
+                    {Parts_}
+                    {Tickets_}
+                </LiquidColumn>
+            </Solid>
         )
     },
     (a, b) => MSchedule.isSame(a.schedule, b.schedule),
@@ -352,6 +385,14 @@ export const ScheduleDetail = memo(
                         <ScheduleDetailModal
                             schedule={s}
                             compact={compact}
+                            css={{
+                                ...margin({ x: -1 }),
+
+                                borderRadius: 11,
+                                overflow: 'hidden',
+                                boxShadow: dialogShadow(color.black(0.2)),
+                                background: color.white(),
+                            }}
                         ></ScheduleDetailModal>
                     </Container>
                 </SolidColumn>

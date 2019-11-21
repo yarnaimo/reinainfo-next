@@ -1,8 +1,11 @@
 import { NextPage } from 'next'
 import React, { useContext, useEffect, useState } from 'react'
-import { } from 'rmwc'
+import {} from 'rmwc'
 import { MainContainer } from '../../components/blocks/Container'
-import { ScheduleDetail } from '../../components/molecules/ScheduleDetail'
+import {
+    ScheduleDetail,
+    ScheduleDetailModal,
+} from '../../components/molecules/ScheduleDetail'
 import { Store } from '../../components/templates/Store'
 import { Title } from '../../components/templates/Title'
 import { IScheduleSerialized, MSchedule } from '../../models/Schedule'
@@ -18,7 +21,10 @@ const SchedulePage: NextPage<Props> = ({ schedule: pSchedule }) => {
     const { globalState } = useContext(Store)
     const { map } = globalState.gSchedules
     // const router = useRouter()
-    const { params, router } = useQueryParams({ id: '' })
+    const { params, router } = useQueryParams({
+        id: '',
+        type: undefined as 'compact' | undefined,
+    })
 
     const [_schedule, _setSchedule] = useState<IScheduleSerialized>()
 
@@ -35,17 +41,28 @@ const SchedulePage: NextPage<Props> = ({ schedule: pSchedule }) => {
         }
     }, [globalState.schedulesPageAccessed, pSchedule, _setSchedule])
 
+    if (!schedule) {
+        return <></>
+    }
+
+    if (params.type === 'compact') {
+        return (
+            <ScheduleDetailModal
+                schedule={schedule}
+                compact={true}
+            ></ScheduleDetailModal>
+        )
+    }
+
     return (
         <MainContainer>
             <Title title={schedule?.title}></Title>
 
-            {schedule && (
-                <ScheduleDetail
-                    schedule={schedule}
-                    open={true}
-                    onClose={() => router.push('/schedules', undefined)}
-                ></ScheduleDetail>
-            )}
+            <ScheduleDetail
+                schedule={schedule}
+                open={true}
+                onClose={() => router.push('/schedules', undefined)}
+            ></ScheduleDetail>
         </MainContainer>
     )
 }
