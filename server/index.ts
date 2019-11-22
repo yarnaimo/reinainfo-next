@@ -16,25 +16,20 @@ process.env.TZ = timezone
 const defaultRegion = functions.region('asia-northeast1')
 const usRegion = functions.region('us-central1')
 
-const defaultBuilder = defaultRegion.runWith({ timeoutSeconds: 30 })
+const nextBuilder = usRegion.runWith({
+    timeoutSeconds: 15,
+    memory: '256MB',
+})
+const defaultBuilder = defaultRegion.runWith({
+    timeoutSeconds: 30,
+    memory: '256MB',
+})
 const puppeteerBuilder = defaultRegion.runWith({
     timeoutSeconds: 30,
     memory: '1GB',
 })
 
-export const test = defaultBuilder.pubsub
-    .schedule('every 1 minutes')
-    .onRun(async () => {
-        console.log(
-            dayjs()
-                .startOf('day')
-                .toISOString(),
-        )
-    })
-
-export const next = usRegion
-    .runWith({ timeoutSeconds: 15 })
-    .https.onRequest(_next)
+export const next = nextBuilder.https.onRequest(_next)
 
 export const retweetManually = defaultBuilder.https.onCall(_retweetManually)
 
