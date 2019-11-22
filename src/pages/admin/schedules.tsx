@@ -22,7 +22,7 @@ const AdminSchedulesPage: NextPage<Props> = props => {
 
     return (
         <MainContainer>
-            <Title title="Admin - Schedules"></Title>
+            <Title title="Admin - Schedules" path={null}></Title>
 
             <h2>Serials</h2>
 

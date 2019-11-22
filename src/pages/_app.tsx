@@ -1,3 +1,4 @@
+import { Global } from '@emotion/core'
 import styled from '@emotion/styled'
 import '@mdi/font/css/materialdesignicons.css'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -21,6 +22,15 @@ const Spacer = styled.div({
 
 export const MyApp: AppType = ({ Component, pageProps }) => {
     const router = useRouter()
+
+    if (router.pathname.startsWith('/headless/')) {
+        return (
+            <Provider>
+                <Global styles={{ html: { overflow: 'hidden' } }}></Global>
+                <Component {...pageProps} />
+            </Provider>
+        )
+    }
 
     return (
         <Provider>

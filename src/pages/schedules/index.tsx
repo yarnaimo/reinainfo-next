@@ -144,7 +144,7 @@ const SchedulesPage: NextPage<Props> = ({ schedules: pSchedules }) => {
 
     return (
         <MainContainer>
-            <Title title="Schedules"></Title>
+            <Title title="Schedules" path="schedules"></Title>
 
             <Solid ai="center" css={{ ...margin({ y: 24 }) }}>
                 <Solid>

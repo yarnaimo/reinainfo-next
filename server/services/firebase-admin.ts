@@ -15,6 +15,7 @@ export const appAdmin = admin.apps.length
     : serviceAccount
     ? admin.initializeApp({
           credential: admin.credential.cert(serviceAccount),
+          storageBucket: `gs://${serviceAccount.project_id}.appspot.com`,
       })
     : admin.initializeApp()
 
@@ -29,6 +30,9 @@ export const getEnv = async () => {
     }
     return env
 }
+
+export const storageAdmin = appAdmin.storage()
+export const bucketAdmin = storageAdmin.bucket()
 
 export const createCallable = <
     N extends string,

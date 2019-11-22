@@ -4,14 +4,14 @@ $mdc-theme-on-primary: $mdc-theme-background;
 $mdc-theme-secondary: hsl(42, 97, 50);
 $mdc-theme-on-secondary: $mdc-theme-background;
 
-$black: rgba(black, 0.75);
+$black: rgba(black, 0.7);
 $mdc-theme-on-surface: $black;
 $mdc-chip-ink-color-default: $black;
 
 // 87,54,38
 $mdc-theme-text-colors: (
     dark: (
-        primary: rgba(black, 0.75),
+        primary: rgba(black, 0.7),
         secondary: rgba(black, 0.45),
         hint: rgba(black, 0.3),
         disabled: rgba(black, 0.3),

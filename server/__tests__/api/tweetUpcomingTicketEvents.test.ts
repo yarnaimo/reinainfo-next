@@ -39,6 +39,7 @@ const o = {
     venue: null,
     // way: null,
     hasTickets: false,
+    thumbUrl: null,
 }
 beforeEach(async () => {
     const schedule: ISchedule['_E'] = {

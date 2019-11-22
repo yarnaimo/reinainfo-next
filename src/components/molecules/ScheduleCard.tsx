@@ -26,7 +26,7 @@ export const ScheduleCard = memo(
                 cardGradient(category.color[0], category.color[1]),
                 cardShadow(category.color[0](0.4)),
             ],
-            [category, s.ribbonColors],
+            [category],
         )
 
         const sidePadding = 18

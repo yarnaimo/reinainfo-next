@@ -8,7 +8,7 @@ import { _updateTwitterLists } from './api/updateTwitterLists'
 process.env.TZ = 'Asia/Tokyo'
 
 const { https, pubsub } = functions
-    .runWith({ timeoutSeconds: 180 })
+    .runWith({ timeoutSeconds: 180 }) // memory: '1GB'
     .region('asia-northeast1')
 
 export const next = functions.region('us-central1').https.onRequest(_next)

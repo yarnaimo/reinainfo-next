@@ -2,10 +2,7 @@ import { NextPage } from 'next'
 import React, { useContext, useEffect, useState } from 'react'
 import {} from 'rmwc'
 import { MainContainer } from '../../components/blocks/Container'
-import {
-    ScheduleDetail,
-    ScheduleDetailModal,
-} from '../../components/molecules/ScheduleDetail'
+import { ScheduleDetail } from '../../components/molecules/ScheduleDetail'
 import { Store } from '../../components/templates/Store'
 import { Title } from '../../components/templates/Title'
 import { IScheduleSerialized, MSchedule } from '../../models/Schedule'
@@ -23,7 +20,6 @@ const SchedulePage: NextPage<Props> = ({ schedule: pSchedule }) => {
     // const router = useRouter()
     const { params, router } = useQueryParams({
         id: '',
-        type: undefined as 'compact' | undefined,
     })
 
     const [_schedule, _setSchedule] = useState<IScheduleSerialized>()
@@ -45,18 +41,12 @@ const SchedulePage: NextPage<Props> = ({ schedule: pSchedule }) => {
         return <></>
     }
 
-    if (params.type === 'compact') {
-        return (
-            <ScheduleDetailModal
-                schedule={schedule}
-                compact={true}
-            ></ScheduleDetailModal>
-        )
-    }
-
     return (
         <MainContainer>
-            <Title title={schedule?.title}></Title>
+            <Title
+                title={schedule.title}
+                path={`schedules/${schedule._id}`}
+            ></Title>
 
             <ScheduleDetail
                 schedule={schedule}

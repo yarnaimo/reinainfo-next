@@ -9,7 +9,7 @@ type Props = {}
 const TopicsPage: NextPage<Props> = props => {
     return (
         <MainContainer>
-            <Title title="Topics"></Title>
+            <Title title="Topics" path="topics"></Title>
         </MainContainer>
     )
 }

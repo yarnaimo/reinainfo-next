@@ -150,6 +150,8 @@ export type ISchedule = Blue.Interface<{
     venue: string | null
     // way: string | null
     hasTickets: boolean
+
+    thumbUrl: string | null
 }>
 
 export type IScheduleSerialized = Merge<
