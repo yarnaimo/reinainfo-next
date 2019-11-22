@@ -274,12 +274,17 @@ export class MSchedule {
         }
     }
 
+    static getPageUrl(s: ISchedule['_D']) {
+        return s.isSerial ? null : `${env.origin}/schedules/${s._id}`
+    }
+
     static buildTweetText(
         s: ISchedule['_D'],
         header: string,
         withDate: boolean,
     ) {
         const formattedDate = MSchedule.formatDate(s)
+        const pageUrl = MSchedule.getPageUrl(s)
 
         return Rstring.joinOnlyStrings()([
             header,
@@ -297,6 +302,7 @@ export class MSchedule {
 
             // s.way && `参加方法 » ${s.way}`,
             s.url,
+            pageUrl,
         ])!
     }
 

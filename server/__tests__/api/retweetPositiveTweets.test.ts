@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { Status } from 'twitter-d'
-import { _retweetPickedTweets } from '../../api/retweetPickedTweets'
+import { _retweetPositiveTweets } from '../../api/retweetPositiveTweets'
 import { dbAdmin } from '../../services/firebase-admin'
 import * as webhookModule from '../../services/webhook'
 import { mockTwimo } from '../utils'
@@ -40,7 +40,7 @@ const tweets = [
     },
 ] as Status[]
 
-test('retweetPickedTweets', async () => {
+test('retweetPositiveTweets', async () => {
     const twimo = mockTwimo({
         getMutedIds: async () => new Set(['91']),
         searchTweets: jest
@@ -78,7 +78,7 @@ test('retweetPickedTweets', async () => {
 
     // start
 
-    const result1 = await _retweetPickedTweets(
+    const result1 = await _retweetPositiveTweets(
         twimo,
         now,
         t => t.id_str !== '3',
@@ -100,7 +100,7 @@ test('retweetPickedTweets', async () => {
 
     // start
 
-    const result2 = await _retweetPickedTweets(
+    const result2 = await _retweetPositiveTweets(
         twimo,
         now,
         t => t.id_str !== '3',

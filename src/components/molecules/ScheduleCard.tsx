@@ -163,7 +163,7 @@ export const ScheduleCard = memo(
                 ></ScheduleDetail>
 
                 <motion.a
-                    href={`/schedules/${s._id}`}
+                    href={s.isSerial ? undefined : `/schedules/${s._id}`}
                     onClick={e => {
                         setModalOpen(true)
                         e.preventDefault()

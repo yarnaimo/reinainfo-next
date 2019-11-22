@@ -1,25 +1,86 @@
 import dayjs from 'dayjs'
 import * as functions from 'firebase-functions'
+import { TweetClassifier } from '../learn'
+import { _mightUpdateScheduleThumb } from './api/mightUpdateScheduleThumb'
 import { _next } from './api/next'
-import { _crawlTweets } from './api/retweetPickedTweets'
-import { _tweetSchedulesBetween } from './api/tweetUpcomingSchedules'
-import { _updateTwitterLists } from './api/updateTwitterLists'
+import { _retweetManually } from './api/retweetManually'
+import { _retweetPositiveTweets } from './api/retweetPositiveTweets'
+import { _retweetScheduleTweetsOfPrevNight } from './api/retweetScheduleTweetsOfPrevNight'
+import { _tweetUpcomingSchedules } from './api/tweetUpcomingSchedules'
+import { _tweetUpcomingTicketEvents } from './api/tweetUpcomingTicketEvents'
+import { getTwimoClient } from './services/twitter'
 
-process.env.TZ = 'Asia/Tokyo'
+const timezone = 'Asia/Tokyo'
+process.env.TZ = timezone
 
-const { https, pubsub } = functions
-    .runWith({ timeoutSeconds: 180 }) // memory: '1GB'
-    .region('asia-northeast1')
+const defaultRegion = functions.region('asia-northeast1')
+const usRegion = functions.region('us-central1')
 
-export const next = functions.region('us-central1').https.onRequest(_next)
-
-export const crawl = pubsub.schedule('every 15 minutes').onRun(async () => {
-    const tasks = [_crawlTweets()]
-
-    if (dayjs().minute() < 15) {
-        tasks.push(_tweetSchedulesBetween())
-    }
-    await Promise.all(tasks)
+const defaultBuilder = defaultRegion.runWith({ timeoutSeconds: 30 })
+const puppeteerBuilder = defaultRegion.runWith({
+    timeoutSeconds: 30,
+    memory: '1GB',
 })
 
-export const updateTwitterLists = https.onCall(_updateTwitterLists)
+export const test = defaultBuilder.pubsub
+    .schedule('every 1 minutes')
+    .onRun(async () => {
+        console.log(
+            dayjs()
+                .startOf('day')
+                .toISOString(),
+        )
+    })
+
+export const next = usRegion
+    .runWith({ timeoutSeconds: 15 })
+    .https.onRequest(_next)
+
+export const retweetManually = defaultBuilder.https.onCall(_retweetManually)
+
+// const tasks = [_crawlTweets()]
+
+// if (dayjs().minute() < 15) {
+//     tasks.push(_tweetSchedulesBetween())
+// }
+// await Promise.all(tasks)
+
+export const retweetPositiveTweets = defaultBuilder.pubsub
+    .schedule('every 15 minutes')
+    .timeZone(timezone)
+    .onRun(async () => {
+        const twimo = await getTwimoClient()
+        const tc = new TweetClassifier()
+        await _retweetPositiveTweets(twimo, dayjs(), t => tc.isOfficialTweet(t))
+    })
+
+export const retweetScheduleTweetsOfPrevNight = defaultBuilder.pubsub
+    .schedule('every day 09:00')
+    .timeZone(timezone)
+    .onRun(async () => {
+        const twimo = await getTwimoClient()
+        await _retweetScheduleTweetsOfPrevNight(twimo, dayjs())
+    })
+
+export const tweetUpcomingSchedules = defaultBuilder.pubsub
+    .schedule('every day 21:00')
+    .timeZone(timezone)
+    .onRun(async () => {
+        const twimo = await getTwimoClient()
+        await _tweetUpcomingSchedules(twimo, dayjs(), 'daily')
+    })
+
+export const tweetUpcomingTicketEvents = defaultBuilder.pubsub
+    .schedule('every day 21:05')
+    .timeZone(timezone)
+    .onRun(async () => {
+        const twimo = await getTwimoClient()
+        await _tweetUpcomingTicketEvents(twimo, dayjs())
+    })
+
+export const mightUpdateScheduleThumb = puppeteerBuilder.firestore
+    .document('schedules/{schedule}')
+    .onWrite(async (change, context) => {
+        const { before, after } = change
+        await _mightUpdateScheduleThumb(before, after)
+    })

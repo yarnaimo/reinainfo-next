@@ -15,6 +15,7 @@ const day7End = now.add(7, 'day').endOf('day')
 const day8Start = now.add(8, 'day').startOf('day')
 
 const url = 'https://t.co'
+const pageUrlBase = 'https://localhost:3000/schedules'
 
 let twimo: TwimoClient
 
@@ -68,6 +69,7 @@ const schedules = prray<ISchedule['_E']>([
         title: 'live2',
         date: day2Start.toDate(),
         ...o,
+        hasTime: false,
     },
     {
         active: true,
@@ -87,7 +89,10 @@ const schedules = prray<ISchedule['_E']>([
 
 beforeEach(async () => {
     await schedules.mapAsync(s =>
-        dbInstanceAdmin.collection('schedules').add(s),
+        dbInstanceAdmin
+            .collection('schedules')
+            .doc(s.title)
+            .set(s),
     )
 })
 
@@ -129,24 +134,23 @@ test('weekly', async () => {
 1/19 (土) 22:00
 🎫 live1
 
-${url}
-`,
+${url}`,
         `1/19 (土) - 1/25 (金) の予定 <2/3>
 
-1/20 (日) 0:00
+1/20 (日)
 🎫 live2
 
 ${url}
-`,
+${pageUrlBase}/live2`,
         `1/19 (土) - 1/25 (金) の予定 <3/3>
 
 1/25 (金) 23:59
 🎫 live7
 
 ${url}
-`,
+${pageUrlBase}/live7`,
     ].map(t => ({
-        full_text: t.trim(),
+        full_text: t,
     }))
 
     expectObjectArrayContaining(result, 3, expectedTweets)

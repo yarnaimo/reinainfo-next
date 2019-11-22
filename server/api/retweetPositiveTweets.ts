@@ -5,7 +5,7 @@ import { dbAdmin } from '../services/firebase-admin'
 import { retweetWithLoggingAndNotification } from '../services/integrated'
 import { TwimoClient } from '../services/twitter'
 
-export const _retweetPickedTweets = async (
+export const _retweetPositiveTweets = async (
     twimo: TwimoClient,
     now: Dayjs,
     tweetClassifier: (t: Status) => boolean,

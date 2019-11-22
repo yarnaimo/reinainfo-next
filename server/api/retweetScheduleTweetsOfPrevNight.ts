@@ -2,7 +2,10 @@ import { Dayjs } from 'dayjs'
 import { dbAdmin } from '../services/firebase-admin'
 import { TwimoClient } from '../services/twitter'
 
-export const _morningRetweet = async (twimo: TwimoClient, now: Dayjs) => {
+export const _retweetScheduleTweetsOfPrevNight = async (
+    twimo: TwimoClient,
+    now: Dayjs,
+) => {
     const logs = await dbAdmin.tweetLogs.getQuery({
         q: q =>
             q

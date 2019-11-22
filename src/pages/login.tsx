@@ -15,7 +15,7 @@ const Login: NextPage<Props> = props => {
     return (
         <>
             <Head>
-                <Title title="ログイン"></Title>
+                <Title title="ログイン" path="login"></Title>
             </Head>
 
             <Container>
