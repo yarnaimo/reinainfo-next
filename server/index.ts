@@ -73,9 +73,10 @@ export const tweetUpcomingTicketEvents = defaultBuilder.pubsub
         await _tweetUpcomingTicketEvents(twimo, dayjs())
     })
 
-export const mightUpdateScheduleThumb = puppeteerBuilder.firestore
+export const onScheduleWrite = puppeteerBuilder.firestore
     .document('schedules/{schedule}')
     .onWrite(async (change, context) => {
+        const twimo = await getTwimoClient()
         const { before, after } = change
-        await _onScheduleWrite(before, after)
+        await _onScheduleWrite(twimo, before, after)
     })
