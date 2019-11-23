@@ -2,12 +2,14 @@ import { _retweetPositiveTweets } from '../../api/retweetPositiveTweets'
 import { dbAdmin } from '../../services/firebase-admin'
 import { getTwimoClient, TwimoClient } from '../../services/twitter'
 import { now } from '../__fixtures__/date'
-import { send } from '../__mocks__/@slack/webhook'
+import { addWebhook, send } from '../__mocks__/@slack/webhook'
 
 let twimo: TwimoClient
 
 beforeEach(async () => {
     twimo = await getTwimoClient()
+
+    await addWebhook()
 })
 
 test('retweetPositiveTweets', async () => {
@@ -17,10 +19,10 @@ test('retweetPositiveTweets', async () => {
         prevTweetId: null,
     })
 
-    await dbAdmin.webhooks.create(null, {
-        service: 'slack',
-        url: 'url',
-    })
+    // await dbAdmin.webhooks.create(null, {
+    //     service: 'slack',
+    //     url: 'url',
+    // })
 
     const expectedMessages = [
         '⚡ 1 件のツイートをリツイートしました\nhttps://twitter.com/screenName/status/0',

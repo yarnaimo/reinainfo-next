@@ -3,11 +3,11 @@ import { prray } from 'prray'
 import { ISchedule } from '../../../src/models/Schedule'
 import { ITicket } from '../../../src/models/Ticket'
 import { _tweetUpcomingTicketEvents } from '../../api/tweetUpcomingTicketEvents'
-import { dbAdmin, dbInstanceAdmin } from '../../services/firebase-admin'
+import { dbInstanceAdmin } from '../../services/firebase-admin'
 import { getTwimoClient, TwimoClient } from '../../services/twitter'
 import { expectObjectArrayContaining } from '../utils'
 import { now } from '../__fixtures__/date'
-import { send } from '../__mocks__/@slack/webhook'
+import { addWebhook, send } from '../__mocks__/@slack/webhook'
 
 const day0End = now.endOf('day')
 const day1 = now.add(1, 'day')
@@ -22,10 +22,7 @@ let twimo: TwimoClient
 beforeEach(async () => {
     twimo = await getTwimoClient()
 
-    await dbAdmin.webhooks.create(null, {
-        service: 'slack',
-        url: 'url',
-    })
+    await addWebhook()
 })
 
 const o = {

@@ -8,18 +8,14 @@ import {
     pageUrlBase,
     scheduleUrl,
 } from '../__fixtures__/schedules'
-import { send } from '../__mocks__/@slack/webhook'
+import { addWebhook, send } from '../__mocks__/@slack/webhook'
 
 let twimo: TwimoClient
 
 beforeEach(async () => {
     twimo = await getTwimoClient()
 
-    await dbAdmin.webhooks.create(null, {
-        service: 'slack',
-        url: 'url',
-    })
-
+    await addWebhook()
     await addSchedules()
 })
 

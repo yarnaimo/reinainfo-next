@@ -9,6 +9,7 @@ import {
     pageUrlBase,
     scheduleUrl,
 } from '../__fixtures__/schedules'
+import { addWebhook, send } from '../__mocks__/@slack/webhook'
 
 let twimo: TwimoClient
 
@@ -16,6 +17,7 @@ beforeEach(async () => {
     twimo = await getTwimoClient()
 
     await addSchedules()
+    await addWebhook()
 })
 
 const timestamp1 = firestore.Timestamp.fromDate(now.toDate())
@@ -85,4 +87,6 @@ ${pageUrlBase}/live2`
     expectObjectArrayContaining((result as any).tweetResults, 1, [
         { full_text: expectedText },
     ])
+
+    expect(send).toHaveBeenCalledTimes(1)
 })
