@@ -24,7 +24,7 @@ const AdminSchedulesPage: NextPage<Props> = props => {
         <MainContainer>
             <Title title="Admin - Schedules" path={null}></Title>
 
-            <h2>Serials</h2>
+            <h2>Schedules</h2>
 
             <Section>
                 <SimpleDataTable data={[[]]}></SimpleDataTable>

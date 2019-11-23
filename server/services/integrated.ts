@@ -26,3 +26,19 @@ export const retweetWithLoggingAndNotification = async (
 
     return { retweetResults, webhookResults }
 }
+
+export const sendCrossNotification = async (
+    twimo: TwimoClient,
+    texts: string[],
+) => {
+    const tweetResults = await twimo.postThread(texts)
+
+    const webhookResults = await prray(texts).mapAsync(
+        text => sendMessageToAllWebhooks({ text }),
+        {
+            concurrency: 1,
+        },
+    )
+
+    return { tweetResults, webhookResults }
+}

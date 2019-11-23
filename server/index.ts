@@ -1,8 +1,8 @@
 import dayjs from 'dayjs'
 import * as functions from 'firebase-functions'
 import { TweetClassifier } from '../learn'
-import { _mightUpdateScheduleThumb } from './api/mightUpdateScheduleThumb'
 import { _next } from './api/next'
+import { _onScheduleWrite } from './api/onScheduleWrite'
 import { _retweetManually } from './api/retweetManually'
 import { _retweetPositiveTweets } from './api/retweetPositiveTweets'
 import { _retweetScheduleTweetsOfPrevNight } from './api/retweetScheduleTweetsOfPrevNight'
@@ -77,5 +77,5 @@ export const mightUpdateScheduleThumb = puppeteerBuilder.firestore
     .document('schedules/{schedule}')
     .onWrite(async (change, context) => {
         const { before, after } = change
-        await _mightUpdateScheduleThumb(before, after)
+        await _onScheduleWrite(before, after)
     })

@@ -1,45 +1,40 @@
-import dayjs from 'dayjs'
 import { prray } from 'prray'
-import { Status } from 'twitter-d'
 import { _retweetScheduleTweetsOfPrevNight } from '../../api/retweetScheduleTweetsOfPrevNight'
 import { dbInstanceAdmin } from '../../services/firebase-admin'
-import { mockTwimo } from '../utils'
+import { getTwimoClient, TwimoClient } from '../../services/twitter'
+import { nowMorning } from '../__fixtures__/date'
 
-const now = dayjs('2018-08-03T09:00')
+let twimo: TwimoClient
+
+beforeEach(async () => {
+    twimo = await getTwimoClient()
+})
 
 test('retweetScheduleTweetsOfPrevNight', async () => {
-    const twimo = mockTwimo({
-        retweet: async (ids: string[]) => {
-            return ids.map(
-                id => ({ retweeted_status: { id_str: id } } as Status),
-            )
-        },
-    })
-
     await prray([
         {
             _createdAt: new Date('2018-08-01T22:00'),
             type: 'upcomingSchedule' as const,
-            tweetId: '81',
+            tweetId: '0',
         },
         {
             _createdAt: new Date('2018-08-02T22:00'),
             type: 'retweet' as const,
-            tweetId: '117',
+            tweetId: '2',
         },
         {
             _createdAt: new Date('2018-08-02T22:00'),
             type: 'upcomingSchedule' as const,
-            tweetId: '1080',
+            tweetId: '4',
         },
     ]).mapAsync(log => dbInstanceAdmin.collection('tweetLogs').add(log))
 
     // start
 
-    const result = await _retweetScheduleTweetsOfPrevNight(twimo, now)
+    const result = await _retweetScheduleTweetsOfPrevNight(twimo, nowMorning)
 
     // end
 
     expect(result).toHaveLength(1)
-    expect(result).toMatchObject([{ retweeted_status: { id_str: '1080' } }])
+    expect(result).toMatchObject([{ retweeted_status: { id_str: '4' } }])
 })

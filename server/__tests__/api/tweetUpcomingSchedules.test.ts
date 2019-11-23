@@ -1,13 +1,12 @@
-import dayjs from 'dayjs'
 import { prray } from 'prray'
-import { Status } from 'twitter-d'
 import { ISchedule } from '../../../src/models/Schedule'
 import { _tweetUpcomingSchedules } from '../../api/tweetUpcomingSchedules'
 import { dbAdmin, dbInstanceAdmin } from '../../services/firebase-admin'
-import { TwimoClient } from '../../services/twitter'
-import { expectObjectArrayContaining, mockTwimo } from '../utils'
+import { getTwimoClient, TwimoClient } from '../../services/twitter'
+import { expectObjectArrayContaining } from '../utils'
+import { now } from '../__fixtures__/date'
+import { send } from '../__mocks__/@slack/webhook'
 
-const now = dayjs('2019-01-18T22:00')
 const day0End = now.endOf('day')
 const day1 = now.add(1, 'day')
 const day2Start = now.add(2, 'day').startOf('day')
@@ -19,13 +18,12 @@ const pageUrlBase = 'https://localhost:3000/schedules'
 
 let twimo: TwimoClient
 
-beforeEach(() => {
-    twimo = mockTwimo({
-        postThread: async (texts: string[]) => {
-            return texts.map(
-                (full_text, i) => ({ full_text, id_str: String(i) } as Status),
-            )
-        },
+beforeEach(async () => {
+    twimo = await getTwimoClient()
+
+    await dbAdmin.webhooks.create(null, {
+        service: 'slack',
+        url: 'url',
     })
 })
 
@@ -110,7 +108,9 @@ test('daily', async () => {
 
 ${url}`
 
-    expectObjectArrayContaining(result, 1, [{ full_text: expectedText }])
+    expectObjectArrayContaining(result.tweetResults, 1, [
+        { full_text: expectedText },
+    ])
 
     const { array: logs } = await dbAdmin.tweetLogs.getQuery({})
     expectObjectArrayContaining(logs, 1, [
@@ -119,6 +119,8 @@ ${url}`
             tweetId: '0',
         },
     ])
+
+    expect(send).toHaveBeenCalledTimes(1)
 })
 
 test('weekly', async () => {
@@ -153,8 +155,10 @@ ${pageUrlBase}/live7`,
         full_text: t,
     }))
 
-    expectObjectArrayContaining(result, 3, expectedTweets)
+    expectObjectArrayContaining(result.tweetResults, 3, expectedTweets)
 
     const { array: logs } = await dbAdmin.tweetLogs.getQuery({})
     expectObjectArrayContaining(logs, 0, [])
+
+    expect(send).toHaveBeenCalledTimes(3)
 })

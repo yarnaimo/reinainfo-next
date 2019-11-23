@@ -1,14 +1,14 @@
 import dayjs from 'dayjs'
 import { prray } from 'prray'
-import { Status } from 'twitter-d'
 import { ISchedule } from '../../../src/models/Schedule'
 import { ITicket } from '../../../src/models/Ticket'
 import { _tweetUpcomingTicketEvents } from '../../api/tweetUpcomingTicketEvents'
-import { dbInstanceAdmin } from '../../services/firebase-admin'
-import { TwimoClient } from '../../services/twitter'
-import { expectObjectArrayContaining, mockTwimo } from '../utils'
+import { dbAdmin, dbInstanceAdmin } from '../../services/firebase-admin'
+import { getTwimoClient, TwimoClient } from '../../services/twitter'
+import { expectObjectArrayContaining } from '../utils'
+import { now } from '../__fixtures__/date'
+import { send } from '../__mocks__/@slack/webhook'
 
-const now = dayjs('2019-01-18T22:00')
 const day0End = now.endOf('day')
 const day1 = now.add(1, 'day')
 const day1Noon = day1.set('h', 12)
@@ -19,13 +19,12 @@ const url = 'https://t.co'
 
 let twimo: TwimoClient
 
-beforeEach(() => {
-    twimo = mockTwimo({
-        postThread: async (texts: string[]) => {
-            return texts.map(
-                (full_text, i) => ({ full_text, id_str: String(i) } as Status),
-            )
-        },
+beforeEach(async () => {
+    twimo = await getTwimoClient()
+
+    await dbAdmin.webhooks.create(null, {
+        service: 'slack',
+        url: 'url',
     })
 })
 
@@ -106,5 +105,7 @@ ${url}`,
 ${url}`,
     ].map(t => ({ full_text: t }))
 
-    expectObjectArrayContaining(result, 2, expectedTweets)
+    expectObjectArrayContaining(result.tweetResults, 2, expectedTweets)
+
+    expect(send).toHaveBeenCalledTimes(2)
 })

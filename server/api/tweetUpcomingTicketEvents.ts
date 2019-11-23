@@ -7,6 +7,7 @@ import {
 } from '../../src/models/Schedule'
 import { ITicket } from '../../src/models/Ticket'
 import { dbAdmin } from '../services/firebase-admin'
+import { sendCrossNotification } from '../services/integrated'
 import { TwimoClient } from '../services/twitter'
 
 const combineSchedule = async (
@@ -43,18 +44,18 @@ export const _tweetUpcomingTicketEvents = async (
     const opTextsToTweet = opTickets.map((pair, i) => {
         // const header = `🚩 チケットの受付が始まります <${i + 1}>`
 
-        return MSchedule.buildTweetTextOfTicketEvent(pair, 'open')
+        return MSchedule.buildNotificationTextOfTicketEvent(pair, 'open')
     })
     const clTextsToTweet = clTickets.map((pair, i) => {
         // const header = `⚠ チケットの申込期限が近づいています <${i + 1}>`
 
-        return MSchedule.buildTweetTextOfTicketEvent(pair, 'close')
+        return MSchedule.buildNotificationTextOfTicketEvent(pair, 'close')
     })
 
-    const thread = await twimo.postThread([
-        ...clTextsToTweet,
-        ...opTextsToTweet,
-    ])
+    const { tweetResults, webhookResults } = await sendCrossNotification(
+        twimo,
+        [...clTextsToTweet, ...opTextsToTweet],
+    )
 
-    return thread
+    return { tweetResults, webhookResults }
 }

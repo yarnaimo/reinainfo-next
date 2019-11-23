@@ -1,65 +1,16 @@
-import dayjs from 'dayjs'
-import { Status } from 'twitter-d'
 import { _retweetPositiveTweets } from '../../api/retweetPositiveTweets'
 import { dbAdmin } from '../../services/firebase-admin'
-import * as webhookModule from '../../services/webhook'
-import { mockTwimo } from '../utils'
+import { getTwimoClient, TwimoClient } from '../../services/twitter'
+import { now } from '../__fixtures__/date'
+import { send } from '../__mocks__/@slack/webhook'
 
-const webhookMock = jest
-    .spyOn(webhookModule, 'sendWebhookMessage')
-    .mockResolvedValue({ text: 'ok' })
+let twimo: TwimoClient
 
-const now = dayjs('2019-08-10T09:00')
-const screen_name = 'screenName'
-
-const tweets = [
-    {
-        id_str: '0',
-        created_at: dayjs('2019-1-17').toISOString(),
-        user: { id_str: '50', screen_name },
-    },
-    {
-        id_str: '1',
-        created_at: dayjs('2019-2-27').toISOString(),
-        user: { id_str: '91', screen_name },
-    },
-    {
-        id_str: '2',
-        created_at: dayjs('2019-2-27').toISOString(),
-        user: { id_str: '52', screen_name },
-    },
-    {
-        id_str: '3',
-        created_at: dayjs('2019-2-27').toISOString(),
-        user: { id_str: '53', screen_name },
-    },
-    {
-        id_str: '4',
-        created_at: now.subtract(10, 'minute').toISOString(),
-        user: { id_str: '54', screen_name },
-    },
-] as Status[]
+beforeEach(async () => {
+    twimo = await getTwimoClient()
+})
 
 test('retweetPositiveTweets', async () => {
-    const twimo = mockTwimo({
-        getMutedIds: async () => new Set(['91']),
-        searchTweets: jest
-            .fn()
-            .mockResolvedValueOnce(tweets.slice(0, 2).reverse())
-            .mockImplementationOnce(
-                async ({ sinceId }: any) =>
-                    sinceId === '2' && tweets.slice(2).reverse(),
-            ),
-        retweet: async (ids: string[]) => {
-            return ids.map(
-                id =>
-                    ({
-                        retweeted_status: tweets.find(t => t.id_str === id),
-                    } as Status),
-            )
-        },
-    })
-
     const query = 'query'
     await dbAdmin.twitterSearches.create('default', {
         query,
@@ -90,8 +41,9 @@ test('retweetPositiveTweets', async () => {
     expect(result1.retweetResults).toMatchObject([
         { retweeted_status: { id_str: '0' } },
     ])
-    expect(webhookMock).toHaveBeenCalledWith(
-        expect.objectContaining({ service: 'slack', url: 'url' }),
+    expect(send).toHaveBeenNthCalledWith(
+        1,
+        // expect.objectContaining({ service: 'slack', url: 'url' }),
         { text: expectedMessages[0] },
     )
 
@@ -112,11 +64,14 @@ test('retweetPositiveTweets', async () => {
     expect(result2.retweetResults).toMatchObject([
         { retweeted_status: { id_str: '2' } },
     ])
-    expect(webhookMock).toHaveBeenCalledWith(
-        expect.objectContaining({ service: 'slack', url: 'url' }),
+    expect(send).toHaveBeenNthCalledWith(
+        2,
+        // expect.objectContaining({ service: 'slack', url: 'url' }),
         { text: expectedMessages[1] },
     )
 
     const search2 = await dbAdmin.twitterSearches.getDoc({ doc: 'default' })
     expect(search2).toMatchObject({ query, prevTweetId: '3' })
+
+    expect(send).toHaveBeenCalledTimes(2)
 })

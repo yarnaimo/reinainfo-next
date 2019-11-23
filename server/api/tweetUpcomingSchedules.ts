@@ -3,6 +3,7 @@ import { prray } from 'prray'
 import { filterByTimestamp, MSchedule } from '../../src/models/Schedule'
 import { stringifyWDate } from '../../src/utils/date'
 import { dbAdmin } from '../services/firebase-admin'
+import { sendCrossNotification } from '../services/integrated'
 import { TwimoClient } from '../services/twitter'
 
 export const _tweetUpcomingSchedules = async (
@@ -24,17 +25,20 @@ export const _tweetUpcomingSchedules = async (
             ? `明日 ${stringifyWDate(since)}`
             : `${stringifyWDate(since)} - ${stringifyWDate(untilDate)}`
 
-    const textsToTweet = schedules.array.map((s, i) => {
+    const texts = schedules.array.map((s, i) => {
         const header = `${dateRange} の予定 <${i + 1}/${
             schedules.array.length
         }>`
-        return MSchedule.buildTweetText(s, header, freq === 'weekly')
+        return MSchedule.buildNotificationText(s, header, freq === 'weekly')
     })
 
-    const thread = await twimo.postThread(textsToTweet)
+    const { tweetResults, webhookResults } = await sendCrossNotification(
+        twimo,
+        texts,
+    )
 
     if (freq === 'daily') {
-        await prray(thread).mapAsync(({ id_str }) =>
+        await prray(tweetResults).mapAsync(({ id_str }) =>
             dbAdmin.tweetLogs.create(null, {
                 type: 'upcomingSchedule',
                 tweetId: id_str,
@@ -42,5 +46,5 @@ export const _tweetUpcomingSchedules = async (
         )
     }
 
-    return thread
+    return { tweetResults, webhookResults }
 }

@@ -278,7 +278,7 @@ export class MSchedule {
         return s.isSerial ? null : `${env.origin}/schedules/${s._id}`
     }
 
-    static buildTweetText(
+    static buildNotificationText(
         s: ISchedule['_D'],
         header: string,
         withDate: boolean,
@@ -306,7 +306,7 @@ export class MSchedule {
         ])!
     }
 
-    static buildTweetTextOfTicketEvent(
+    static buildNotificationTextOfTicketEvent(
         { schedule, ticket }: ITicketSchedulePair,
         event: 'open' | 'close',
     ) {
