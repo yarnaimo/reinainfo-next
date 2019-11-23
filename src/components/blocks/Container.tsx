@@ -11,7 +11,7 @@ import { responsive } from '../../utils/css'
 //     },
 // })
 
-const _Container = styled.div({
+export const Container = styled.div({
     width: '70%',
     maxWidth: 640,
     margin: '0px auto',
@@ -22,6 +22,9 @@ const _Container = styled.div({
     },
 })
 
-export const Container = _Container
+export const AdminContainer = styled(Container)({
+    width: 'calc(100% - 24px)',
+    maxWidth: 'unset',
+})
 
-export const MainContainer = _Container.withComponent('main')
+export const MainContainer = Container.withComponent('main')

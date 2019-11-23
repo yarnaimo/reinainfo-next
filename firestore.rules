@@ -24,7 +24,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // match /sources/{source}/posts/{post} {
+    match /tweetLogs/{tweetLog} {
+      allow read;
+      // allow write: if isAdmin();
+    }
+
+     // match /sources/{source}/posts/{post} {
     //   allow read: if isAdmin();
     //   allow update: if isAdmin();
     // }

@@ -22,8 +22,6 @@ import { margin, transition } from '../../utils/css'
 import { useBool } from '../../utils/hooks'
 import { cardVariants } from '../../utils/variants'
 
-type Props = { schedules?: IScheduleSerialized[] }
-
 const getGSchedulesSerialized = () =>
     db.gSchedulesActive.getQuery({
         q: filterSchedulesAfterNow(),
@@ -104,13 +102,10 @@ const ScheduleList: FC<{ chunkedSchedules: ScheduleChunks }> = ({
     )
 }
 
+type Props = { schedules?: IScheduleSerialized[] }
+
 const SchedulesPage: NextPage<Props> = ({ schedules: pSchedules }) => {
     const { globalState, setGlobalState } = useContext(Store)
-
-    // const modalSchedule = useMemo(
-    //     () => (is.string(id) ? globalState.gSchedules.map?.get(id) : undefined),
-    //     [globalState.gSchedules.map, id],
-    // )
 
     useEffectOnce(() => {
         // router.prefetch('/schedules/[id]')

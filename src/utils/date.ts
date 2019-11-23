@@ -1,5 +1,7 @@
 import dayjs, { Dayjs } from 'dayjs'
 import 'dayjs/locale/ja'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+dayjs.extend(customParseFormat)
 dayjs.locale('ja')
 
 // export const formatDate = (date: Dayjs) =>
@@ -24,3 +26,25 @@ export const stringifyTime = (date: Dayjs) => date.format('H:mm')
 
 export const stringifyWDateTime = (date: Dayjs, omitSpace = false) =>
     `${stringifyWDate(date, omitSpace)} ${stringifyTime(date)}`
+
+const parseDateString = (str: string) => {
+    const [date, time] = [...str.split('.'), '']
+
+    if (![2, 4, 8].includes(date.length) || ![0, 2, 4].includes(time.length)) {
+        return null
+    }
+
+    const paddedTime = time.padEnd(4, '0')
+    const strToParse = `${date}.${paddedTime}`
+
+    const formats = ['YYYYMMDD.HHmm', 'MMDD.HHmm', 'DD.HHmm']
+
+    for (const f of formats) {
+        const parsed = dayjs(strToParse, f)
+
+        if (parsed.isValid()) {
+            return parsed
+        }
+    }
+    return null
+}
