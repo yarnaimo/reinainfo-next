@@ -13,6 +13,8 @@ import { getTwimoClient } from './services/twitter'
 const timezone = 'Asia/Tokyo'
 process.env.TZ = timezone
 
+const getTime = () => dayjs().format('HHmm')
+
 const defaultRegion = functions.region('asia-northeast1')
 const usRegion = functions.region('us-central1')
 
@@ -40,37 +42,24 @@ export const retweetManually = defaultBuilder.https.onCall(_retweetManually)
 // }
 // await Promise.all(tasks)
 
-export const retweetPositiveTweets = defaultBuilder.pubsub
-    .schedule('every 15 minutes')
+export const defaultBuilderFunctions = defaultBuilder.pubsub
+    .schedule('*/15 * * * *')
     .timeZone(timezone)
     .onRun(async () => {
+        const time = getTime()
         const twimo = await getTwimoClient()
+
         const tc = new TweetClassifier()
         await _retweetPositiveTweets(twimo, dayjs(), t => tc.isOfficialTweet(t))
-    })
 
-export const retweetScheduleTweetsOfPrevNight = defaultBuilder.pubsub
-    .schedule('every day 09:00')
-    .timeZone(timezone)
-    .onRun(async () => {
-        const twimo = await getTwimoClient()
-        await _retweetScheduleTweetsOfPrevNight(twimo, dayjs())
-    })
+        if (time === '0900') {
+            await _retweetScheduleTweetsOfPrevNight(twimo, dayjs())
+        }
 
-export const tweetUpcomingSchedules = defaultBuilder.pubsub
-    .schedule('every day 21:00')
-    .timeZone(timezone)
-    .onRun(async () => {
-        const twimo = await getTwimoClient()
-        await _tweetUpcomingSchedules(twimo, dayjs(), 'daily')
-    })
-
-export const tweetUpcomingTicketEvents = defaultBuilder.pubsub
-    .schedule('every day 21:05')
-    .timeZone(timezone)
-    .onRun(async () => {
-        const twimo = await getTwimoClient()
-        await _tweetUpcomingTicketEvents(twimo, dayjs())
+        if (time === '2100') {
+            await _tweetUpcomingSchedules(twimo, dayjs(), 'daily')
+            await _tweetUpcomingTicketEvents(twimo, dayjs())
+        }
     })
 
 export const onScheduleWrite = puppeteerBuilder.firestore

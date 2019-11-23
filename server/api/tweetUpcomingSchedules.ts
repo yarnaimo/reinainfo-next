@@ -11,6 +11,8 @@ export const _tweetUpcomingSchedules = async (
     now: Dayjs,
     freq: 'daily' | 'weekly',
 ) => {
+    console.log('[ tweetUpcomingSchedules ]')
+
     const since = now.startOf('day').add(1, 'day')
 
     const until = freq === 'daily' ? since.add(1, 'day') : since.add(1, 'week')

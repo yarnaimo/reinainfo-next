@@ -35,6 +35,8 @@ export const _tweetUpcomingTicketEvents = async (
     twimo: TwimoClient,
     now: Dayjs,
 ) => {
+    console.log('[ tweetUpcomingTicketEvents ]')
+
     const since = now.startOf('day').add(1, 'day')
     const until = since.add(1, 'day')
 

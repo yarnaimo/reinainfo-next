@@ -6,6 +6,8 @@ export const _retweetScheduleTweetsOfPrevNight = async (
     twimo: TwimoClient,
     now: Dayjs,
 ) => {
+    console.log('[ retweetScheduleTweetsOfPrevNight ]')
+
     const logs = await dbAdmin.tweetLogs.getQuery({
         q: q =>
             q
