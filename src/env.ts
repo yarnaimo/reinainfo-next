@@ -8,7 +8,7 @@ export const env = {
     origin: isDev()
         ? `https://localhost:${port()}`
         : 'https://reinainfo-next.web.app',
-    appName: 'ReinaInfo',
+    appName: 'ReinaInfo Next',
     description: '',
     screenName: 'Unoffishama',
     twitterCardSize: [310, 162] as const,

@@ -160,14 +160,15 @@ const AppBar: FC<{ openDrawer: () => void }> = memo(({ openDrawer }) => {
                         }
                     >
                         <TopAppBarNavigationIcon
-                            // icon={'/assets/icons/button-icon.png'}
+                            icon={'/assets/icons/apple-touch-icon.png'}
                             css={{
                                 opacity: 0.75,
-                                backgroundSize: 'contain',
+                                // backgroundSize: 'contain',
                                 backgroundPosition: 'center',
                                 backgroundRepeat: 'no-repeat',
+                                backgroundSize: '80%',
                             }}
-                            onClick={openDrawer}
+                            // onClick={openDrawer}
                         />
                     </Solid>
 
