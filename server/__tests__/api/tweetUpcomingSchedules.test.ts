@@ -1,20 +1,14 @@
-import { prray } from 'prray'
-import { ISchedule } from '../../../src/models/Schedule'
 import { _tweetUpcomingSchedules } from '../../api/tweetUpcomingSchedules'
-import { dbAdmin, dbInstanceAdmin } from '../../services/firebase-admin'
+import { dbAdmin } from '../../services/firebase-admin'
 import { getTwimoClient, TwimoClient } from '../../services/twitter'
 import { expectObjectArrayContaining } from '../utils'
 import { now } from '../__fixtures__/date'
+import {
+    addSchedules,
+    pageUrlBase,
+    scheduleUrl,
+} from '../__fixtures__/schedules'
 import { send } from '../__mocks__/@slack/webhook'
-
-const day0End = now.endOf('day')
-const day1 = now.add(1, 'day')
-const day2Start = now.add(2, 'day').startOf('day')
-const day7End = now.add(7, 'day').endOf('day')
-const day8Start = now.add(8, 'day').startOf('day')
-
-const url = 'https://t.co'
-const pageUrlBase = 'https://localhost:3000/schedules'
 
 let twimo: TwimoClient
 
@@ -25,73 +19,8 @@ beforeEach(async () => {
         service: 'slack',
         url: 'url',
     })
-})
 
-const o = {
-    category: 'live' as const,
-    customIcon: null,
-    ribbonColors: null,
-    hasTime: true,
-    url,
-    parts: [],
-    venue: null,
-    // way: null,
-    hasTickets: false,
-    thumbUrl: null,
-}
-const schedules = prray<ISchedule['_E']>([
-    {
-        active: true,
-        isSerial: false,
-        title: 'live0',
-        date: day0End.toDate(),
-        ...o,
-    },
-    {
-        active: true,
-        isSerial: true,
-        title: 'live1',
-        date: day1.toDate(),
-        ...o,
-    },
-    {
-        active: false,
-        isSerial: false,
-        title: 'live1-inactive',
-        date: day1.toDate(),
-        ...o,
-    },
-    {
-        active: true,
-        isSerial: false,
-        title: 'live2',
-        date: day2Start.toDate(),
-        ...o,
-        hasTime: false,
-    },
-    {
-        active: true,
-        isSerial: false,
-        title: 'live7',
-        date: day7End.toDate(),
-        ...o,
-    },
-    {
-        active: true,
-        isSerial: false,
-        title: 'live8',
-        date: day8Start.toDate(),
-        ...o,
-    },
-])
-
-beforeEach(async () => {
-    await schedules.mapAsync(s =>
-        dbInstanceAdmin
-            .collection('schedules')
-            .doc(s.title)
-            .set(s),
-    )
+    await addSchedules()
 })
 
 test('daily', async () => {
@@ -104,9 +33,9 @@ test('daily', async () => {
     const expectedText = `明日 1/19 (土) の予定 <1/1>
 
 22:00
-🎫 live1
+🎫 up1
 
-${url}`
+${scheduleUrl}`
 
     expectObjectArrayContaining(result.tweetResults, 1, [
         { full_text: expectedText },
@@ -134,22 +63,22 @@ test('weekly', async () => {
         `1/19 (土) - 1/25 (金) の予定 <1/3>
 
 1/19 (土) 22:00
-🎫 live1
+🎫 up1
 
-${url}`,
+${scheduleUrl}`,
         `1/19 (土) - 1/25 (金) の予定 <2/3>
 
 1/20 (日)
 🎫 live2
 
-${url}
+${scheduleUrl}
 ${pageUrlBase}/live2`,
         `1/19 (土) - 1/25 (金) の予定 <3/3>
 
 1/25 (金) 23:59
 🎫 live7
 
-${url}
+${scheduleUrl}
 ${pageUrlBase}/live7`,
     ].map(t => ({
         full_text: t,

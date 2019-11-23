@@ -1,15 +1,14 @@
 import { Blue } from 'bluespark'
 import { ulid } from 'ulid'
 import { env } from '../../src/env'
-import { MSchedule } from '../../src/models/Schedule'
+import { ISchedule, MSchedule } from '../../src/models/Schedule'
+import { dbAdmin } from '../services/firebase-admin'
 import { sendCrossNotification } from '../services/integrated'
 import { newBrowserPage } from '../services/puppeteer'
 import { savePNGImage } from '../services/storage'
 import { TwimoClient } from '../services/twitter'
 
-export const updateScheduleThumb = async (snap: Blue.DocSnapshot) => {
-    const { id } = snap.ref
-
+export const updateScheduleThumb = async (schedule: ISchedule['_D']) => {
     const page = await newBrowserPage()
 
     await page.setViewport({
@@ -18,7 +17,7 @@ export const updateScheduleThumb = async (snap: Blue.DocSnapshot) => {
         deviceScaleFactor: 2,
     })
 
-    await page.goto(`${env.origin}/headless/schedules/${id}`)
+    await page.goto(`${env.origin}/headless/schedules/${schedule._id}`)
     await page.waitFor(4000)
 
     const buffer = await page.screenshot({ encoding: 'binary' })
@@ -28,7 +27,7 @@ export const updateScheduleThumb = async (snap: Blue.DocSnapshot) => {
     console.log(thumbUrl)
 
     // ** keep _updatedAt unchanged **
-    await snap.ref.update({
+    await schedule._ref.update({
         thumbUrl,
     })
 
@@ -37,12 +36,15 @@ export const updateScheduleThumb = async (snap: Blue.DocSnapshot) => {
 
 export const onScheduleCreate = async (
     twimo: TwimoClient,
-    snap: Blue.DocSnapshot,
+    schedule: ISchedule['_D'],
+    skipScreenshot: boolean,
 ) => {
-    await updateScheduleThumb(snap)
+    if (!skipScreenshot) {
+        await updateScheduleThumb(schedule)
+    }
 
     const text = MSchedule.buildNotificationText(
-        snap.data() as any,
+        schedule,
         '🎉 スケジュールが追加されました',
         true,
     )
@@ -52,27 +54,34 @@ export const onScheduleCreate = async (
         [text],
     )
 
-    return { tweetResults, webhookResults }
+    return { type: 'created', tweetResults, webhookResults }
 }
 
 export const onScheduleUpdate = async (
     twimo: TwimoClient,
-    snap: Blue.DocSnapshot,
+    schedule: ISchedule['_D'],
+    skipScreenshot: boolean,
 ) => {
-    await updateScheduleThumb(snap)
+    if (!skipScreenshot) {
+        await updateScheduleThumb(schedule)
+    }
+    return { type: 'updated' }
 }
 
 export const _onScheduleWrite = async (
     twimo: TwimoClient,
-    before: Blue.DocSnapshot | undefined,
-    after: Blue.DocSnapshot,
+    _before: Blue.DocSnapshot,
+    _after: Blue.DocSnapshot,
+    skipScreenshot = false,
 ) => {
-    const [beforeTimestamp, afterTimestamp] = [before, after].map(
-        snap => snap?.data()?._updatedAt as Blue.Timestamp | undefined,
-    )
+    const before = dbAdmin.schedules._decode(_before)
+    const after = dbAdmin.schedules._decode(_after)
+
+    const beforeTimestamp = before?._updatedAt
+    const afterTimestamp = after?._updatedAt
 
     if (!beforeTimestamp && afterTimestamp) {
-        return onScheduleCreate(twimo, after)
+        return onScheduleCreate(twimo, after!, skipScreenshot)
     }
 
     if (
@@ -80,6 +89,8 @@ export const _onScheduleWrite = async (
         afterTimestamp &&
         !afterTimestamp.isEqual(beforeTimestamp)
     ) {
-        return onScheduleUpdate(twimo, after)
+        return onScheduleUpdate(twimo, after!, skipScreenshot)
     }
+
+    return { type: null }
 }
