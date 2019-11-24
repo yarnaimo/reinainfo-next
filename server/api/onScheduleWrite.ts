@@ -17,7 +17,7 @@ export const updateScheduleThumb = async (schedule: ISchedule['_D']) => {
         deviceScaleFactor: 2,
     })
 
-    await page.goto(`${env.origin}/headless/schedules/${schedule._id}`)
+    await page.goto(`${env.origin}/_headless/schedules/${schedule._id}`)
     await page.waitFor(4000)
 
     const buffer = await page.screenshot({ encoding: 'binary' })

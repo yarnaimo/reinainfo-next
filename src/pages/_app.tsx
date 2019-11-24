@@ -23,7 +23,7 @@ const Spacer = styled.div({
 export const MyApp: AppType = ({ Component, pageProps }) => {
     const router = useRouter()
 
-    if (router.pathname.startsWith('/headless/')) {
+    if (router.pathname.startsWith('/_headless/')) {
         return (
             <Provider>
                 <Global styles={{ html: { overflow: 'hidden' } }}></Global>

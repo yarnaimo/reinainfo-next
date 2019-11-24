@@ -1,7 +1,7 @@
 import { useSCollection } from 'bluespark'
 import dayjs from 'dayjs'
 import { NextPage } from 'next'
-import React, { ReactNode, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
     Button,
     CircularProgress,
@@ -31,9 +31,7 @@ const bool = (value: any) => (value ? <b>*</b> : '')
 
 type Props = {}
 
-const S = (children: ReactNode) => <Section>{children}</Section>
-
-const AdminSchedulesPage: NextPage<Props> = props => {
+const AdminIndexPage: NextPage<Props> = props => {
     // const serials = db.serials.getQuery({
     //     q: q => q.where('active', '==', true),
     //     decoder: (serial: ISerial['_D']) => {
@@ -222,4 +220,4 @@ const AdminSchedulesPage: NextPage<Props> = props => {
 //     return {}
 // }
 
-export default AdminSchedulesPage
+export default AdminIndexPage
