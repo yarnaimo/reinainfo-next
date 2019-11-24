@@ -6,7 +6,7 @@ import { getTwimoClient } from '../services/twitter'
 export const _retweetManually = createCallable<
     'retweetManually',
     { ids: string[] },
-    {}
+    { retweetCount: number }
 >(async (data, ctx) => {
     if (!ctx.auth) {
         throw new https.HttpsError('unauthenticated', '')
@@ -25,5 +25,5 @@ export const _retweetManually = createCallable<
     const twimo = await getTwimoClient()
     const results = await retweetWithLoggingAndNotification(twimo, data.ids)
 
-    return results
+    return { retweetCount: results.retweetResults.length }
 })

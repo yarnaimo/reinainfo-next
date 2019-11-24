@@ -10,8 +10,12 @@ import {
     DialogButton,
     DialogContent,
     DialogTitle,
+    List,
     SimpleDataTable,
+    SimpleListItem,
+    TextField,
 } from 'rmwc'
+import { _retweetManually } from '../../../server/api/retweetManually'
 import { AdminContainer } from '../../components/blocks/Container'
 import { Section } from '../../components/blocks/Section'
 import { ScheduleDetailContent } from '../../components/molecules/ScheduleDetailContent'
@@ -23,7 +27,7 @@ import {
     IScheduleSerialized,
     MSchedule,
 } from '../../models/Schedule'
-import { db } from '../../services/firebase'
+import { callable, db } from '../../services/firebase'
 import { useBool } from '../../utils/hooks'
 import { micon } from '../../utils/icon'
 
@@ -52,12 +56,12 @@ const AdminIndexPage: NextPage<Props> = props => {
             '',
             '',
             'カテゴリ',
+            '日時',
+            '時刻あり?',
             'アイコン',
             '色',
             'タイトル',
             'URL',
-            '日時',
-            '時刻あり?',
             'パート',
             '場所',
             'チケットあり?',
@@ -77,17 +81,22 @@ const AdminIndexPage: NextPage<Props> = props => {
                 //     }}
                 //     css={{ margin: '0 -8px' }}
                 // ></SmallIconButton>,
-                <Button label="Edit" onClick={() => editSchedule(s)}></Button>,
+                <Button
+                    label="Edit"
+                    onClick={() => editSchedule(s)}
+                    css={{ margin: '0 -8px' }}
+                ></Button>,
                 bool(s.active),
 
                 MSchedule.getCategory(s.category).name,
+                dayjs(s.date.toDate()).format('YYYY-MM-DD HH:mm'),
+                bool(s.hasTime),
+
                 s.customIcon,
                 s.ribbonColors?.length || '',
 
                 s.title,
                 s.url,
-                dayjs(s.date.toDate()).format('YYYY-MM-DD HH:mm'),
-                bool(s.hasTime),
                 s.parts.toString(),
                 s.venue,
                 bool(s.hasTickets),
@@ -102,7 +111,7 @@ const AdminIndexPage: NextPage<Props> = props => {
 
     const scheduleForm = useScheduleForm()
 
-    const [dialogTitle, setDialogTitle] = useState('')
+    const [editingSchedule, setEditingSchedule] = useState<ISchedule['_D']>()
 
     const DialogContent_ = (
         <DialogContent>
@@ -130,7 +139,9 @@ const AdminIndexPage: NextPage<Props> = props => {
 
     const Dialog_ = (
         <Dialog open={dialog.state}>
-            <DialogTitle>{dialogTitle}</DialogTitle>
+            <DialogTitle>
+                スケジュールの{editingSchedule ? '編集' : '登録'}
+            </DialogTitle>
 
             {DialogContent_}
 
@@ -155,17 +166,14 @@ const AdminIndexPage: NextPage<Props> = props => {
                             micon('check')
                         )
                     }
-                    onClick={
-                        scheduleForm.handleSubmit(data => {
-                            console.log(data)
-                        })
-                        // if (formRef.validate()) {
-                        //     dialog.off()
+                    onClick={scheduleForm.handleSubmit(data => {
+                        dialog.off()
+                        console.log(data)
 
-                        //     const encoded = encodeFormData(form)
-                        //     console.log(encoded)
-                        // }
-                    }
+                        editingSchedule
+                            ? db.schedules.update(editingSchedule._ref, data)
+                            : db.schedules.create(null, data)
+                    })}
                 >
                     保存
                 </DialogButton>
@@ -174,26 +182,24 @@ const AdminIndexPage: NextPage<Props> = props => {
     )
 
     const editSchedule = (s?: ISchedule['_D']) => {
-        setDialogTitle(s ? 'スケジュールの編集' : 'スケジュールの追加')
+        setEditingSchedule(s)
         scheduleForm.init(s)
 
         dialog.on()
     }
 
-    //         .then(async data => {
-    //             if (!data) {
-    //                 return
-    //             }
-    //             return schedule
-    //                 ? db.sources.update(schedule._ref, data)
-    //                 : db.sources.create(null, data)
-    // })
+    const Schedules_ = (
+        <>
+            <Section>
+                {Dialog_}
 
-    return (
-        <AdminContainer>
-            <Title title="Admin - Schedules" path={null}></Title>
-
-            <h2>Schedules</h2>
+                <Button
+                    outlined
+                    icon={micon('plus')}
+                    label={'スケジュールの登録'}
+                    onClick={() => editSchedule()}
+                ></Button>
+            </Section>
 
             <Section css={{ overflowX: 'scroll' }}>
                 <SimpleDataTable
@@ -201,17 +207,95 @@ const AdminIndexPage: NextPage<Props> = props => {
                     data={tableData}
                 ></SimpleDataTable>
             </Section>
+        </>
+    )
+
+    //
+
+    const [tweetIdField, setTweetIdField] = useState('')
+    const [retweetTargets, setRetweetTargets] = useState<
+        { screenName: string; id: string }[]
+    >([])
+
+    const Retweet_ = (
+        <>
+            <Section>
+                <List>
+                    {retweetTargets.map(({ screenName, id }, i) => (
+                        <SimpleListItem
+                            key={i}
+                            text={`${screenName}/${id}`}
+                            metaIcon={{
+                                icon: 'close',
+                                onClick: () => {
+                                    setRetweetTargets(pre =>
+                                        pre.filter((_, _i) => i !== _i),
+                                    )
+                                },
+                            }}
+                        />
+                    ))}
+                </List>
+
+                <TextField
+                    label="Paste Tweet URL"
+                    onPaste={e => {
+                        const text: string = e.clipboardData.getData('text')
+                        const twitterMatch = text.match(
+                            /twitter.com\/([\w]+)\/status\/(\d+)/,
+                        )
+
+                        if (twitterMatch) {
+                            const [, screenName, id] = twitterMatch
+
+                            if (!retweetTargets.some(t => t.id === id)) {
+                                setRetweetTargets(pre => [
+                                    ...pre,
+                                    {
+                                        screenName,
+                                        id,
+                                    },
+                                ])
+                            }
+                        }
+
+                        setTweetIdField('')
+                    }}
+                    value={tweetIdField}
+                    onChange={() => {}}
+                ></TextField>
+            </Section>
 
             <Section>
-                {Dialog_}
-
                 <Button
-                    outlined
-                    icon={micon('plus')}
-                    label={dialogTitle}
-                    onClick={() => editSchedule()}
+                    label="リツイート"
+                    onClick={() => {
+                        callable<typeof _retweetManually>('retweetManually', {
+                            ids: retweetTargets.map(t => t.id),
+                        }).then(res => {
+                            if (res) {
+                                window.alert(
+                                    `${res.retweetCount} 件リツイートしました`,
+                                )
+                            }
+                        })
+                    }}
                 ></Button>
             </Section>
+        </>
+    )
+
+    return (
+        <AdminContainer>
+            <Title title="Admin - Schedules" path={null}></Title>
+
+            <h2>Retweet</h2>
+            {Retweet_}
+
+            <div css={{ height: 16 }}></div>
+
+            <h2>Schedules</h2>
+            {Schedules_}
         </AdminContainer>
     )
 }

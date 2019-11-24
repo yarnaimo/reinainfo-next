@@ -3,8 +3,9 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { Button } from 'rmwc'
 import { Container } from '../../components/blocks/Container'
+import { Section } from '../../components/blocks/Section'
 import { Title } from '../../components/templates/Title'
-import { login } from '../../services/firebase'
+import { login, logout } from '../../services/firebase'
 
 type Props = {}
 
@@ -15,17 +16,27 @@ const AdminLoginPage: NextPage<Props> = props => {
         <Container>
             <Title title="ログイン" path="login"></Title>
 
-            <Button
-                icon="exit_to_app"
-                unelevated
-                onClick={async () => {
-                    await login()
-                    router.push('/admin')
-                    // router.push((router.query.referrerPath as string) || '/')
-                }}
-            >
-                ログイン
-            </Button>
+            <Section>
+                <Button
+                    unelevated
+                    label="ログイン"
+                    onClick={async () => {
+                        await login()
+                        router.push('/_admin')
+                        // router.push((router.query.referrerPath as string) || '/')
+                    }}
+                ></Button>
+            </Section>
+
+            <Section>
+                <Button
+                    unelevated
+                    label="ログアウト"
+                    onClick={async () => {
+                        await logout()
+                    }}
+                ></Button>
+            </Section>
         </Container>
     )
 }
