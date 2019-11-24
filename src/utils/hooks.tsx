@@ -337,7 +337,10 @@ export const useFormDialog = <
     titleBase: string,
     schema: S,
     encoder: ((data: D) => E) | undefined,
-    bodyRenderer: (form: UseForm<S, D, E>) => ReactNode,
+    bodyRenderer: (
+        form: UseForm<S, D, E>,
+        encodeData: () => Promise<E | null>,
+    ) => ReactNode,
 ) => {
     const [title, setTitle] = useState('')
     const dialog = useBool(false)
@@ -346,12 +349,24 @@ export const useFormDialog = <
     const onClose = useRef((data: E | null) => {})
     const isSaving = useBool(false)
 
+    const encodeData = async () => {
+        const data = await form.trimData()
+        console.log(data)
+
+        if (formRef.validate()) {
+            const encoded = form.encode(data)
+            console.log(encoded)
+            return encoded
+        }
+        return null
+    }
+
     const rendered = (
         <Dialog open={dialog.state}>
             <DialogTitle>{title}</DialogTitle>
 
             <DialogContent>
-                <form ref={formRef.ref}>{bodyRenderer(form)}</form>
+                <form ref={formRef.ref}>{bodyRenderer(form, encodeData)}</form>
             </DialogContent>
 
             <DialogActions>
@@ -377,17 +392,23 @@ export const useFormDialog = <
                         )
                     }
                     onClick={() => {
-                        form.trimData().then(data => {
-                            console.log(data)
-
-                            if (formRef.validate()) {
+                        encodeData().then(encoded => {
+                            if (encoded) {
                                 dialog.off()
-
-                                const encoded = form.encode(data)
-                                console.log(encoded)
                                 onClose.current(encoded)
                             }
                         })
+                        // form.trimData().then(data => {
+                        //     console.log(data)
+
+                        //     if (formRef.validate()) {
+                        //         dialog.off()
+
+                        //         const encoded = form.encode(data)
+                        //         console.log(encoded)
+                        //         onClose.current(encoded)
+                        //     }
+                        // })
                     }}
                 >
                     保存
@@ -416,5 +437,5 @@ export const useFormDialog = <
 
     const buttonLabel = (suffix: string) => titleBase + suffix
 
-    return { rendered, prompt, buttonLabel }
+    return { rendered, prompt, buttonLabel, encodeData }
 }

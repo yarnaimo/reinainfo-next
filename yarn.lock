@@ -11142,6 +11142,11 @@ react-firebase-hooks@^2.1.1:
   resolved "https://registry.yarnpkg.com/react-firebase-hooks/-/react-firebase-hooks-2.1.1.tgz#7180b86e4bd8e33699003a41e6d33f280a54319a"
   integrity sha512-6ZvAUa5q1JJrTQxCEKCXrP6S/en3B65RAYRYHbbjUh9f1BgKPsxkdaGGBPhGKuVSLUrVqTm8PtpZ/LCtAFogKA==
 
+react-hook-form@^3.28.3:
+  version "3.28.3"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-3.28.3.tgz#4f1424e9935e072e77bc36d3b07efcb3dbab426e"
+  integrity sha512-U4Ba/kGpqTD/2hjcKN4kc194cIGqfHGSIdykppkPVsCzMwVRXZRHAo3ep/RQtNxGVJ+hMnGPIJ5xGyG1Jq+2oA==
+
 react-is@16.8.6:
   version "16.8.6"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.8.6.tgz#5bbc1e2d29141c9fbdfed456343fe2bc430a6a16"

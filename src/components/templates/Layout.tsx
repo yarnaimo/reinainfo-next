@@ -166,7 +166,7 @@ const AppBar: FC<{ openDrawer: () => void }> = memo(({ openDrawer }) => {
                                 // backgroundSize: 'contain',
                                 backgroundPosition: 'center',
                                 backgroundRepeat: 'no-repeat',
-                                backgroundSize: '80%',
+                                backgroundSize: '67%',
                             }}
                             // onClick={openDrawer}
                         />

@@ -195,6 +195,17 @@ export type ITicketSchedulePair = {
     ticket: ITicket['_D']
 }
 
+export const partPattern = (() => {
+    const T = '(?:\\d{3,4})?'
+    const TD = `?:\\.(${T})`
+    const S = '(?:^|\\+)'
+    const E = '(?=$|\\+)'
+    return new RegExp(
+        `${S}([^.+]*)(${TD}(?!\\.${T}${E}))?(${TD})?(${TD})${E}`,
+        'g',
+    )
+})()
+
 export class MSchedule {
     static isSame(a?: IScheduleSerialized, b?: IScheduleSerialized) {
         return a?._id === b?._id && a?._updatedAt === b?._updatedAt
@@ -214,6 +225,42 @@ export class MSchedule {
 
     static getCategory(key: CategoryKey) {
         return categories[key]
+    }
+
+    static deserializeParts(str: string) {
+        const matches = Rstring.globalMatch(str, partPattern)
+
+        const parts = matches.map(
+            ([, name, ...times]): IPart => {
+                const [gatherBy, opensAt, startsAt] = times.map(str => {
+                    return str
+                        ? `${Number(str.slice(-4, -2))}:${str.slice(-2)}`
+                        : null
+                })
+
+                return {
+                    name: name || null,
+                    gatherBy,
+                    opensAt,
+                    startsAt: startsAt!,
+                }
+            },
+        )
+
+        return parts
+    }
+
+    static serializeParts(parts: IPart[]) {
+        return parts
+            .map(p =>
+                [
+                    p.name || '',
+                    ...[p.gatherBy, p.opensAt, p.startsAt].map(
+                        s => s?.replace(/\:/, '') || '',
+                    ),
+                ].join('.'),
+            )
+            .join('+')
     }
 
     static formatParts(parts: IPart[]) {

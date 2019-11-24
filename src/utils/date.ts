@@ -27,7 +27,7 @@ export const stringifyTime = (date: Dayjs) => date.format('H:mm')
 export const stringifyWDateTime = (date: Dayjs, omitSpace = false) =>
     `${stringifyWDate(date, omitSpace)} ${stringifyTime(date)}`
 
-const parseDateString = (str: string) => {
+export const parseDateString = (str: string) => {
     const [date, time] = [...str.split('.'), '']
 
     if (![2, 4, 8].includes(date.length) || ![0, 2, 4].includes(time.length)) {

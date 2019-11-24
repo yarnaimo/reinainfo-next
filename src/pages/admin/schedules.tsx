@@ -1,20 +1,37 @@
 import { useSCollection } from 'bluespark'
+import dayjs from 'dayjs'
 import { NextPage } from 'next'
-import React, { useMemo } from 'react'
-import { Button, SimpleDataTable } from 'rmwc'
+import React, { ReactNode, useMemo, useState } from 'react'
+import {
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogButton,
+    DialogContent,
+    DialogTitle,
+    SimpleDataTable,
+} from 'rmwc'
 import { AdminContainer } from '../../components/blocks/Container'
 import { Section } from '../../components/blocks/Section'
+import { ScheduleDetailContent } from '../../components/molecules/ScheduleDetailContent'
+import { useScheduleForm } from '../../components/molecules/ScheduleForm'
 import { Title } from '../../components/templates/Title'
 import {
     filterSchedulesAfterNow,
     ISchedule,
+    IScheduleSerialized,
     MSchedule,
 } from '../../models/Schedule'
 import { db } from '../../services/firebase'
+import { useBool } from '../../utils/hooks'
+import { micon } from '../../utils/icon'
 
 const bool = (value: any) => (value ? <b>*</b> : '')
 
 type Props = {}
+
+const S = (children: ReactNode) => <Section>{children}</Section>
 
 const AdminSchedulesPage: NextPage<Props> = props => {
     // const serials = db.serials.getQuery({
@@ -41,10 +58,11 @@ const AdminSchedulesPage: NextPage<Props> = props => {
             '色',
             'タイトル',
             'URL',
-            '時刻?',
+            '日時',
+            '時刻あり?',
             'パート',
             '場所',
-            'チケット?',
+            'チケットあり?',
             'サムネイルURL',
         ],
     ]
@@ -70,7 +88,7 @@ const AdminSchedulesPage: NextPage<Props> = props => {
 
                 s.title,
                 s.url,
-                // s.date.toDate().,
+                dayjs(s.date.toDate()).format('YYYY-MM-DD HH:mm'),
                 bool(s.hasTime),
                 s.parts.toString(),
                 s.venue,
@@ -80,78 +98,90 @@ const AdminSchedulesPage: NextPage<Props> = props => {
         [schedules.array],
     )
 
-    // const scheduleDialog = useFormDialog(
-    //     'スケジュール',
-    //     {
-    //         active: Field<boolean>(true),
-    //         timelineId: Field<string>(''),
+    const [schedulePreview, setSchedulePreview] = useState<
+        IScheduleSerialized
+    >()
 
-    //         feedUrl: Field<string>(''),
-    //         prevPublishedAt: OptField<string>(''),
+    const scheduleForm = useScheduleForm()
 
-    //         siteName: Field<string>(''),
-    //         faviconUrl: OptField<string>(''),
-    //         siteUrl: OptField<string>(''),
-    //     },
-    //     data => ({
-    //         ...data,
-    //         type: 'feed' as const,
-    //         prevPublishedAt: is.null_(data.prevPublishedAt)
-    //             ? null
-    //             : dayjs(data.prevPublishedAt).toDate(),
-    //     }),
-    //     form => (
-    //         <>
-    //             <Section>
-    //                 <Checkbox
-    //                     label="アクティブ"
-    //                     {...form.field('active', 'bool')}
-    //                 ></Checkbox>
-    //             </Section>
-    //             <Section>
-    //                 <TextField
-    //                     label="サイト名"
-    //                     {...form.readonly('siteName', 'text')}
-    //                 ></TextField>
-    //             </Section>
-    //             <Section>
-    //                 <Select
-    //                     label="保存先タイムライン"
-    //                     // enhanced
-    //                     options={timelines.array.map(timeline => ({
-    //                         value: timeline._id,
-    //                         label: timeline.name,
-    //                     }))}
-    //                     {...form.field('timelineId', 'text')}
-    //                 />
-    //             </Section>
-    //             <Section>
-    //                 <TextField
-    //                     label="URL"
-    //                     {...form.field('feedUrl', 'text')}
-    //                 ></TextField>
-    //             </Section>
-    //             <Section>
-    //                 <TextField
-    //                     label="最終更新 (UTC)"
-    //                     {...form.field('prevPublishedAt', 'text')}
-    //                 ></TextField>
-    //             </Section>
-    //         </>
-    //     ),
-    // )
+    const [dialogTitle, setDialogTitle] = useState('')
 
-    const editSchedule = (schedule?: ISchedule['_D']) => null
-    //     scheduleDialog
-    //         .prompt({
-    //             titleSuffix: schedule ? 'の編集' : 'の追加',
-    //             data: schedule && {
-    //                 ...schedule,
-    //                 prevPublishedAt:
-    //                     schedule.prevPublishedAt &&
-    //                     schedule.prevPublishedAt.toDate().toISOString(),
-    //             },
-    //         })
+    const DialogContent_ = (
+        <DialogContent>
+            {schedulePreview && (
+                <ScheduleDetailContent
+                    compact={false}
+                    schedule={schedulePreview}
+                ></ScheduleDetailContent>
+            )}
+            <Button
+                label="プレビュー"
+                onClick={() => {
+                    // encodeData().then(encoded => {
+                    //     setSchedulePreview(encoded as any)
+                    // })
+                }}
+            ></Button>
+
+            {scheduleForm.rendered}
+        </DialogContent>
+    )
+
+    const dialog = useBool(false)
+    const isSaving = useBool(false)
+
+    const Dialog_ = (
+        <Dialog open={dialog.state}>
+            <DialogTitle>{dialogTitle}</DialogTitle>
+
+            {DialogContent_}
+
+            <DialogActions>
+                <DialogButton
+                    action="cancel"
+                    onClick={() => {
+                        dialog.off()
+                    }}
+                >
+                    キャンセル
+                </DialogButton>
+
+                <DialogButton
+                    action="accept"
+                    unelevated
+                    disabled={isSaving.state}
+                    icon={
+                        isSaving.state ? (
+                            <CircularProgress></CircularProgress>
+                        ) : (
+                            micon('check')
+                        )
+                    }
+                    onClick={
+                        scheduleForm.handleSubmit(data => {
+                            console.log(data)
+                        })
+                        // if (formRef.validate()) {
+                        //     dialog.off()
+
+                        //     const encoded = encodeFormData(form)
+                        //     console.log(encoded)
+                        // }
+                    }
+                >
+                    保存
+                </DialogButton>
+            </DialogActions>
+        </Dialog>
+    )
+
+    const editSchedule = (s?: ISchedule['_D']) => {
+        setDialogTitle(s ? 'スケジュールの編集' : 'スケジュールの追加')
+        scheduleForm.init(s)
+
+        dialog.on()
+    }
+
     //         .then(async data => {
     //             if (!data) {
     //                 return
@@ -172,6 +202,17 @@ const AdminSchedulesPage: NextPage<Props> = props => {
                     headers={tableHeaders}
                     data={tableData}
                 ></SimpleDataTable>
+            </Section>
+
+            <Section>
+                {Dialog_}
+
+                <Button
+                    outlined
+                    icon={micon('plus')}
+                    label={dialogTitle}
+                    onClick={() => editSchedule()}
+                ></Button>
             </Section>
         </AdminContainer>
     )
