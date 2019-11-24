@@ -38,7 +38,7 @@ type Props = {
 }
 
 const tabs = [
-    { path: '/topics', label: 'Topics', icon: 'flash-circle' },
+    { path: '/', label: 'Topics', icon: 'flash-circle' },
     { path: '/schedules', label: 'Schedules', icon: 'calendar' },
     { path: '/info', label: 'Info', icon: 'information-outline' },
 ]
