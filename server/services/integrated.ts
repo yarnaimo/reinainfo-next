@@ -14,6 +14,10 @@ export const retweetWithLoggingAndNotification = async (
         dbAdmin.retweetLogs.create(retweeted_status!.id_str, {}),
     )
 
+    if (!retweetResults.length) {
+        return { retweetResults }
+    }
+
     const webhookResults = await sendMessageToAllWebhooks({
         text: [
             `⚡ ${retweetResults.length} 件のツイートをリツイートしました`,

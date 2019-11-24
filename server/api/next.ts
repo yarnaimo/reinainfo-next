@@ -3,7 +3,7 @@ import next from 'next'
 import { env } from '../../src/env'
 
 const nextServer =
-    process.env.FUNCTION_NAME === 'next'
+    !process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'next'
         ? next({
               dev: env.isDev(),
               dir: 'src',
