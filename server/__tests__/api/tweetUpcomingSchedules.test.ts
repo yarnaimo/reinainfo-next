@@ -37,11 +37,10 @@ ${scheduleUrl}`
         { full_text: expectedText },
     ])
 
-    const { array: logs } = await dbAdmin.tweetLogs.getQuery({})
+    const { array: logs } = await dbAdmin.scheduleTweetLogs.getQuery({})
     expectObjectArrayContaining(logs, 1, [
         {
-            type: 'upcomingSchedule',
-            tweetId: '0',
+            _id: '0',
         },
     ])
 
@@ -82,7 +81,7 @@ ${pageUrlBase}/live7`,
 
     expectObjectArrayContaining(result.tweetResults, 3, expectedTweets)
 
-    const { array: logs } = await dbAdmin.tweetLogs.getQuery({})
+    const { array: logs } = await dbAdmin.scheduleTweetLogs.getQuery({})
     expectObjectArrayContaining(logs, 0, [])
 
     expect(send).toHaveBeenCalledTimes(3)

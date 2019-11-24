@@ -7,8 +7,8 @@ import { Solid } from '../components/blocks/Flex'
 import { Section } from '../components/blocks/Section'
 import { TweetEmbed } from '../components/molecules/TweetEmbed'
 import { Title } from '../components/templates/Title'
+import { IRetweetLogSerialized, MRetweetLog } from '../models/RetweetLog'
 import { filterByTimestamp } from '../models/Schedule'
-import { ITweetLogSerialized, MTweetLog } from '../models/TweetLog'
 import { db } from '../services/firebase'
 import { color } from '../utils/color'
 import { margin } from '../utils/css'
@@ -16,10 +16,10 @@ import { margin } from '../utils/css'
 const getRetweetLogsSerialized = () =>
     db.retweetLogs.getQuery({
         q: filterByTimestamp('_createdAt', dayjs().subtract(2, 'week')),
-        decoder: MTweetLog.serialize,
+        decoder: MRetweetLog.serialize,
     })
 
-type Props = { retweetLogs: ITweetLogSerialized[] }
+type Props = { retweetLogs: IRetweetLogSerialized[] }
 
 const TopicsPage: NextPage<Props> = ({ retweetLogs }) => {
     return (
@@ -39,7 +39,7 @@ const TopicsPage: NextPage<Props> = ({ retweetLogs }) => {
 
             <Section>
                 {retweetLogs.map(l => (
-                    <TweetEmbed key={l.tweetId} id={l.tweetId}></TweetEmbed>
+                    <TweetEmbed key={l._id} id={l._id}></TweetEmbed>
                 ))}
             </Section>
         </MainContainer>

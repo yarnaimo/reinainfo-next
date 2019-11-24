@@ -41,10 +41,7 @@ export const _tweetUpcomingSchedules = async (
 
     if (freq === 'daily') {
         await prray(tweetResults).mapAsync(({ id_str }) =>
-            dbAdmin.tweetLogs.create(null, {
-                type: 'upcomingSchedule',
-                tweetId: id_str,
-            }),
+            dbAdmin.scheduleTweetLogs.create(id_str, {}),
         )
     }
 

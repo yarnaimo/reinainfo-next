@@ -45,7 +45,7 @@ export const onScheduleCreate = async (
 
     const text = MSchedule.buildNotificationText(
         schedule,
-        '🎉 スケジュールが追加されました',
+        '🎉 スケジュールが登録されました',
         true,
     )
 

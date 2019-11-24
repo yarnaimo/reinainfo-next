@@ -8,14 +8,13 @@ export const _retweetScheduleTweetsOfPrevNight = async (
 ) => {
     console.log('[ retweetScheduleTweetsOfPrevNight ]')
 
-    const logs = await dbAdmin.tweetLogs.getQuery({
+    const logs = await dbAdmin.scheduleTweetLogs.getQuery({
         q: q =>
             q
-                .where('type', '==', 'upcomingSchedule')
                 .where('_createdAt', '>=', now.subtract(1, 'day').toDate())
                 .orderBy('_createdAt'),
     })
 
-    const retweets = await twimo.retweet(logs.array.map(l => l.tweetId))
+    const retweets = await twimo.retweet(logs.array.map(l => l._id))
     return retweets
 }

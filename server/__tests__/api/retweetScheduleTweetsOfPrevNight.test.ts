@@ -14,20 +14,25 @@ test('retweetScheduleTweetsOfPrevNight', async () => {
     await prray([
         {
             _createdAt: new Date('2018-08-01T22:00'),
-            type: 'upcomingSchedule' as const,
-            tweetId: '0',
+            // type: 'upcomingSchedule' as const,
+            // tweetId: '0',
         },
+        // {
+        //     _createdAt: new Date('2018-08-02T22:00'),
+        //     type: 'retweet' as const,
+        //     tweetId: '2',
+        // },
         {
             _createdAt: new Date('2018-08-02T22:00'),
-            type: 'retweet' as const,
-            tweetId: '2',
+            // type: 'upcomingSchedule' as const,
+            // tweetId: '4',
         },
-        {
-            _createdAt: new Date('2018-08-02T22:00'),
-            type: 'upcomingSchedule' as const,
-            tweetId: '4',
-        },
-    ]).mapAsync(log => dbInstanceAdmin.collection('tweetLogs').add(log))
+    ]).mapAsync((log, i) =>
+        dbInstanceAdmin
+            .collection('scheduleTweetLogs')
+            .doc(String(i))
+            .set(log),
+    )
 
     // start
 
@@ -36,5 +41,5 @@ test('retweetScheduleTweetsOfPrevNight', async () => {
     // end
 
     expect(result).toHaveLength(1)
-    expect(result).toMatchObject([{ retweeted_status: { id_str: '4' } }])
+    expect(result).toMatchObject([{ retweeted_status: { id_str: '1' } }])
 })

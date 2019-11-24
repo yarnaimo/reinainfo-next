@@ -11,10 +11,7 @@ export const retweetWithLoggingAndNotification = async (
     const retweetResults = await twimo.retweet(ids)
 
     await prray(retweetResults).mapAsync(({ retweeted_status }) =>
-        dbAdmin.tweetLogs.create(null, {
-            type: 'retweet',
-            tweetId: retweeted_status!.id_str,
-        }),
+        dbAdmin.retweetLogs.create(retweeted_status!.id_str, {}),
     )
 
     const webhookResults = await sendMessageToAllWebhooks({

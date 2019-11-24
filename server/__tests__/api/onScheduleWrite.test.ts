@@ -76,7 +76,7 @@ test('created', async () => {
         true,
     )
 
-    const expectedText = `🎉 スケジュールが追加されました
+    const expectedText = `🎉 スケジュールが登録されました
 
 1/20 (日)
 🎫 live2

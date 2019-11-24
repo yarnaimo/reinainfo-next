@@ -1,4 +1,5 @@
 import * as admin from 'firebase-admin'
+import { https } from 'firebase-functions'
 import { JsonObject } from 'type-fest'
 import { createCollections } from '../../src/services/create-collections'
 
@@ -39,7 +40,10 @@ export const createCallable = <
     Request extends JsonObject,
     Response extends JsonObject
 >(
-    handler: (request: Request) => Promise<Response>,
+    handler: (
+        request: Request,
+        context: https.CallableContext,
+    ) => Promise<Response>,
 ) => {
     return handler as typeof handler & {
         name: N
