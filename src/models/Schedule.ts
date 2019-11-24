@@ -299,8 +299,14 @@ export class MSchedule {
             .join(' / ')
     }
 
-    static formatDate(s: ISchedule['_D'] | IScheduleSerialized) {
-        const date = dayjs(is.string(s.date) ? s.date : s.date.toDate())
+    static formatDate(
+        s: ISchedule['_D'] | ISchedule['_E'] | IScheduleSerialized,
+    ) {
+        const date = dayjs(
+            is.string(s.date) || s.date instanceof Date
+                ? s.date
+                : s.date.toDate(),
+        )
         const wdateString = stringifyWDate(date)
 
         if (s.hasTime) {

@@ -106,29 +106,33 @@ const AdminIndexPage: NextPage<Props> = props => {
         [schedules.array],
     )
 
-    const [schedulePreview, setSchedulePreview] = useState<
-        IScheduleSerialized
-    >()
-
     const scheduleForm = useScheduleForm()
 
+    const [previewSchedule, setPreviewSchedule] = useState<
+        IScheduleSerialized
+    >()
     const [editingSchedule, setEditingSchedule] = useState<ISchedule['_D']>()
 
     const DialogContent_ = (
         <DialogContent>
-            {schedulePreview && (
+            {previewSchedule && (
                 <ScheduleDetailContent
                     compact={false}
-                    schedule={schedulePreview}
+                    schedule={previewSchedule}
                 ></ScheduleDetailContent>
             )}
             <Button
                 label="プレビュー"
-                onClick={() => {
-                    // encodeData().then(encoded => {
-                    //     setSchedulePreview(encoded as any)
-                    // })
-                }}
+                onClick={scheduleForm.handleSubmit(data => {
+                    console.log(data)
+                    const dataD = {
+                        ...data,
+                        _updatedAt: dayjs().toISOString(),
+                        date: data.date.toISOString(),
+                        formattedDate: MSchedule.formatDate(data),
+                    }
+                    setPreviewSchedule(dataD as any)
+                })}
             ></Button>
 
             {scheduleForm.rendered}

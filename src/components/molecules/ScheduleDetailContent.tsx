@@ -83,7 +83,7 @@ export const ScheduleDetailContent = memo<Props>(
         >()
 
         useEffect(() => {
-            if (s.hasTickets) {
+            if (s.hasTickets && s._path) {
                 db._ticketsIn(dbInstance.doc(s._path))
                     .getQuery({ decoder: decodeTicket })
                     .then(({ array }) => setTickets(array))

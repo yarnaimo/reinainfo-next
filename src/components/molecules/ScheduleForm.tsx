@@ -1,15 +1,12 @@
 import is from '@sindresorhus/is'
 import dayjs from 'dayjs'
-import React, { FC, ReactNode, useEffect, useState } from 'react'
+import React from 'react'
 import useForm from 'react-hook-form'
-import { Checkbox, FormattedOption, Select, TextField } from 'rmwc'
+import { RHFInput } from 'react-hook-form-input'
+import { Checkbox, Select, TextField } from 'rmwc'
 import { categories, ISchedule, MSchedule } from '../../models/Schedule'
 import { parseDateString } from '../../utils/date'
 import { Section } from '../blocks/Section'
-
-const _Section = (children: ReactNode, key?: number) => (
-    <Section key={key}>{children}</Section>
-)
 
 type Field<T> = {
     type: 'toggle' | 'required' | 'optional'
@@ -64,25 +61,6 @@ const initialValues = Object.entries(schema).reduce(
     {} as GetFormValuesType<typeof schema>,
 )
 
-const FSelect: FC<{
-    value: string
-    options: FormattedOption[]
-    inputRef: any
-}> = ({ value: _value, options, inputRef, ...props }) => {
-    const [value, setValue] = useState('')
-    useEffect(() => setValue(_value), [_value])
-
-    return (
-        <Select
-            options={options}
-            value={value}
-            inputRef={inputRef}
-            onChange={e => setValue((e.target as any).value)}
-            {...props}
-        />
-    )
-}
-
 const replaceEmptyStringWithNull = <T extends { [key: string]: any }>(
     data: T,
 ) => {
@@ -118,12 +96,19 @@ export const useScheduleForm = () => {
         reset(trimmed)
     }
 
-    const props = (key: keyof typeof schema) => {
+    const props = (key: keyof typeof schema, noRegister = false) => {
         const required = schema[key].type === 'required'
+
+        const inputRef = noRegister
+            ? undefined
+            : required
+            ? register({ required: true })
+            : register
+
         return {
             name: key,
             label: schema[key].label,
-            inputRef: required ? register({ required: true }) : register,
+            inputRef,
             required,
         }
     }
@@ -132,14 +117,20 @@ export const useScheduleForm = () => {
         <Checkbox {...props('active')}></Checkbox>,
         <Checkbox {...props('isSerial')}></Checkbox>,
 
-        <FSelect
-            {...props('category')}
-            options={Object.entries(categories).map(([k, v]) => ({
-                value: k,
-                label: v.name,
-            }))}
-            value={getValues().category}
-        ></FSelect>,
+        <RHFInput
+            as={
+                <Select
+                    {...props('category', true)}
+                    options={Object.entries(categories).map(([k, v]) => ({
+                        value: k,
+                        label: v.name,
+                    }))}
+                />
+            }
+            register={register}
+            setValue={setValue}
+            name="category"
+        />,
         <TextField {...props('customIcon')}></TextField>,
         <TextField {...props('ribbonColors')}></TextField>,
 
@@ -197,7 +188,13 @@ export const useScheduleForm = () => {
             callback(encode(data))
         })
 
-    const rendered = <form>{form.map(_Section)}</form>
+    const rendered = (
+        <form>
+            {form.map((f, i) => (
+                <Section key={i}>{f}</Section>
+            ))}
+        </form>
+    )
 
     return {
         form,

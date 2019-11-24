@@ -65,6 +65,10 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
+.mdc-dialog-scroll-lock {
+    overflow: unset;
+}
+
 .mdc-button__label {
     text-transform: none;
 }
