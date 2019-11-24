@@ -11,7 +11,7 @@
     "debug": "node -r ts-node/register --inspect-brk",
     "deploy": "ts-node server/scripts/migrate.ts && firebase deploy",
     "logs": "firebase functions:log",
-    "next:build": "next build src && mkdir .static/_next && cp -r src/.next/static .static/_next/",
+    "next:build": "next build src && mkdir -p .static/_next && cp -r src/.next/static .static/_next/",
     "next:debug": "node -r ts-node/register --inspect server/next-dev",
     "next:dev": "ts-node server/next-dev",
     "serve": "firebase serve --only firestore",
