@@ -2,6 +2,7 @@ import { useSCollection } from 'bluespark'
 import dayjs from 'dayjs'
 import { NextPage } from 'next'
 import React, { useMemo, useState } from 'react'
+import { useAuthState } from 'react-firebase-hooks/auth'
 import {
     Button,
     CircularProgress,
@@ -27,7 +28,7 @@ import {
     IScheduleSerialized,
     MSchedule,
 } from '../../models/Schedule'
-import { callable, db } from '../../services/firebase'
+import { app, callable, db } from '../../services/firebase'
 import { useBool } from '../../utils/hooks'
 import { micon } from '../../utils/icon'
 
@@ -284,6 +285,12 @@ const AdminIndexPage: NextPage<Props> = props => {
             </Section>
         </>
     )
+
+    const [user, loading, error] = useAuthState(app.auth())
+
+    if (!user) {
+        return <></>
+    }
 
     return (
         <AdminContainer>
