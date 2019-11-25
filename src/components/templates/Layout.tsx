@@ -38,9 +38,24 @@ type Props = {
 }
 
 const tabs = [
-    { path: '/', label: 'Topics', icon: 'flash-circle' },
-    { path: '/schedules', label: 'Schedules', icon: 'calendar' },
-    { path: '/info', label: 'Info', icon: 'information-outline' },
+    {
+        path: '/',
+        label: 'Topics',
+        icon: 'flash-circle',
+        color: color.blue(0.7),
+    },
+    {
+        path: '/schedules',
+        label: 'Schedules',
+        icon: 'calendar',
+        color: color.blue(0.7),
+    },
+    {
+        path: '/info',
+        label: 'Info',
+        icon: 'information-outline',
+        color: color.blue(0.7),
+    },
 ]
 
 const tabTransition = transition('std', ['color', 'transform'], [0.35], [0.05])
@@ -83,7 +98,7 @@ const Tabs = () => {
                                     css={{
                                         ...tabTransition,
                                         color: active
-                                            ? color.blue(0.75)
+                                            ? tab.color
                                             : color.black(0.3),
                                         transform: active
                                             ? 'scale(1) translateX(0px)'
@@ -98,7 +113,7 @@ const Tabs = () => {
                                         width: 22,
 
                                         ...tabBarTransition,
-                                        background: color.blue(0.75),
+                                        background: tab.color,
                                         opacity: active ? 1 : 0,
                                         transform: active
                                             ? 'scaleX(1)'

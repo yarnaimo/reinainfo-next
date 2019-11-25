@@ -44,6 +44,7 @@ $mdc-typography-font-family: 'Ubuntu', -apple-system, BlinkMacSystemFont,
 @import '~@rmwc/data-table/data-table';
 
 html {
+    overflow-x: hidden;
     overflow-y: scroll;
     touch-action: manipulation;
     font-size: 15px;

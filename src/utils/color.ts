@@ -39,7 +39,8 @@ export const color = {
     // secondaryL: hsl(49, 95, 66),
     // secondary: hsl(355, 97, 73),
 
-    pink: hsl(352, 85, 65),
+    pink: hsl(3, 77, 75),
+    // pink: hsl(352, 85, 65),
 
     orangeL: hsl(37, 93, 71),
     orange: hsl(42, 97, 50),
