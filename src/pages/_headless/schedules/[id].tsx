@@ -1,3 +1,4 @@
+import { Global } from '@emotion/core'
 import { NextPage } from 'next'
 import React from 'react'
 import {} from 'rmwc'
@@ -12,10 +13,29 @@ const getSchedule = async (id: string) =>
 
 const HeadlessSchedulePage: NextPage<Props> = ({ schedule }) => {
     return (
-        <ScheduleDetailContent
-            schedule={schedule}
-            compact={true}
-        ></ScheduleDetailContent>
+        <>
+            <Global
+                styles={`
+                    @font-face {
+                        font-family: 'BIZ-UDPGothic';
+                        src: url('/assets/fonts/BIZ-UDPGothic-02.ttf') format('truetype');
+                        font-weight: 400;
+                        font-style: normal;
+                    }
+                    @font-face {
+                        font-family: 'BIZ-UDPGothic';
+                        src: url('/assets/fonts/BIZ-UDPGothic-Bold-02.ttf') format('truetype');
+                        font-weight: 700;
+                        font-style: normal;
+                    }
+                `}
+            ></Global>
+            <ScheduleDetailContent
+                schedule={schedule}
+                compact={true}
+                css={{ fontFamily: 'Ubuntu, "BIZ-UDPGothic", sans-serif' }}
+            ></ScheduleDetailContent>
+        </>
     )
 }
 
