@@ -1,11 +1,11 @@
 {
-  "name": "Sodafloat",
-  "short_name": "Sodafloat",
+  "name": "ReinaInfo Next",
+  "short_name": "ReinaInfo Next",
   "description": "",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#ffffff",
-  "background_color": "#fdc235",
+  "background_color": "#ffffff",
   "start_url": "/",
   "icons": [
     {

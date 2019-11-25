@@ -1,7 +1,7 @@
 import { FirestoreTest } from '@yarnaimo/firebase-testing'
 import { createCollections } from '../../../src/services/create-collections'
 
-const provider = new FirestoreTest('sodafloat-test')
+const provider = new FirestoreTest('reinainfo-next-test')
 
 export let dbInstanceAdmin: FirebaseFirestore.Firestore
 
