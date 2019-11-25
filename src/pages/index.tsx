@@ -1,11 +1,13 @@
 import dayjs from 'dayjs'
 import { NextPage } from 'next'
-import React from 'react'
+import React, { useContext } from 'react'
+import { useEffectOnce } from 'react-use'
 import {} from 'rmwc'
 import { MainContainer } from '../components/blocks/Container'
 import { Solid } from '../components/blocks/Flex'
 import { Section } from '../components/blocks/Section'
 import { TweetEmbed } from '../components/molecules/TweetEmbed'
+import { Store } from '../components/templates/Store'
 import { Title } from '../components/templates/Title'
 import { IRetweetLogSerialized, MRetweetLog } from '../models/RetweetLog'
 import { filterByTimestamp } from '../models/Schedule'
@@ -19,9 +21,17 @@ const getRetweetLogsSerialized = () =>
         decoder: MRetweetLog.serialize,
     })
 
-type Props = { retweetLogs: IRetweetLogSerialized[] }
+type Props = { retweetLogs?: IRetweetLogSerialized[] }
 
-const TopicsPage: NextPage<Props> = ({ retweetLogs }) => {
+const TopicsPage: NextPage<Props> = ({ retweetLogs: pRetweetLogs }) => {
+    const { globalState, setGlobalState } = useContext(Store)
+
+    useEffectOnce(() => {
+        setGlobalState({ topicsPageAccessed: true })
+    })
+
+    const retweetLogs = globalState.retweetLogs.array || pRetweetLogs || []
+
     return (
         <MainContainer>
             <Title title="Topics" path="topics"></Title>
@@ -47,12 +57,12 @@ const TopicsPage: NextPage<Props> = ({ retweetLogs }) => {
 }
 
 TopicsPage.getInitialProps = async ctx => {
-    // if (ctx.req) {
-    const { array: retweetLogs } = await getRetweetLogsSerialized()
-    return { retweetLogs }
-    // } else {
-    //     return { tweetLogs: undefined }
-    // }
+    if (ctx.req) {
+        const { array: retweetLogs } = await getRetweetLogsSerialized()
+        return { retweetLogs }
+    } else {
+        return { retweetLogs: undefined }
+    }
 }
 
 export default TopicsPage
