@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is'
 import dayjs from 'dayjs'
-import React from 'react'
+import React, { FC } from 'react'
 import useForm from 'react-hook-form'
 import { RHFInput } from 'react-hook-form-input'
 import { Checkbox, Select, TextField } from 'rmwc'
@@ -96,6 +96,61 @@ export const useScheduleForm = () => {
         reset(trimmed)
     }
 
+    const init = (s?: ISchedule['_D']) => {
+        console.log('schedule to init', s)
+
+        if (!s) {
+            reset(initialValues)
+        } else {
+            const _s = Object.entries(s).reduce(
+                (pre, [k, v]) => (k in schema ? { ...pre, [k]: v } : pre),
+                {} as ISchedule['_D'],
+            )
+            reset({
+                ..._s,
+                date: dayjs(s.date.toDate()).format('YYYYMMDD.HHmm'),
+                ribbonColors: s.ribbonColors?.join('/') ?? null,
+                parts: s.parts && MSchedule.serializeParts(s.parts),
+            })
+        }
+        console.log('inited', getValues())
+    }
+
+    const encode = (data: FormValues) => {
+        const _data = replaceEmptyStringWithNull(data)
+        console.log('errors', errors)
+
+        const d = {
+            ..._data,
+            date: parseDateString(data.date)?.toDate() ?? new Date(NaN),
+            ribbonColors: data.ribbonColors
+                ? data.ribbonColors.split('/')
+                : null,
+            parts: MSchedule.deserializeParts(data.parts ?? ''),
+        }
+        return {
+            ...d,
+            // formattedDate: MSchedule.formatDate(d as any),
+        } as ISchedule['_E']
+    }
+
+    const handleSubmit = (callback: (s: ISchedule['_E']) => void) =>
+        _handleSubmit(data => {
+            trimData()
+            callback(encode(data))
+        })
+
+    return {
+        register,
+        setValue,
+        init,
+        handleSubmit,
+    }
+}
+
+type Props = ReturnType<typeof useScheduleForm>
+
+export const ScheduleForm: FC<Props> = ({ register, setValue }) => {
     const props = (key: keyof typeof schema, noRegister = false) => {
         const required = schema[key].type === 'required'
 
@@ -144,62 +199,11 @@ export const useScheduleForm = () => {
         <TextField {...props('thumbUrl')}></TextField>,
     ]
 
-    const init = (s?: ISchedule['_D']) => {
-        console.log('schedule to init', s)
-
-        if (!s) {
-            reset(initialValues)
-        } else {
-            const _s = Object.entries(s).reduce(
-                (pre, [k, v]) => (k in schema ? { ...pre, [k]: v } : pre),
-                {} as ISchedule['_D'],
-            )
-            reset({
-                ..._s,
-                date: dayjs(s.date.toDate()).format('YYYYMMDD.HHmm'),
-                ribbonColors: s.ribbonColors?.join('/') ?? null,
-                parts: s.parts && MSchedule.serializeParts(s.parts),
-            })
-        }
-        console.log('inited', getValues())
-    }
-
-    const encode = (data: FormValues) => {
-        const _data = replaceEmptyStringWithNull(data)
-        console.log('errors', errors)
-
-        const d = {
-            ..._data,
-            date: parseDateString(data.date)?.toDate() ?? new Date(NaN),
-            ribbonColors: data.ribbonColors
-                ? data.ribbonColors.split('/')
-                : null,
-            parts: MSchedule.deserializeParts(data.parts ?? ''),
-        }
-        return {
-            ...d,
-            // formattedDate: MSchedule.formatDate(d as any),
-        } as ISchedule['_E']
-    }
-
-    const handleSubmit = (callback: (s: ISchedule['_E']) => void) =>
-        _handleSubmit(data => {
-            trimData()
-            callback(encode(data))
-        })
-
-    const rendered = (
+    return (
         <form>
             {form.map((f, i) => (
                 <Section key={i}>{f}</Section>
             ))}
         </form>
     )
-
-    return {
-        form,
-        init,
-        handleSubmit,
-        rendered,
-    }
 }

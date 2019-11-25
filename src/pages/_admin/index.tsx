@@ -20,7 +20,10 @@ import { _retweetManually } from '../../../server/api/retweetManually'
 import { AdminContainer } from '../../components/blocks/Container'
 import { Section } from '../../components/blocks/Section'
 import { ScheduleDetailContent } from '../../components/molecules/ScheduleDetailContent'
-import { useScheduleForm } from '../../components/molecules/ScheduleForm'
+import {
+    ScheduleForm,
+    useScheduleForm,
+} from '../../components/molecules/ScheduleForm'
 import { Title } from '../../components/templates/Title'
 import {
     filterSchedulesAfterNow,
@@ -46,10 +49,10 @@ const AdminIndexPage: NextPage<Props> = props => {
     //         }
     //     },
     // })
-
+    const q = useMemo(() => filterSchedulesAfterNow(), [])
     const schedules = useSCollection({
         model: db.gSchedulesActive,
-        q: filterSchedulesAfterNow(),
+        q,
     })
 
     const tableHeaders = [
@@ -135,7 +138,7 @@ const AdminIndexPage: NextPage<Props> = props => {
                 })}
             ></Button>
 
-            {scheduleForm.rendered}
+            <ScheduleForm {...scheduleForm}></ScheduleForm>
         </DialogContent>
     )
 
