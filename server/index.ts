@@ -1,3 +1,6 @@
+const timezone = 'Asia/Tokyo'
+process.env.TZ = timezone
+
 import dayjs from 'dayjs'
 import * as functions from 'firebase-functions'
 import { TweetClassifier } from '../learn'
@@ -9,9 +12,6 @@ import { _retweetScheduleTweetsOfPrevNight } from './api/retweetScheduleTweetsOf
 import { _tweetUpcomingSchedules } from './api/tweetUpcomingSchedules'
 import { _tweetUpcomingTicketEvents } from './api/tweetUpcomingTicketEvents'
 import { getTwimoClient } from './services/twitter'
-
-const timezone = 'Asia/Tokyo'
-process.env.TZ = timezone
 
 const getTime = () => dayjs().format('HHmm')
 
@@ -47,6 +47,7 @@ export const defaultBuilderFunctions = defaultBuilder.pubsub
     .timeZone(timezone)
     .onRun(async () => {
         const time = getTime()
+        console.log(time)
         const twimo = await getTwimoClient()
 
         const tc = new TweetClassifier()
