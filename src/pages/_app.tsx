@@ -27,6 +27,7 @@ export const MyApp: AppType = ({ Component, pageProps }) => {
         return (
             <Provider>
                 <Global styles={{ html: { overflow: 'hidden' } }}></Global>
+
                 <Component {...pageProps} />
             </Provider>
         )

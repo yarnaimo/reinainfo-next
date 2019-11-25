@@ -46,6 +46,7 @@ const SchedulePage: NextPage<Props> = ({ schedule: pSchedule }) => {
             <Title
                 title={schedule.title}
                 path={`schedules/${schedule._id}`}
+                thumbUrl={schedule.thumbUrl || undefined}
             ></Title>
 
             <ScheduleDetail
