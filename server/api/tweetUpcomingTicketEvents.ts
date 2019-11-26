@@ -1,11 +1,8 @@
 import { Dayjs } from 'dayjs'
 import { SetOptional } from 'type-fest'
-import {
-    filterByTimestamp,
-    ITicketSchedulePair,
-    MSchedule,
-} from '../../src/models/Schedule'
+import { ITicketSchedulePair, MSchedule } from '../../src/models/Schedule'
 import { ITicket } from '../../src/models/Ticket'
+import { filterByTimestamp } from '../../src/utils/firebase'
 import { dbAdmin } from '../services/firebase-admin'
 import { sendCrossNotification } from '../services/integrated'
 import { TwimoClient } from '../services/twitter'
@@ -23,7 +20,7 @@ const getTickets = async (
     until: Dayjs,
 ) => {
     const { array } = await dbAdmin.gTickets.getQuery({
-        q: filterByTimestamp(filterField, since, until),
+        q: filterByTimestamp(filterField, 'asc', since, until),
     })
     const combined = await array.mapAsync(combineSchedule)
     return combined

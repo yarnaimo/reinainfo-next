@@ -24,7 +24,7 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    match /retweetLogs/{tweetLog} {
+    match /topics/{topic} {
       allow read;
     }
 

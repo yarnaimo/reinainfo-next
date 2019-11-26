@@ -1,7 +1,8 @@
 import { Dayjs } from 'dayjs'
 import { prray } from 'prray'
-import { filterByTimestamp, MSchedule } from '../../src/models/Schedule'
+import { MSchedule } from '../../src/models/Schedule'
 import { stringifyWDate } from '../../src/utils/date'
+import { filterByTimestamp } from '../../src/utils/firebase'
 import { dbAdmin } from '../services/firebase-admin'
 import { sendCrossNotification } from '../services/integrated'
 import { TwimoClient } from '../services/twitter'
@@ -19,7 +20,7 @@ export const _tweetUpcomingSchedules = async (
     const untilDate = until.subtract(1, 'day')
 
     const schedules = await dbAdmin.gSchedulesActive.getQuery({
-        q: filterByTimestamp('date', since, until),
+        q: filterByTimestamp('date', 'asc', since, until),
     })
 
     const dateRange =

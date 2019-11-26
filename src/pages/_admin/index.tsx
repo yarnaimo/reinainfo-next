@@ -26,7 +26,6 @@ import {
 } from '../../components/molecules/ScheduleForm'
 import { Title } from '../../components/templates/Title'
 import {
-    filterSchedulesAfterNow,
     ISchedule,
     IScheduleSerialized,
     MSchedule,
@@ -49,7 +48,7 @@ const AdminIndexPage: NextPage<Props> = props => {
     //         }
     //     },
     // })
-    const q = useMemo(() => filterSchedulesAfterNow(), [])
+    const q = useMemo(() => MSchedule.whereSinceNow(), [])
     const schedules = useSCollection({
         model: db.gSchedulesActive,
         q,

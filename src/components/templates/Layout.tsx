@@ -42,7 +42,7 @@ const tabs = [
         path: '/',
         label: 'Topics',
         icon: 'flash-circle',
-        color: color.blue(0.7),
+        color: color.orange(1),
     },
     {
         path: '/schedules',

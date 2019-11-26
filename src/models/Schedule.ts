@@ -6,7 +6,11 @@ import { Merge } from 'type-fest'
 import { env } from '../env'
 import { hsl } from '../utils/color'
 import { stringifyTime, stringifyWDate } from '../utils/date'
-import { serializeTimestamp, timestampToDayjs } from '../utils/firebase'
+import {
+    filterByTimestamp,
+    serializeTimestamp,
+    timestampToDayjs,
+} from '../utils/firebase'
 import { ITicket } from './Ticket'
 
 const colorSet = {
@@ -173,23 +177,6 @@ export const GScheduleActive = SparkQuery<ISchedule>()({
     query: db => db.collectionGroup('schedules').where('active', '==', true),
 })
 
-export const filterSchedulesAfterNow = () =>
-    filterByTimestamp('date', dayjs(env.isDev() ? 0 : undefined))
-
-export const filterByTimestamp = (
-    field: string,
-    since?: Dayjs,
-    until?: Dayjs,
-) => {
-    return <Q extends Blue.Query>(q: Q) => {
-        let _q = q as Blue.Query
-        since && (_q = _q.where(field, '>=', since.toDate()))
-        until && (_q = _q.where(field, '<', until.toDate()))
-
-        return _q.orderBy(field, 'asc') as Q
-    }
-}
-
 export type ITicketSchedulePair = {
     schedule: ISchedule['_D']
     ticket: ITicket['_D']
@@ -207,6 +194,14 @@ export const partPattern = (() => {
 })()
 
 export class MSchedule {
+    static whereSinceNow() {
+        return filterByTimestamp(
+            'date',
+            'asc',
+            dayjs(env.isDev() ? 0 : undefined),
+        )
+    }
+
     static isSame(a?: IScheduleSerialized, b?: IScheduleSerialized) {
         return a?._id === b?._id && a?._updatedAt === b?._updatedAt
     }

@@ -1,13 +1,7 @@
 import is from '@sindresorhus/is/dist'
-import dayjs from 'dayjs'
 import React, { createContext, FC, useEffect, useReducer } from 'react'
-import { IRetweetLogSerialized, MRetweetLog } from '../../models/RetweetLog'
-import {
-    filterByTimestamp,
-    filterSchedulesAfterNow,
-    IScheduleSerialized,
-    MSchedule,
-} from '../../models/Schedule'
+import { IScheduleSerialized, MSchedule } from '../../models/Schedule'
+import { ITopicSerialized, MTopic } from '../../models/Topic'
 import { db } from '../../services/firebase'
 
 type NewStateAction = Partial<S> | ((prevState: S) => Partial<S>)
@@ -28,10 +22,10 @@ const initialState = {
     },
 
     topicsPageAccessed: false,
-    retweetLogsListening: false,
-    retweetLogs: {
-        array: undefined as IRetweetLogSerialized[] | undefined,
-        map: undefined as Map<string, IRetweetLogSerialized> | undefined,
+    topicsListening: false,
+    topics: {
+        array: undefined as ITopicSerialized[] | undefined,
+        map: undefined as Map<string, ITopicSerialized> | undefined,
     },
 }
 
@@ -53,7 +47,7 @@ export const Provider: FC<{}> = ({ children }) => {
         ) {
             setGlobalState({ gSchedulesListening: true })
 
-            const query = filterSchedulesAfterNow()(
+            const query = MSchedule.whereSinceNow()(
                 db.gSchedulesActive.collectionRef,
             )
 
@@ -72,25 +66,21 @@ export const Provider: FC<{}> = ({ children }) => {
     }, [globalState.schedulesPageAccessed])
 
     useEffect(() => {
-        if (
-            globalState.topicsPageAccessed &&
-            !globalState.retweetLogsListening
-        ) {
-            setGlobalState({ retweetLogsListening: true })
+        if (globalState.topicsPageAccessed && !globalState.topicsListening) {
+            setGlobalState({ topicsListening: true })
 
-            const query = filterByTimestamp(
-                '_createdAt',
-                dayjs().subtract(2, 'week'),
-            )(db.retweetLogs.collectionRef)
+            const query = MTopic.whereCreatedWithinTwoWeeks()(
+                db.topics.collectionRef,
+            )
 
             return query.onSnapshot(snapshot => {
-                const retweetLogs = db.retweetLogs._decodeQuerySnapshot(
+                const topics = db.topics._decodeQuerySnapshot(
                     query,
                     snapshot,
-                    MRetweetLog.serialize,
+                    MTopic.serialize,
                 )
 
-                setGlobalState({ retweetLogs })
+                setGlobalState({ topics })
             })
         }
 

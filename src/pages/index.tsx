@@ -1,4 +1,3 @@
-import dayjs from 'dayjs'
 import { NextPage } from 'next'
 import React, { useContext } from 'react'
 import { useEffectOnce } from 'react-use'
@@ -9,28 +8,27 @@ import { Section } from '../components/blocks/Section'
 import { TweetEmbed } from '../components/molecules/TweetEmbed'
 import { Store } from '../components/templates/Store'
 import { Title } from '../components/templates/Title'
-import { IRetweetLogSerialized, MRetweetLog } from '../models/RetweetLog'
-import { filterByTimestamp } from '../models/Schedule'
+import { ITopicSerialized, MTopic } from '../models/Topic'
 import { db } from '../services/firebase'
 import { color } from '../utils/color'
 import { margin } from '../utils/css'
 
-const getRetweetLogsSerialized = () =>
-    db.retweetLogs.getQuery({
-        q: filterByTimestamp('_createdAt', dayjs().subtract(2, 'week')),
-        decoder: MRetweetLog.serialize,
+const getTopicsSerialized = () =>
+    db.topics.getQuery({
+        q: MTopic.whereCreatedWithinTwoWeeks(),
+        decoder: MTopic.serialize,
     })
 
-type Props = { retweetLogs?: IRetweetLogSerialized[] }
+type Props = { topics?: ITopicSerialized[] }
 
-const TopicsPage: NextPage<Props> = ({ retweetLogs: pRetweetLogs }) => {
+const TopicsPage: NextPage<Props> = ({ topics: pTopics }) => {
     const { globalState, setGlobalState } = useContext(Store)
 
     useEffectOnce(() => {
         setGlobalState({ topicsPageAccessed: true })
     })
 
-    const retweetLogs = globalState.retweetLogs.array || pRetweetLogs || []
+    const topics = globalState.topics.array || pTopics || []
 
     return (
         <MainContainer>
@@ -48,8 +46,8 @@ const TopicsPage: NextPage<Props> = ({ retweetLogs: pRetweetLogs }) => {
             </Solid>
 
             <Section>
-                {retweetLogs.map(l => (
-                    <TweetEmbed key={l._id} id={l._id}></TweetEmbed>
+                {topics.map(l => (
+                    <TweetEmbed key={l._id} id={l.tweetId}></TweetEmbed>
                 ))}
             </Section>
         </MainContainer>
@@ -58,10 +56,10 @@ const TopicsPage: NextPage<Props> = ({ retweetLogs: pRetweetLogs }) => {
 
 TopicsPage.getInitialProps = async ctx => {
     if (ctx.req) {
-        const { array: retweetLogs } = await getRetweetLogsSerialized()
-        return { retweetLogs }
+        const { array: topics } = await getTopicsSerialized()
+        return { topics }
     } else {
-        return { retweetLogs: undefined }
+        return { topics: undefined }
     }
 }
 

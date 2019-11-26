@@ -41,9 +41,10 @@ export const color = {
 
     pink: hsl(3, 77, 75),
     // pink: hsl(352, 85, 65),
+    orange: hsl(40, 85, 65),
 
-    orangeL: hsl(37, 93, 71),
-    orange: hsl(42, 97, 50),
+    // orangeL: hsl(37, 93, 71),
+    // orange: hsl(42, 97, 50),
     // orange: hsl(21, 91, 61),
 }
 
@@ -65,7 +66,7 @@ export const cardLight = gradientFn(120)
 export const gradients = {
     primary: cardGradient(color.primaryL(), color.primary()),
     // secondary: gradientFn(color.secondaryL(), color.secondary()),
-    orange: cardGradient(color.orangeL(), color.orange()),
+    // orange: cardGradient(color.orangeL(), color.orange()),
 }
 
 export const shadowFn = (x: number, y: number, b: number, s: number) => (
