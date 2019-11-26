@@ -36,9 +36,9 @@ const registerSW = config => {
 const config = {
     assetPath: dev ? '' : `https://static-${projectId}.web.app`,
     distDir: '.next',
-    register: false,
     pwa: {
         dest: 'public',
+        register: false,
     },
     experimental: {
         publicDirectory: true,
