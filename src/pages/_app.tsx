@@ -5,13 +5,15 @@ import 'material-colors/dist/colors.var.css'
 import 'modern-normalize/modern-normalize.css'
 import { AppType } from 'next/dist/next-server/lib/utils'
 import Head from 'next/head'
-import { useRouter } from 'next/router'
+import Router, { useRouter } from 'next/router'
 import React from 'react'
+import { config } from '../.config/default'
 import { Layout } from '../components/templates/Layout'
 import { Provider } from '../components/templates/Store'
 import { env } from '../env'
 import '../styles/style.scss'
 import { appbarHeight, responsive } from '../utils/css'
+const { default: withGA } = require('next-ga')
 const { PageTransition } = require('next-page-transitions')
 
 const Spacer = styled.div({
@@ -124,4 +126,4 @@ export const MyApp: AppType = ({ Component, pageProps }) => {
     )
 }
 
-export default MyApp
+export default withGA(config.trackingId, Router)(MyApp)
