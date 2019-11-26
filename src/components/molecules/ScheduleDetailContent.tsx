@@ -85,7 +85,10 @@ export const ScheduleDetailContent = memo<Props>(
         useEffect(() => {
             if (s.hasTickets && s._path) {
                 db._ticketsIn(dbInstance.doc(s._path))
-                    .getQuery({ decoder: decodeTicket })
+                    .getQuery({
+                        q: q => q.orderBy('opensAt'),
+                        decoder: decodeTicket,
+                    })
                     .then(({ array }) => setTickets(array))
             }
         }, [])
