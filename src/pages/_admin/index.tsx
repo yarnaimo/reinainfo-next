@@ -281,6 +281,7 @@ const AdminIndexPage: NextPage<Props> = props => {
                             ids: retweetTargets.map(t => t.id),
                         }).then(res => {
                             if (res) {
+                                setRetweetTargets([])
                                 window.alert(
                                     `${res.retweetCount} 件リツイートしました`,
                                 )
