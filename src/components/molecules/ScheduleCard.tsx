@@ -1,5 +1,6 @@
 import { ComponentProps } from '@rmwc/types'
 import { motion, MotionProps } from 'framer-motion'
+import { useRouter } from 'next/router'
 import React, { forwardRef, memo, useMemo, useState } from 'react'
 import { Icon, Ripple } from 'rmwc'
 import { IScheduleSerialized, MSchedule } from '../../models/Schedule'
@@ -7,6 +8,7 @@ import { cardGradient, cardShadow, color } from '../../utils/color'
 import { ellipsis, margin, padding, size } from '../../utils/css'
 import { micon } from '../../utils/icon'
 import { Liquid, Solid, SolidColumn } from '../blocks/Flex'
+import { Title } from '../templates/Title'
 import { ScheduleDetail } from './ScheduleDetail'
 
 type Props = ComponentProps &
@@ -16,6 +18,8 @@ type Props = ComponentProps &
 
 export const ScheduleCard = memo(
     forwardRef<any, Props>(({ schedule: s, ...props }, ref) => {
+        const router = useRouter()
+
         const [modalOpen, setModalOpen] = useState(false)
 
         const category = MSchedule.getCategory(s.category)
@@ -154,11 +158,20 @@ export const ScheduleCard = memo(
 
         return (
             <>
+                {modalOpen && (
+                    <Title title={s.title} path={`schedules/${s._id}`}></Title>
+                )}
                 <ScheduleDetail
                     schedule={s}
                     open={modalOpen}
                     onClose={() => {
                         setModalOpen(false)
+
+                        setTimeout(() => {
+                            router.push('/schedules', `/schedules`, {
+                                shallow: true,
+                            })
+                        }, 350)
                     }}
                 ></ScheduleDetail>
 
@@ -167,6 +180,12 @@ export const ScheduleCard = memo(
                     onClick={e => {
                         setModalOpen(true)
                         e.preventDefault()
+
+                        setTimeout(() => {
+                            router.push('/schedules', `/schedules/${s._id}`, {
+                                shallow: true,
+                            })
+                        }, 350)
                     }}
                     ref={ref as any}
                     {...props}
