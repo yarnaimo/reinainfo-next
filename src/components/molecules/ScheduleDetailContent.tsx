@@ -9,11 +9,12 @@ import React, {
     useMemo,
     useState,
 } from 'react'
-import { Chip, Icon } from 'rmwc'
+import { Button, Chip, Icon } from 'rmwc'
 import { env } from '../../env'
 import { IScheduleSerialized, MSchedule } from '../../models/Schedule'
 import { ITicket } from '../../models/Ticket'
 import { db, dbInstance } from '../../services/firebase'
+import { openTweetDialog } from '../../services/twitter'
 import { cardShadow, color } from '../../utils/color'
 import { ellipsis, margin, padding, size } from '../../utils/css'
 import { stringifyWDate, stringifyWDateTime } from '../../utils/date'
@@ -324,6 +325,31 @@ export const ScheduleDetailContent = memo<Props>(
             </Block>
         )
 
+        const Actions_ = !compact && (
+            <Block
+                compact={compact}
+                css={{ ...margin({ top: -2, bottom: -6 }) }}
+            >
+                <Liquid></Liquid>
+                {/* <TweetButton
+                    url={`${env.origin}/schedules/${s._id}`}
+                    text={`${s.title}`}
+                > */}
+                <Button
+                    icon={micon('twitter')}
+                    label="ツイート"
+                    dense
+                    theme="secondary"
+                    ripple={{ accent: true }}
+                    css={{ opacity: 0.8 }}
+                    onClick={() =>
+                        openTweetDialog(MSchedule.getPageUrl(s)!, s.title)
+                    }
+                ></Button>
+                {/* </TweetButton> */}
+            </Block>
+        )
+
         return (
             <Solid
                 css={
@@ -356,6 +382,7 @@ export const ScheduleDetailContent = memo<Props>(
                     {Divider_}
                     {Parts_}
                     {Tickets_}
+                    {Actions_}
                 </LiquidColumn>
             </Solid>
         )

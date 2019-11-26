@@ -322,7 +322,7 @@ export class MSchedule {
         }
     }
 
-    static getPageUrl(s: ISchedule['_D']) {
+    static getPageUrl(s: ISchedule['_D'] | IScheduleSerialized) {
         return s.isSerial ? null : `${env.origin}/schedules/${s._id}`
     }
 

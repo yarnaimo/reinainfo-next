@@ -17,6 +17,7 @@ import {
 } from 'rmwc'
 import { env } from '../../env'
 import { logout } from '../../services/firebase'
+import { openTweetDialog } from '../../services/twitter'
 import { appbarShadow, color } from '../../utils/color'
 import {
     appbarHeight,
@@ -194,7 +195,9 @@ const AppBar: FC<{ openDrawer: () => void }> = memo(({ openDrawer }) => {
                     <Solid tag={AppBarSection} ai="center">
                         <TopAppBarActionItem
                             icon={micon('twitter')}
-                            onClick={() => {}}
+                            onClick={() => {
+                                openTweetDialog(env.origin, env.longAppName)
+                            }}
                         />
                     </Solid>
                 </TopAppBarRow>

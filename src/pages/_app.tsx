@@ -60,7 +60,7 @@ export const MyApp: AppType = ({ Component, pageProps }) => {
     return (
         <Provider>
             <Head>
-                <title>{env.appName}</title>
+                <title>{env.longAppName}</title>
             </Head>
 
             <Layout>
