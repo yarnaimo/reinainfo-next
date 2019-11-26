@@ -1,7 +1,7 @@
 import { NextPage } from 'next'
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { useEffectOnce } from 'react-use'
-import {} from 'rmwc'
+import { Button } from 'rmwc'
 import { MainContainer } from '../components/blocks/Container'
 import { Solid } from '../components/blocks/Flex'
 import { Section } from '../components/blocks/Section'
@@ -30,6 +30,8 @@ const TopicsPage: NextPage<Props> = ({ topics: pTopics }) => {
 
     const topics = globalState.topics.array || pTopics || []
 
+    const [maxIndex, setMaxIndex] = useState(20)
+
     return (
         <MainContainer>
             <Title title="Topics" path="topics"></Title>
@@ -46,9 +48,16 @@ const TopicsPage: NextPage<Props> = ({ topics: pTopics }) => {
             </Solid>
 
             <Section>
-                {topics.map(l => (
+                {topics.slice(0, maxIndex).map(l => (
                     <TweetEmbed key={l._id} id={l.tweetId}></TweetEmbed>
                 ))}
+            </Section>
+
+            <Section>
+                <Button
+                    label="さらに表示"
+                    onClick={() => setMaxIndex(i => i + 20)}
+                ></Button>
             </Section>
         </MainContainer>
     )
