@@ -4,7 +4,7 @@ import convert from 'color-convert'
 export const hsl = (h: number, s: number, l: number) => {
     const [r, g, b] = convert.hsl.rgb([h, s, l])
 
-    return (a = 1) => `rgb(${r}, ${g}, ${b}, ${a})`
+    return (a = 1) => `rgba(${r}, ${g}, ${b}, ${a})`
 }
 
 export const hexToRgba = (hex: string, alpha = 1) => {
