@@ -1,5 +1,10 @@
-import React, { forwardRef, memo } from 'react'
-import { IScheduleSerialized, MSchedule } from '../../models/Schedule'
+import { MSpark } from 'bluespark'
+import React, { forwardRef, memo, useState } from 'react'
+import { useEffectOnce } from 'react-use'
+import { env } from '../../env'
+import { IScheduleSerialized } from '../../models/Schedule'
+import { ITicket } from '../../models/Ticket'
+import { db, dbInstance } from '../../services/firebase'
 import { color, dialogShadow } from '../../utils/color'
 import { fixedFit, margin, transition } from '../../utils/css'
 import { Container } from '../blocks/Container'
@@ -20,6 +25,18 @@ type Props = {
 export const ScheduleDetail = memo(
     forwardRef<any, Props>(
         ({ schedule: s, compact = false, open, onClose, ...props }, ref) => {
+            const [tickets, setTickets] = useState<ITicket['_D'][]>()
+
+            useEffectOnce(() => {
+                if (s.hasTickets && env.isBrowser) {
+                    db._ticketsIn(dbInstance.doc(s._path))
+                        .getQuery({
+                            q: q => q.orderBy('opensAt'),
+                        })
+                        .then(({ array }) => setTickets(array))
+                }
+            })
+
             return (
                 <SolidColumn
                     jc="center"
@@ -60,6 +77,7 @@ export const ScheduleDetail = memo(
                     >
                         <ScheduleDetailContent
                             schedule={s}
+                            tickets={tickets}
                             compact={compact}
                             css={{
                                 ...margin({ x: -1 }),
@@ -75,5 +93,5 @@ export const ScheduleDetail = memo(
             )
         },
     ),
-    (a, b) => MSchedule.isSame(a.schedule, b.schedule) && a.open === b.open,
+    (a, b) => MSpark.isEqual(a.schedule, b.schedule) && a.open === b.open,
 )

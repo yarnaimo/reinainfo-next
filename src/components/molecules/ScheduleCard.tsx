@@ -1,4 +1,5 @@
 import { ComponentProps } from '@rmwc/types'
+import { MSpark } from 'bluespark'
 import { motion, MotionProps } from 'framer-motion'
 import { useRouter } from 'next/router'
 import React, { forwardRef, memo, useMemo, useState } from 'react'
@@ -221,7 +222,7 @@ export const ScheduleCard = memo(
             </>
         )
     }),
-    (a, b) => MSchedule.isSame(a.schedule, b.schedule),
+    (a, b) => MSpark.isEqual(a.schedule, b.schedule),
 )
 
 // export const ScheduleCard = memo<Props>(({ schedule }) => {

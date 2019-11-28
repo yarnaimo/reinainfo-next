@@ -1,33 +1,17 @@
 import styled, { CSSObject } from '@emotion/styled'
-import { Rstring } from '@yarnaimo/rain'
-import dayjs, { Dayjs } from 'dayjs'
-import React, {
-    ComponentProps,
-    FC,
-    memo,
-    useEffect,
-    useMemo,
-    useState,
-} from 'react'
+import { MSpark } from 'bluespark'
+import React, { ComponentProps, FC, memo, useMemo } from 'react'
 import { Button, Chip, Icon } from 'rmwc'
+import { SetOptional } from 'type-fest'
 import { env } from '../../env'
 import { IScheduleSerialized, MSchedule } from '../../models/Schedule'
-import { ITicket } from '../../models/Ticket'
-import { db, dbInstance } from '../../services/firebase'
+import { ITicket, MTicket } from '../../models/Ticket'
 import { openTweetDialog } from '../../services/twitter'
 import { cardShadow, color } from '../../utils/color'
 import { ellipsis, margin, padding, size } from '../../utils/css'
-import { stringifyWDate, stringifyWDateTime } from '../../utils/date'
 import { micon } from '../../utils/icon'
 import { ExternalLink } from '../atoms/ExternalLink'
 import { Liquid, LiquidColumn, Solid, SolidColumn } from '../blocks/Flex'
-
-const dateTimeOrDate = (withTime: boolean, date: Dayjs | null) => {
-    return (
-        date &&
-        (withTime ? stringifyWDateTime(date, true) : stringifyWDate(date, true))
-    )
-}
 
 const Block: FC<ComponentProps<typeof Solid> & {
     column?: boolean
@@ -50,50 +34,15 @@ const PartChip = styled(Chip)({
 
 const smallFontSize = 12
 
-const decodeTicket = (t: ITicket['_D']) => {
-    const now = dayjs(env.isDev() ? '2019-07-25T00:00:00+0900' : undefined)
-    const [openDate, closeDate] = [t.opensAt, t.closesAt].map(ts =>
-        ts ? dayjs(ts.toDate()) : null,
-    )
-
-    const beforeOpen = openDate && now.isBefore(openDate.endOf('day'))
-    const beforeClose = closeDate && now.isBefore(closeDate.endOf('day'))
-
-    const toShow = beforeOpen ? 'open' : beforeClose ? 'close' : null
-
-    const openStr = dateTimeOrDate(toShow === 'open', openDate)
-    const closeStr = dateTimeOrDate(toShow === 'close', closeDate)
-
-    const timeStr = Rstring.joinOnlyStrings(' ')([openStr, '～', closeStr])
-
-    return {
-        text: `${t.label} - ${timeStr}`,
-        closed: closeDate && now.isAfter(closeDate),
-    }
-}
-
 type Props = {
-    schedule: IScheduleSerialized
+    schedule: SetOptional<IScheduleSerialized, '_path'>
+    tickets?: ITicket['_D'][]
     compact: boolean
 }
 
 export const ScheduleDetailContent = memo<Props>(
-    ({ children, schedule: s, compact, ...props }) => {
-        const [tickets, setTickets] = useState<
-            ReturnType<typeof decodeTicket>[]
-        >()
-
-        useEffect(() => {
-            if (s.hasTickets && s._path) {
-                db._ticketsIn(dbInstance.doc(s._path))
-                    .getQuery({
-                        q: q => q.orderBy('opensAt'),
-                        decoder: decodeTicket,
-                    })
-                    .then(({ array }) => setTickets(array))
-            }
-        }, [])
-
+    ({ children, schedule: s, tickets, compact, ...props }) => {
+        const decodedTickets = tickets && tickets.map(MTicket.stringify)
         const category = MSchedule.getCategory(s.category)
 
         const [textColor, background, boxShadow, categoryTextColor] = useMemo(
@@ -263,11 +212,12 @@ export const ScheduleDetailContent = memo<Props>(
             </Block>
         )
 
-        const Divider_ = !compact && (s.formattedDate.parts || tickets) && (
-            <Block compact={compact}></Block>
-        )
+        const Divider_ = !compact &&
+            (s.formattedDate.parts || decodedTickets) && (
+                <Block compact={compact}></Block>
+            )
 
-        const Parts_ = s.formattedDate.parts && (!compact || !tickets) && (
+        const Parts_ = s.formattedDate.parts && (!compact || !decodedTickets) && (
             <Block
                 compact={compact}
                 css={{ ...margin({ x: -3 }), flexWrap: 'wrap' }}
@@ -285,9 +235,9 @@ export const ScheduleDetailContent = memo<Props>(
             </Block>
         )
 
-        const Tickets_ = tickets && (
+        const Tickets_ = decodedTickets && (
             <Block compact={compact} column>
-                {tickets.map((t, i) => (
+                {decodedTickets.map((t, i) => (
                     <Solid
                         key={i}
                         ai="start"
@@ -335,17 +285,22 @@ export const ScheduleDetailContent = memo<Props>(
                     url={`${env.origin}/schedules/${s._id}`}
                     text={`${s.title}`}
                 > */}
-                <Button
-                    icon={micon('twitter')}
-                    label="ツイート"
-                    dense
-                    theme="secondary"
-                    ripple={{ accent: true }}
-                    css={{ opacity: 0.8 }}
-                    onClick={() =>
-                        openTweetDialog(MSchedule.getPageUrl(s)!, s.title)
-                    }
-                ></Button>
+                {s._path && (
+                    <Button
+                        icon={micon('twitter')}
+                        label="ツイート"
+                        dense
+                        theme="secondary"
+                        ripple={{ accent: true }}
+                        css={{ opacity: 0.8 }}
+                        onClick={() =>
+                            openTweetDialog(
+                                MSchedule.getPageUrl(s as IScheduleSerialized)!,
+                                s.title,
+                            )
+                        }
+                    ></Button>
+                )}
                 {/* </TweetButton> */}
             </Block>
         )
@@ -387,5 +342,9 @@ export const ScheduleDetailContent = memo<Props>(
             </Solid>
         )
     },
-    (a, b) => MSchedule.isSame(a.schedule, b.schedule),
+    (a, b) =>
+        MSpark.isEqual(
+            a.schedule as IScheduleSerialized,
+            b.schedule as IScheduleSerialized,
+        ) && a.tickets === b.tickets,
 )

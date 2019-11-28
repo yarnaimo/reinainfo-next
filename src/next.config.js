@@ -15,7 +15,10 @@ const projectId = firebaserc.projects.default
 const dev = process.env.NODE_ENV !== 'production'
 
 const registerSW = config => {
-    registerScript = join(__dirname, 'register.js')
+    if (dev) {
+        return
+    }
+    const registerScript = join(__dirname, 'register.js')
     console.log(
         `> [PWA] auto register service worker with: ${resolve(registerScript)}`,
     )
@@ -33,7 +36,7 @@ const registerSW = config => {
         })
 }
 
-const config = {
+const nextConfig = {
     assetPath: dev ? '' : `https://static-${projectId}.web.app`,
     distDir: '.next',
     pwa: {
@@ -63,4 +66,4 @@ const config = {
     },
 }
 
-module.exports = withFonts(withCss(withSass(withPWA(config))))
+module.exports = withFonts(withCss(withSass(withPWA(nextConfig))))

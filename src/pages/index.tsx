@@ -22,13 +22,13 @@ const getTopicsSerialized = () =>
 type Props = { topics?: ITopicSerialized[] }
 
 const TopicsPage: NextPage<Props> = ({ topics: pTopics }) => {
-    const { globalState, setGlobalState } = useContext(Store)
+    const global = useContext(Store)
 
     useEffectOnce(() => {
-        setGlobalState({ topicsPageAccessed: true })
+        global.listenTopics()
     })
 
-    const topics = globalState.topics.array || pTopics || []
+    const topics = global.topics.array || pTopics || []
 
     const [maxIndex, setMaxIndex] = useState(20)
 

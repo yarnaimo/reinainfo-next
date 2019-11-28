@@ -1,16 +1,19 @@
 import is from '@sindresorhus/is/dist'
 import { Rstring } from '@yarnaimo/rain'
-import { Blue, BlueObject, Spark, SparkQuery } from 'bluespark'
+import {
+    Blue,
+    BlueObject,
+    MSpark,
+    MTimestamp,
+    Spark,
+    SparkQuery,
+    SparkSerialized,
+} from 'bluespark'
 import dayjs, { Dayjs } from 'dayjs'
 import { Merge } from 'type-fest'
 import { env } from '../env'
 import { hsl } from '../utils/color'
 import { stringifyTime, stringifyWDate } from '../utils/date'
-import {
-    filterByTimestamp,
-    serializeTimestamp,
-    timestampToDayjs,
-} from '../utils/firebase'
 import { ITicket } from './Ticket'
 
 const colorSet = {
@@ -159,9 +162,9 @@ export type ISchedule = Blue.Interface<{
 }>
 
 export type IScheduleSerialized = Merge<
-    ISchedule['_D'],
-    Record<'_createdAt' | '_updatedAt' | 'date', string> & {
-        _ref: undefined
+    SparkSerialized<ISchedule['_D']>,
+    {
+        date: string
         formattedDate: ReturnType<typeof MSchedule['formatDate']>
     }
 >
@@ -195,24 +198,17 @@ export const partPattern = (() => {
 
 export class MSchedule {
     static whereSinceNow() {
-        return filterByTimestamp(
-            'date',
-            'asc',
-            dayjs(env.isDev() ? 0 : undefined),
-        )
-    }
-
-    static isSame(a?: IScheduleSerialized, b?: IScheduleSerialized) {
-        return a?._id === b?._id && a?._updatedAt === b?._updatedAt
+        return MTimestamp.where({
+            field: 'date',
+            order: 'asc',
+            since: dayjs(env.isDev ? 0 : undefined),
+        })
     }
 
     static serialize(schedule: ISchedule['_D']): IScheduleSerialized {
-        const date = serializeTimestamp(schedule.date)
+        const date = MTimestamp.serialize(schedule.date)
         return {
-            ...schedule,
-            _createdAt: serializeTimestamp(schedule._createdAt),
-            _updatedAt: serializeTimestamp(schedule._updatedAt),
-            _ref: undefined,
+            ...MSpark.serialize(schedule),
             date,
             formattedDate: MSchedule.formatDate(schedule),
         }
@@ -361,8 +357,9 @@ export class MSchedule {
         const formattedDate = MSchedule.formatDate(schedule)
 
         const [openTime, closeTime] = [
-            ticket.opensAt && stringifyTime(timestampToDayjs(ticket.opensAt)),
-            ticket.closesAt && stringifyTime(timestampToDayjs(ticket.closesAt)),
+            ticket.opensAt && stringifyTime(MTimestamp.toDayjs(ticket.opensAt)),
+            ticket.closesAt &&
+                stringifyTime(MTimestamp.toDayjs(ticket.closesAt)),
         ]
 
         return Rstring.joinOnlyStrings()([

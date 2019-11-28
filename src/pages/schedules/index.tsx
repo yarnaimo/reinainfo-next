@@ -104,14 +104,13 @@ const ScheduleList: FC<{ chunkedSchedules: ScheduleChunks }> = ({
 type Props = { schedules?: IScheduleSerialized[] }
 
 const SchedulesPage: NextPage<Props> = ({ schedules: pSchedules }) => {
-    const { globalState, setGlobalState } = useContext(Store)
+    const global = useContext(Store)
 
     useEffectOnce(() => {
-        // router.prefetch('/schedules/[id]')
-        setGlobalState({ schedulesPageAccessed: true })
+        global.listenSchedules()
     })
 
-    const schedules = globalState.gSchedules.array || pSchedules || []
+    const schedules = global.schedules.array || pSchedules || []
 
     const excludeSerials = useBool(false)
 

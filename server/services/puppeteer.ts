@@ -6,8 +6,8 @@ const winChromePath =
 
 export const newBrowserPage = async () => {
     const browser = await puppeteer.launch({
-        headless: !env.isDev(),
-        executablePath: env.isDev() ? winChromePath : undefined,
+        headless: !env.isDev,
+        executablePath: env.isDev ? winChromePath : undefined,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
         ignoreHTTPSErrors: true,
     })

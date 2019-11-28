@@ -1,11 +1,12 @@
-const isDev = () => process.env.NODE_ENV !== 'production'
-
+const isDev = process.env.NODE_ENV !== 'production'
+const isBrowser = (process as any).browser as boolean
 const port = () => parseInt(process.env.PORT || '3000', 10)
 
 export const env = {
     isDev,
+    isBrowser,
     port,
-    origin: isDev()
+    origin: isDev
         ? `https://localhost:${port()}`
         : 'https://reinainfo-next.web.app',
     appName: 'ReinaInfo Next',

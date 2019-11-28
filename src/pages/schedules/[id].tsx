@@ -1,5 +1,5 @@
 import { NextPage } from 'next'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useState } from 'react'
 import {} from 'rmwc'
 import { MainContainer } from '../../components/blocks/Container'
 import { ScheduleDetail } from '../../components/molecules/ScheduleDetail'
@@ -15,8 +15,8 @@ const getSchedule = async (id: string) =>
     db.schedules.getDoc({ doc: id, decoder: MSchedule.serialize })
 
 const SchedulePage: NextPage<Props> = ({ schedule: pSchedule }) => {
-    const { globalState } = useContext(Store)
-    const { map } = globalState.gSchedules
+    const global = useContext(Store)
+    const { map } = global.schedules
     // const router = useRouter()
     const { params, router } = useQueryParams({
         id: '',
@@ -31,11 +31,11 @@ const SchedulePage: NextPage<Props> = ({ schedule: pSchedule }) => {
     // })
     // console.log(router)
 
-    useEffect(() => {
-        if (!globalState.schedulesPageAccessed && !pSchedule) {
-            getSchedule(params.id).then(s => _setSchedule(s))
-        }
-    }, [globalState.schedulesPageAccessed, pSchedule, _setSchedule])
+    // useEffect(() => {
+    //     if (!globalState.schedulesPageAccessed && !pSchedule) {
+    //         getSchedule(params.id).then(s => _setSchedule(s))
+    //     }
+    // }, [globalState.schedulesPageAccessed, pSchedule, _setSchedule])
 
     if (!schedule) {
         return <></>

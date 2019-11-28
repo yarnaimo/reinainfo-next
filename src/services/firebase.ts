@@ -31,7 +31,7 @@ export const db = createCollections(dbInstance)
 
 export const functions = app.functions('asia-northeast1')
 
-if (env.isDev()) {
+if (env.isDev) {
     functions.useFunctionsEmulator(`http://localhost:5000`)
 }
 
