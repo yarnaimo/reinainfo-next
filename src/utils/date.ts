@@ -7,6 +7,12 @@ dayjs.locale('ja')
 // export const formatDate = (date: Dayjs) =>
 //     date.format(date.isSame(dayjs(), 'day') ? 'H:mm' : 'D日 H:mm')
 
+export const formDatePattern =
+    '^(?:\\d{2}|\\d{4}|\\d{8})(?:\\.(?:\\d{2}|\\d{4}))?$'
+
+export const formifyDate = (date: Dayjs | Date) =>
+    dayjs(date).format('YYYYMMDD.HHmm')
+
 export const stringifyWDate = (date: Dayjs, omitSpace = false) => {
     const now = dayjs()
 
@@ -27,7 +33,7 @@ export const stringifyTime = (date: Dayjs) => date.format('H:mm')
 export const stringifyWDateTime = (date: Dayjs, omitSpace = false) =>
     `${stringifyWDate(date, omitSpace)} ${stringifyTime(date)}`
 
-export const parseDateString = (str: string) => {
+export const parseFormDate = (str: string) => {
     const [date, time] = [...str.split('.'), '']
 
     if (![2, 4, 8].includes(date.length) || ![0, 2, 4].includes(time.length)) {
@@ -43,7 +49,7 @@ export const parseDateString = (str: string) => {
         const parsed = dayjs(strToParse, f)
 
         if (parsed.isValid()) {
-            return parsed
+            return parsed.toDate()
         }
     }
     return null
