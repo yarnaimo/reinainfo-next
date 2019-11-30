@@ -27,9 +27,10 @@ export const _tweetUpcomingSchedules = async (
             : `${stringifyWDate(since)} - ${stringifyWDate(untilDate)}`
 
     const texts = schedules.array.map((s, i) => {
-        const header = `${dateRange} の予定 <${i + 1}/${
-            schedules.array.length
-        }>`
+        const header =
+            schedules.array.length >= 2
+                ? `${dateRange} の予定 [${i + 1}/${schedules.array.length}]`
+                : `${dateRange} の予定`
         return MSchedule.buildNotificationText(s, header, freq === 'weekly')
     })
 
