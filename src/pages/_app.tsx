@@ -5,7 +5,7 @@ import 'material-colors/dist/colors.var.css'
 import 'modern-normalize/modern-normalize.css'
 import { AppType } from 'next/dist/next-server/lib/utils'
 import Head from 'next/head'
-import Router, { useRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import React from 'react'
 import { config } from '../.config/default'
 import { Layout } from '../components/templates/Layout'
@@ -13,7 +13,7 @@ import { Provider } from '../components/templates/Store'
 import { env } from '../env'
 import '../styles/style.scss'
 import { appbarHeight, responsive } from '../utils/css'
-const { default: withGA } = require('next-ga')
+import { useGA } from '../utils/ga'
 const { PageTransition } = require('next-page-transitions')
 
 const Spacer = styled.div({
@@ -23,6 +23,7 @@ const Spacer = styled.div({
 
 export const MyApp: AppType = ({ Component, pageProps }) => {
     const router = useRouter()
+    useGA(config.trackingId)
 
     if (router.pathname.startsWith('/_headless/')) {
         return (
@@ -126,4 +127,4 @@ export const MyApp: AppType = ({ Component, pageProps }) => {
     )
 }
 
-export default withGA(config.trackingId, Router)(MyApp)
+export default MyApp
