@@ -33,7 +33,7 @@
     "@yarnaimo/twimo": "^2.1.1",
     "@zeit/next-sass": "^1.0.1",
     "babel-plugin-emotion": "^10.0.23",
-    "bluespark": "^2.2.2",
+    "bluespark": "^2.2.3",
     "color-convert": "^2.0.1",
     "express": "^4.17.1",
     "firebase": "^7.5.0",

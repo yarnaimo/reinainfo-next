@@ -1,13 +1,25 @@
 import styled from '@emotion/styled'
-import React, { FC } from 'react'
+import { useSCollection } from 'bluespark'
+import React, { FC, useEffect, useMemo } from 'react'
 import { RHFInput } from 'react-hook-form-input'
-import { Checkbox, Select, TextField } from 'rmwc'
+import {
+    Button,
+    Checkbox,
+    Dialog,
+    Select,
+    SimpleDataTable,
+    TextField,
+} from 'rmwc'
 import { categories, ISchedule, MSchedule } from '../../models/Schedule'
+import { ITicket } from '../../models/Ticket'
+import { db } from '../../services/firebase'
 import { margin, padding } from '../../utils/css'
-import { formDatePattern, formifyDate, parseFormDate } from '../../utils/date'
+import { formDatePattern, parseFormDate, toFormDate } from '../../utils/date'
+import { useBool, UseBool } from '../../utils/hooks'
 import { Solid } from '../blocks/Flex'
 import { Section } from '../blocks/Section'
 import { createUseTypedForm, optional, required, toggle } from './Form'
+import { TicketForm, useTicketForm } from './TicketForm'
 
 const schema = {
     active: toggle(true, 'アクティブ?'),
@@ -33,10 +45,11 @@ export const useScheduleForm = createUseTypedForm<
     ISchedule['_D'],
     ISchedule['_E']
 >({
+    name: 'schedule',
     schema,
     decoder: s => ({
         ...s,
-        date: formifyDate(s.date.toDate()),
+        date: toFormDate(s.date.toDate()),
         ribbonColors: s.ribbonColors?.join('/') ?? null,
         parts: s.parts && MSchedule.serializeParts(s.parts),
     }),
@@ -58,13 +71,63 @@ const Block = styled(Solid)({
     },
 })
 
+const TicketDialog: FC<{
+    ticketForm: ReturnType<typeof useTicketForm>
+    open: boolean
+    onCancel: () => void
+    onAccept: (data: ITicket['_E']) => Promise<void>
+}> = ({ ticketForm, open, onCancel, onAccept }) => {
+    return (
+        <Dialog open={open}>
+            {ticketForm.dialogTitle('チケットの追加', 'チケットの編集')}
+
+            {ticketForm.dialogContent(
+                <TicketForm {...ticketForm}></TicketForm>,
+            )}
+
+            {ticketForm.dialogActions({
+                onCancel,
+                onAccept,
+            })}
+        </Dialog>
+    )
+}
+
 type Props = ReturnType<typeof useScheduleForm>
 
 export const ScheduleForm: FC<Props> = ({
     props: _props,
     register,
     setValue,
+    docRef: scheduleRef,
 }) => {
+    const dialog = useBool(false)
+    const ticketForm = useTicketForm()
+
+    const model = useMemo(() => scheduleRef && db._ticketsIn(scheduleRef), [
+        scheduleRef,
+    ])
+    const tickets = useSCollection({
+        model,
+        q: q => q.orderBy('opensAt'),
+        // decoder: ticketForm.decoder,
+        // decoder: (t: ITicket['_D']) => t,
+    })
+    useEffect(() => {
+        setValue('hasTickets', !!tickets.array.length)
+    }, [tickets.array.length])
+
+    const editTicket = (t?: ITicket['_D']) => {
+        if (!model) {
+            return
+        }
+        ticketForm.init({
+            data: t,
+            ref: t ? t._ref : model.collectionRef.doc(),
+        })
+        dialog.on()
+    }
+
     const props: typeof _props = (key, noRegister) => ({
         ..._props(key, noRegister),
         css: { width: '100%' },
@@ -93,8 +156,44 @@ export const ScheduleForm: FC<Props> = ({
         />
     )
 
+    const TicketsSection_ = (
+        <Section>
+            <TicketDialog
+                ticketForm={ticketForm}
+                open={dialog.state}
+                onCancel={dialog.off}
+                onAccept={async data => {
+                    dialog.off()
+                    await model![ticketForm.action](ticketForm.docRef!, data)
+                }}
+            ></TicketDialog>
+
+            <Block>
+                <Checkbox disabled {...props('hasTickets')}></Checkbox>
+            </Block>
+            <Block>
+                <SimpleDataTable
+                    headers={[['', 'ラベル', '開始日時', '終了日時']]}
+                    data={tickets.array.map(t => {
+                        const dt = ticketForm.decoder(t)
+                        return [
+                            <Button
+                                label="Edit"
+                                onClick={() => editTicket(t)}
+                                css={{ margin: '0 -8px' }}
+                            ></Button>,
+                            dt.label,
+                            dt.opensAt,
+                            dt.closesAt,
+                        ]
+                    })}
+                ></SimpleDataTable>
+            </Block>
+        </Section>
+    )
+
     return (
-        <form>
+        <>
             <Section>
                 <Block>
                     <Checkbox {...props('active')}></Checkbox>
@@ -128,17 +227,13 @@ export const ScheduleForm: FC<Props> = ({
                 </Block>
             </Section>
 
-            <Section>
-                <Block>
-                    <Checkbox disabled {...props('hasTickets')}></Checkbox>
-                </Block>
-            </Section>
+            {TicketsSection_}
 
             <Section>
                 <Block>
                     <TextField {...props('thumbUrl')}></TextField>
                 </Block>
             </Section>
-        </form>
+        </>
     )
 }

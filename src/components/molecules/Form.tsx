@@ -1,6 +1,17 @@
 import is from '@sindresorhus/is'
-import { useMemo } from 'react'
+import { Blue } from 'bluespark'
+import { ReactNode, useMemo, useState } from 'react'
 import useForm from 'react-hook-form'
+import {
+    CircularProgress,
+    DialogActions,
+    DialogButton,
+    DialogContent,
+    DialogTitle,
+} from 'rmwc'
+import { Merge } from 'type-fest'
+import { useBool } from '../../utils/hooks'
+import { micon } from '../../utils/icon'
 
 type Field<T> = {
     type: 'toggle' | 'required' | 'optional'
@@ -60,21 +71,79 @@ const replaceEmptyStringWithNull = <T extends { [key: string]: any }>(
     )
 }
 
+export type RefRequired<T extends (...args: any) => any> = Merge<
+    ReturnType<T>,
+    { docRef: Blue.DocRef }
+>
+
 export const createUseTypedForm = <
     S extends Schema,
     D extends object,
     E extends unknown,
     FormValues extends GetFormValuesType<S> = GetFormValuesType<S>
 >({
+    name,
     schema,
     decoder,
     encoder,
 }: {
+    name: string
     schema: S
     decoder: (data: D) => FormValues
     encoder: (data: FormValues) => E
 }) => {
+    const log = (type: string, data: any) =>
+        console.log(`[${name} form] ${type}`, data)
+
     return () => {
+        const isSaving = useBool(false)
+        const [action, setAction] = useState<'create' | 'update'>('create')
+        const [editingTicketRef, setDocRef] = useState<Blue.DocRef>()
+
+        const dialogTitle = (toCreate: string, toUpdate: string) => (
+            <DialogTitle>
+                {action === 'create' ? toCreate : toUpdate}
+            </DialogTitle>
+        )
+
+        const dialogContent = (children: ReactNode) => (
+            <DialogContent>{children}</DialogContent>
+        )
+
+        const dialogActions = ({
+            onCancel,
+            onAccept,
+        }: {
+            onCancel: () => void
+            onAccept: (data: E) => Promise<void>
+        }) => (
+            <DialogActions>
+                <DialogButton action="cancel" onClick={onCancel}>
+                    キャンセル
+                </DialogButton>
+
+                <DialogButton
+                    action="accept"
+                    unelevated
+                    // disabled={isSaving.state}
+                    icon={
+                        isSaving.state ? (
+                            <CircularProgress></CircularProgress>
+                        ) : (
+                            micon('check')
+                        )
+                    }
+                    onClick={async e => {
+                        isSaving.on()
+                        await handleSubmit(onAccept)(e)
+                        isSaving.off()
+                    }}
+                >
+                    保存
+                </DialogButton>
+            </DialogActions>
+        )
+
         const initialValues = useMemo(
             () =>
                 Object.entries(schema).reduce(
@@ -99,7 +168,7 @@ export const createUseTypedForm = <
                 : register
 
             return {
-                name: key,
+                name: key as string,
                 label: schema[key].label,
                 inputRef,
                 required,
@@ -127,8 +196,10 @@ export const createUseTypedForm = <
             reset(trimmed)
         }
 
-        const init = (data?: D) => {
-            console.log('data to init', data)
+        const init = ({ data, ref }: { data?: D; ref: Blue.DocRef }) => {
+            log('init', data)
+            setAction(data ? 'update' : 'create')
+            setDocRef(ref)
 
             if (!data) {
                 reset(initialValues)
@@ -140,24 +211,34 @@ export const createUseTypedForm = <
                 const decoded = decoder(cleanData)
                 reset(decoded)
             }
-            console.log('inited', getValues())
+            log('initialized', getValues())
         }
 
         const encode = (data: FormValues) => {
             const cleanData = replaceEmptyStringWithNull(data)
-            console.log('errors', errors)
+            log('errors', errors)
 
             const encoded = encoder(cleanData)
             return encoded
         }
 
-        const handleSubmit = (callback: (s: E) => void) =>
+        const handleSubmit = (callback: (s: E) => void | Promise<void>) =>
             _handleSubmit(data => {
                 trimData()
-                callback(encode(data))
+
+                const encoded = encode(data)
+                log('encoded', encoded)
+                return callback(encoded)
             })
 
         return {
+            dialogTitle,
+            dialogContent,
+            dialogActions,
+            action,
+            docRef: editingTicketRef,
+            decoder,
+            encoder,
             props,
             register,
             setValue,

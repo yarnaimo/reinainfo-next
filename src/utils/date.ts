@@ -10,8 +10,11 @@ dayjs.locale('ja')
 export const formDatePattern =
     '^(?:\\d{2}|\\d{4}|\\d{8})(?:\\.(?:\\d{2}|\\d{4}))?$'
 
-export const formifyDate = (date: Dayjs | Date) =>
+export const toFormDate = (date: Dayjs | Date) =>
     dayjs(date).format('YYYYMMDD.HHmm')
+
+export const toTableDate = (date: Dayjs | Date) =>
+    dayjs(date).format('YYYY-MM-DD HH:mm')
 
 export const stringifyWDate = (date: Dayjs, omitSpace = false) => {
     const now = dayjs()
