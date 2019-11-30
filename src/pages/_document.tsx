@@ -66,6 +66,10 @@ class MyDocument extends Document {
                         href="https://fonts.googleapis.com/icon?family=Material+Icons"
                         rel="stylesheet"
                     />
+                    <script
+                        // async
+                        src="https://platform.twitter.com/widgets.js"
+                    ></script>
                 </Head>
 
                 <body>
