@@ -1,8 +1,8 @@
+import { MTimestamp } from 'bluespark'
 import { Dayjs } from 'dayjs'
 import { prray } from 'prray'
 import { MSchedule } from '../../src/models/Schedule'
 import { stringifyWDate } from '../../src/utils/date'
-import { filterByTimestamp } from '../../src/utils/firebase'
 import { dbAdmin } from '../services/firebase-admin'
 import { sendCrossNotification } from '../services/integrated'
 import { TwimoClient } from '../services/twitter'
@@ -12,15 +12,13 @@ export const _tweetUpcomingSchedules = async (
     now: Dayjs,
     freq: 'daily' | 'weekly',
 ) => {
-    console.log('[ tweetUpcomingSchedules ]')
-
     const since = now.startOf('day').add(1, 'day')
 
     const until = freq === 'daily' ? since.add(1, 'day') : since.add(1, 'week')
     const untilDate = until.subtract(1, 'day')
 
     const schedules = await dbAdmin.gSchedulesActive.getQuery({
-        q: filterByTimestamp('date', 'asc', since, until),
+        q: MTimestamp.where({ field: 'date', order: 'asc', since, until }),
     })
 
     const dateRange =

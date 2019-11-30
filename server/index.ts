@@ -42,6 +42,11 @@ export const retweetManually = defaultBuilder.https.onCall(_retweetManually)
 // }
 // await Promise.all(tasks)
 
+const run = <T extends any>(name: string, fn: () => Promise<T>) => {
+    console.log(`⚡ ${name}`)
+    return fn()
+}
+
 export const defaultBuilderFunctions = defaultBuilder.pubsub
     .schedule('*/15 * * * *')
     .timeZone(timezone)
@@ -51,15 +56,23 @@ export const defaultBuilderFunctions = defaultBuilder.pubsub
         const twimo = await getTwimoClient()
 
         const tc = new TweetClassifier()
-        await _retweetPositiveTweets(twimo, dayjs(), t => tc.isOfficialTweet(t))
+        await run('retweetPositiveTweets', () =>
+            _retweetPositiveTweets(twimo, dayjs(), t => tc.isOfficialTweet(t)),
+        )
 
         if (time === '0900') {
-            await _retweetScheduleTweetsOfPrevNight(twimo, dayjs())
+            await run('retweetScheduleTweetsOfPrevNight', () =>
+                _retweetScheduleTweetsOfPrevNight(twimo, dayjs()),
+            )
         }
 
         if (time === '2100') {
-            await _tweetUpcomingSchedules(twimo, dayjs(), 'daily')
-            await _tweetUpcomingTicketEvents(twimo, dayjs())
+            await run('tweetUpcomingSchedules', () =>
+                _tweetUpcomingSchedules(twimo, dayjs(), 'daily'),
+            )
+            await run('tweetUpcomingTicketEvents', () =>
+                _tweetUpcomingTicketEvents(twimo, dayjs()),
+            )
         }
     })
 

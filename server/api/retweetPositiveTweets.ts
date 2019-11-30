@@ -10,8 +10,6 @@ export const _retweetPositiveTweets = async (
     now: Dayjs,
     tweetClassifier: (t: Status) => boolean,
 ) => {
-    console.log('[ retweetPositiveTweets ]')
-
     const mutedIds = await twimo.getMutedIds()
     const isMuted = (t: Status) => mutedIds.has(t.user.id_str)
 

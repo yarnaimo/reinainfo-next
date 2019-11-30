@@ -1,8 +1,8 @@
+import { MTimestamp } from 'bluespark'
 import { Dayjs } from 'dayjs'
 import { SetOptional } from 'type-fest'
 import { ITicketSchedulePair, MSchedule } from '../../src/models/Schedule'
 import { ITicket } from '../../src/models/Ticket'
-import { filterByTimestamp } from '../../src/utils/firebase'
 import { dbAdmin } from '../services/firebase-admin'
 import { sendCrossNotification } from '../services/integrated'
 import { TwimoClient } from '../services/twitter'
@@ -20,7 +20,7 @@ const getTickets = async (
     until: Dayjs,
 ) => {
     const { array } = await dbAdmin.gTickets.getQuery({
-        q: filterByTimestamp(filterField, 'asc', since, until),
+        q: MTimestamp.where({ field: filterField, order: 'asc', since, until }),
     })
     const combined = await array.mapAsync(combineSchedule)
     return combined
@@ -32,8 +32,6 @@ export const _tweetUpcomingTicketEvents = async (
     twimo: TwimoClient,
     now: Dayjs,
 ) => {
-    console.log('[ tweetUpcomingTicketEvents ]')
-
     const since = now.startOf('day').add(1, 'day')
     const until = since.add(1, 'day')
 
