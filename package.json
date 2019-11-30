@@ -49,7 +49,7 @@
     "next-pwa": "^1.1.1",
     "node-sass": "^4.13.0",
     "p-limit": "^2.2.1",
-    "prray": "^0.6.2",
+    "prray": "^0.6.3",
     "puppeteer": "^2.0.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
