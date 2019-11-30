@@ -43,13 +43,16 @@ const HeadlessSchedulePage: NextPage<Props> = ({ schedule: s }) => {
                         font-weight: 700;
                         font-style: normal;
                     }
+
+                    * {
+                        font-family: Ubuntu, "BIZ-UDPGothic", sans-serif!important;
+                    }
                 `}
             ></Global>
             <ScheduleDetailContent
                 schedule={s}
                 tickets={tickets}
                 compact={true}
-                css={{ fontFamily: 'Ubuntu, "BIZ-UDPGothic", sans-serif' }}
             ></ScheduleDetailContent>
         </>
     )
