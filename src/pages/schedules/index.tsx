@@ -4,8 +4,9 @@ import { motion, Variants } from 'framer-motion'
 import { NextPage } from 'next'
 import React, { FC, Fragment, useContext } from 'react'
 import { useEffectOnce } from 'react-use'
+import { Heading2 } from '../../components/atoms/Heading2'
 import { MainContainer } from '../../components/blocks/Container'
-import { Liquid, Solid } from '../../components/blocks/Flex'
+import { Solid } from '../../components/blocks/Flex'
 import { Section } from '../../components/blocks/Section'
 import { ScheduleCard } from '../../components/molecules/ScheduleCard'
 import { Store } from '../../components/templates/Store'
@@ -139,20 +140,7 @@ const SchedulesPage: NextPage<Props> = ({ schedules: pSchedules }) => {
         <MainContainer>
             <Title title="Schedules" path="schedules"></Title>
 
-            <Solid ai="center" css={{ ...margin({ y: 24 }) }}>
-                <Solid>
-                    <h2
-                        css={{
-                            ...margin({ y: 0 }),
-                            color: color.brown(0.75),
-                        }}
-                    >
-                        Schedules
-                    </h2>
-                </Solid>
-
-                <Liquid></Liquid>
-
+            <Heading2 text="Schedules">
                 <Solid ai="center" css={{ transform: 'translateY(-1px)' }}>
                     <FilterLabel
                         active={!excludeSerials.state}
@@ -168,7 +156,7 @@ const SchedulesPage: NextPage<Props> = ({ schedules: pSchedules }) => {
                         label="定期更新を除く"
                     ></FilterLabel>
                 </Solid>
-            </Solid>
+            </Heading2>
 
             <Section>
                 <ScheduleList

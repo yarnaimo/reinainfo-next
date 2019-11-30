@@ -2,12 +2,10 @@ import { NextPage } from 'next'
 import React from 'react'
 import {} from 'rmwc'
 import { ExternalLink } from '../../components/atoms/ExternalLink'
+import { Heading2 } from '../../components/atoms/Heading2'
 import { MainContainer } from '../../components/blocks/Container'
-import { Solid } from '../../components/blocks/Flex'
 import { Section } from '../../components/blocks/Section'
 import { Title } from '../../components/templates/Title'
-import { color } from '../../utils/color'
-import { margin } from '../../utils/css'
 
 type Props = {}
 
@@ -16,16 +14,7 @@ const InfoPage: NextPage<Props> = props => {
         <MainContainer>
             <Title title="Info" path="info"></Title>
 
-            <Solid ai="center" css={{ ...margin({ y: 24 }) }}>
-                <h2
-                    css={{
-                        ...margin({ y: 0 }),
-                        color: color.brown(0.75),
-                    }}
-                >
-                    Info
-                </h2>
-            </Solid>
+            <Heading2 text="Info"></Heading2>
 
             <Section>
                 <p>上田麗奈さん非公式info</p>
