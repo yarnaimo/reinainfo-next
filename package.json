@@ -15,6 +15,7 @@
     "next:build": "next build src && yarn next:append-skip-waiting && mkdir -p .static/_next && cp -r src/.next/static .static/_next/",
     "next:debug": "node -r ts-node/register --inspect server/next-dev",
     "next:dev": "ts-node server/next-dev",
+    "np": "np --yolo --no-publish",
     "serve": "firebase serve --only firestore",
     "serve:functions": "tsc && firebase serve --only firestore,functions",
     "shell": "tsc && firebase functions:shell",
