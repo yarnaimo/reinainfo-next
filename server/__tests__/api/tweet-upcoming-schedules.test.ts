@@ -1,4 +1,4 @@
-import { _tweetUpcomingSchedules } from '../../api/tweetUpcomingSchedules'
+import { _tweetUpcomingSchedules } from '../../api/tweet-upcoming-schedules'
 import { dbAdmin } from '../../services/firebase-admin'
 import { getTwimoClient, TwimoClient } from '../../services/twitter'
 import { expectObjectArrayContaining } from '../utils'

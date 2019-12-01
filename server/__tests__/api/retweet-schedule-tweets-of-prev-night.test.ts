@@ -1,5 +1,5 @@
 import { prray } from 'prray'
-import { _retweetScheduleTweetsOfPrevNight } from '../../api/retweetScheduleTweetsOfPrevNight'
+import { _retweetScheduleTweetsOfPrevNight } from '../../api/retweet-schedule-tweets-of-prev-night'
 import { dbInstanceAdmin } from '../../services/firebase-admin'
 import { getTwimoClient, TwimoClient } from '../../services/twitter'
 import { nowMorning } from '../__fixtures__/date'

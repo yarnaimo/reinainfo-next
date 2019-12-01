@@ -1,4 +1,4 @@
-import { _retweetPositiveTweets } from '../../api/retweetPositiveTweets'
+import { _retweetPositiveTweets } from '../../api/retweet-positive-tweets'
 import { dbAdmin } from '../../services/firebase-admin'
 import { getTwimoClient, TwimoClient } from '../../services/twitter'
 import { now } from '../__fixtures__/date'

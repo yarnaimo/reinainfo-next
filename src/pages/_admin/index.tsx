@@ -11,7 +11,7 @@ import {
     SimpleListItem,
     TextField,
 } from 'rmwc'
-import { _retweetManually } from '../../../server/api/retweetManually'
+import { _retweetManually } from '../../../server/api/retweet-manually'
 import { AdminContainer } from '../../components/blocks/Container'
 import { Section } from '../../components/blocks/Section'
 import { ScheduleDetailContent } from '../../components/molecules/ScheduleDetailContent'

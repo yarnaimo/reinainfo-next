@@ -1,5 +1,5 @@
 import { firestore } from '@firebase/testing'
-import { _onScheduleWrite } from '../../api/onScheduleWrite'
+import { _onScheduleWrite } from '../../api/on-schedule-write'
 import { dbAdmin } from '../../services/firebase-admin'
 import { getTwimoClient, TwimoClient } from '../../services/twitter'
 import { expectObjectArrayContaining } from '../utils'
