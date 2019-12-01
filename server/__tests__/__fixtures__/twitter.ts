@@ -1,6 +1,12 @@
 import dayjs from 'dayjs'
 import { Status } from 'twitter-d'
+import { dbAdmin } from '../../services/firebase-admin'
 import { now } from './date'
+
+export const prepareTwitterCollectionDoc = () =>
+    dbAdmin.twitterCollections.create('topics', {
+        collectionId: '117',
+    })
 
 export const screen_name = 'screenName'
 

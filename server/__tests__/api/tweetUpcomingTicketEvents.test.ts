@@ -7,7 +7,7 @@ import { dbInstanceAdmin } from '../../services/firebase-admin'
 import { getTwimoClient, TwimoClient } from '../../services/twitter'
 import { expectObjectArrayContaining } from '../utils'
 import { now } from '../__fixtures__/date'
-import { addWebhook, send } from '../__mocks__/@slack/webhook'
+import { prepareWebhookDoc, send } from '../__mocks__/@slack/webhook'
 
 const day0End = now.endOf('day')
 const day1 = now.add(1, 'day')
@@ -22,7 +22,7 @@ let twimo: TwimoClient
 beforeEach(async () => {
     twimo = await getTwimoClient()
 
-    await addWebhook()
+    await prepareWebhookDoc()
 })
 
 const o = {

@@ -70,7 +70,7 @@ const schedules = prray<ISchedule['_E']>([
     },
 ])
 
-export const addSchedules = () =>
+export const prepareScheduleDocs = () =>
     schedules.mapAsync(s =>
         dbInstanceAdmin
             .collection('schedules')

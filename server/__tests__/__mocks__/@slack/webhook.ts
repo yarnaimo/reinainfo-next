@@ -10,7 +10,7 @@ export const IncomingWebhook = function(this: any) {
     this.send = send
 }
 
-export const addWebhook = () =>
+export const prepareWebhookDoc = () =>
     dbAdmin.webhooks.create(null, {
         service: 'slack',
         url: 'url',

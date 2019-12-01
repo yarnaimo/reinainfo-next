@@ -28,6 +28,10 @@ service cloud.firestore {
       allow read;
     }
 
+    match /twitterCollections/{twitterCollection} {
+      allow read;
+    }
+
      // match /sources/{source}/posts/{post} {
     //   allow read: if isAdmin();
     //   allow update: if isAdmin();

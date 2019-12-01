@@ -2,14 +2,16 @@ import { _retweetPositiveTweets } from '../../api/retweetPositiveTweets'
 import { dbAdmin } from '../../services/firebase-admin'
 import { getTwimoClient, TwimoClient } from '../../services/twitter'
 import { now } from '../__fixtures__/date'
-import { addWebhook, send } from '../__mocks__/@slack/webhook'
+import { prepareTwitterCollectionDoc } from '../__fixtures__/twitter'
+import { prepareWebhookDoc, send } from '../__mocks__/@slack/webhook'
 
 let twimo: TwimoClient
 
 beforeEach(async () => {
     twimo = await getTwimoClient()
 
-    await addWebhook()
+    await prepareWebhookDoc()
+    await prepareTwitterCollectionDoc()
 })
 
 test('retweetPositiveTweets', async () => {

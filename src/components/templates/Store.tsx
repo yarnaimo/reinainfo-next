@@ -2,7 +2,6 @@ import { useSCollection } from 'bluespark'
 import React, { createContext, FC, useMemo } from 'react'
 import { env } from '../../env'
 import { IScheduleSerialized, MSchedule } from '../../models/Schedule'
-import { ITopicSerialized, MTopic } from '../../models/Topic'
 import { db } from '../../services/firebase'
 import { useBool } from '../../utils/hooks'
 
@@ -18,11 +17,11 @@ type ContextValue = {
         map: Map<string, IScheduleSerialized> | undefined
     }
 
-    listenTopics: () => void
-    topics: {
-        array: ITopicSerialized[] | undefined
-        map: Map<string, ITopicSerialized> | undefined
-    }
+    // listenTopics: () => void
+    // topics: {
+    //     array: ITopicSerialized[] | undefined
+    //     map: Map<string, ITopicSerialized> | undefined
+    // }
 }
 
 // type S = typeof initialState
@@ -66,15 +65,15 @@ export const Provider: FC<{}> = ({ children }) => {
 
     //
 
-    const topicsListening = useBool(false)
+    // const topicsListening = useBool(false)
 
-    const topicQuery = useMemo(() => MTopic.whereCreatedWithinTwoWeeks(), [])
-    const topics = useSCollection({
-        model: db.topics,
-        q: topicQuery,
-        decoder: MTopic.serialize,
-        listen: env.isBrowser && topicsListening.state,
-    })
+    // const topicQuery = useMemo(() => MTopic.whereCreatedWithinTwoWeeks(), [])
+    // const topics = useSCollection({
+    //     model: db.topics,
+    //     q: topicQuery,
+    //     decoder: MTopic.serialize,
+    //     listen: env.isBrowser && topicsListening.state,
+    // })
 
     return (
         <Store.Provider
@@ -82,8 +81,8 @@ export const Provider: FC<{}> = ({ children }) => {
                 listenSchedules: schedulesListening.on,
                 schedules,
 
-                listenTopics: topicsListening.on,
-                topics,
+                // listenTopics: topicsListening.on,
+                // topics,
             }}
         >
             {children}

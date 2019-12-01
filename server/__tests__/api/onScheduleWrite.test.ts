@@ -5,19 +5,19 @@ import { getTwimoClient, TwimoClient } from '../../services/twitter'
 import { expectObjectArrayContaining } from '../utils'
 import { now } from '../__fixtures__/date'
 import {
-    addSchedules,
     pageUrlBase,
+    prepareScheduleDocs,
     scheduleUrl,
 } from '../__fixtures__/schedules'
-import { addWebhook, send } from '../__mocks__/@slack/webhook'
+import { prepareWebhookDoc, send } from '../__mocks__/@slack/webhook'
 
 let twimo: TwimoClient
 
 beforeEach(async () => {
     twimo = await getTwimoClient()
 
-    await addSchedules()
-    await addWebhook()
+    await prepareScheduleDocs()
+    await prepareWebhookDoc()
 })
 
 const timestamp1 = firestore.Timestamp.fromDate(now.toDate())

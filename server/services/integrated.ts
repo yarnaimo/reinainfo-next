@@ -9,14 +9,26 @@ export const retweetWithLoggingAndNotification = async (
     twimo: TwimoClient,
     ids: string[],
 ) => {
+    const twitterCollection = await dbAdmin.twitterCollections.getDoc({
+        doc: 'topics',
+    })
+    if (!twitterCollection) {
+        throw new Error('twitterCollections/topics not found')
+    }
+
     const retweetResults = await twimo.retweet(ids)
 
-    await prray(retweetResults).mapAsync(({ retweeted_status }) => {
-        const { id_str, created_at } = retweeted_status!
+    await prray(retweetResults).mapAsync(async ({ retweeted_status }) => {
+        const { id_str: tweetId, created_at } = retweeted_status!
+
+        await twimo.addTopic({
+            tweetId,
+            collectionId: twitterCollection.collectionId,
+        })
 
         return dbAdmin.topics.create(null, {
             type: 'retweet',
-            tweetId: id_str,
+            tweetId,
             origCreatedAt: dayjs(created_at).toDate(),
         })
     })

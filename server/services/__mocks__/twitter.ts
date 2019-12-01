@@ -26,5 +26,12 @@ export const getTwimoClient = async () => {
                 (full_text, i) => ({ full_text, id_str: String(i) } as Status),
             )
         },
+        addTopic: ({
+            collectionId,
+            tweetId,
+        }: {
+            collectionId: string
+            tweetId: string
+        }) => ({}),
     }
 }

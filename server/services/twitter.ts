@@ -27,6 +27,18 @@ export const getTwimoClient = async () => {
             )
             return new Set(ids)
         },
+
+        addTopic: ({
+            collectionId,
+            tweetId,
+        }: {
+            collectionId: string
+            tweetId: string
+        }) =>
+            twimo.post('collections/entries/add', {
+                id: collectionId,
+                tweet_id: tweetId,
+            }),
     }
 }
 
