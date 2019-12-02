@@ -1,7 +1,7 @@
 import { getUrlOfTweet } from '@yarnaimo/twimo'
-import dayjs from 'dayjs'
 import { prray } from 'prray'
 import { env } from '../../src/env'
+import { dayjs } from '../../src/utils/date'
 import { dbAdmin } from './firebase-admin'
 import { TwimoClient } from './twitter'
 import { sendMessageToAllWebhooks } from './webhook'

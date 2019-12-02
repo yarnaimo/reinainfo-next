@@ -4,6 +4,8 @@ import customParseFormat from 'dayjs/plugin/customParseFormat'
 dayjs.extend(customParseFormat)
 dayjs.locale('ja')
 
+export { dayjs }
+
 // export const formatDate = (date: Dayjs) =>
 //     date.format(date.isSame(dayjs(), 'day') ? 'H:mm' : 'D日 H:mm')
 
@@ -56,4 +58,55 @@ export const parseFormDate = (str: string) => {
         }
     }
     return null
+}
+
+type WNumber = 0 | 1 | 2 | 3 | 4 | 5 | 6
+
+export const createSerialDates = ({
+    dayOfWeek,
+    timeOfDay: [hour, minute] = [0, 0],
+    weekNumbers,
+    weekInterval = 1,
+    count = 25,
+    since = dayjs(),
+    until = dayjs().add(6, 'month'),
+}: {
+    dayOfWeek: WNumber
+    timeOfDay?: [number, number]
+    weekNumbers?: number[]
+    weekInterval?: number
+    count?: number
+    since?: Dayjs
+    until?: Dayjs
+}) => {
+    if (!dayOfWeek) throw new Error('Invalid parameters')
+
+    const mightAddOneWeek = (date: Dayjs) =>
+        date.isBefore(since) ? date.add(1, 'week') : date
+
+    const currentDate = mightAddOneWeek(
+        since
+            .set('day', dayOfWeek)
+            .set('hour', hour)
+            .set('minute', minute),
+    )
+
+    const { dates } = [...Array(count).keys()].reduce(
+        ({ dates, currentDate }) => {
+            if (currentDate.isAfter(until)) {
+                return { dates, currentDate }
+            }
+
+            const nthWeek = Math.ceil(dayjs(currentDate).date() / 7)
+            return {
+                dates:
+                    weekNumbers && !weekNumbers.includes(nthWeek)
+                        ? dates
+                        : [...dates, currentDate],
+                currentDate: currentDate.add(weekInterval, 'week'),
+            }
+        },
+        { dates: [] as Dayjs[], currentDate },
+    )
+    return dates.map(d => d.toDate())
 }

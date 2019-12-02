@@ -1,5 +1,5 @@
-import dayjs from 'dayjs'
 import { Status } from 'twitter-d'
+import { dayjs } from '../../../src/utils/date'
 import { dbAdmin } from '../../services/firebase-admin'
 import { now } from './date'
 

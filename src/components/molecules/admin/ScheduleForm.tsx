@@ -1,5 +1,4 @@
 import { useSCollection } from 'bluespark'
-import dayjs from 'dayjs'
 import React, { useEffect, useMemo, useState } from 'react'
 import { RHFInput } from 'react-hook-form-input'
 import { Button, Checkbox, Select, TextField } from 'rmwc'
@@ -11,7 +10,12 @@ import {
 } from '../../../models/Schedule'
 import { ITicket } from '../../../models/Ticket'
 import { db } from '../../../services/firebase'
-import { formDatePattern, parseFormDate, toFormDate } from '../../../utils/date'
+import {
+    dayjs,
+    formDatePattern,
+    parseFormDate,
+    toFormDate,
+} from '../../../utils/date'
 import { FormBlock as Block } from '../../blocks/FormBlock'
 import { Section } from '../../blocks/Section'
 import {

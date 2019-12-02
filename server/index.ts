@@ -1,9 +1,9 @@
 const timezone = 'Asia/Tokyo'
 process.env.TZ = timezone
 
-import dayjs from 'dayjs'
 import * as functions from 'firebase-functions'
 import { TweetClassifier } from '../learn'
+import { dayjs } from '../src/utils/date'
 import { _next } from './api/next'
 import { _onScheduleWrite } from './api/on-schedule-write'
 import { _retweetManually } from './api/retweet-manually'

@@ -1,7 +1,7 @@
-import dayjs from 'dayjs'
 import { prray } from 'prray'
 import { ISchedule } from '../../../src/models/Schedule'
 import { ITicket } from '../../../src/models/Ticket'
+import { dayjs } from '../../../src/utils/date'
 import { _tweetUpcomingTicketEvents } from '../../api/tweet-upcoming-ticket-events'
 import { dbInstanceAdmin } from '../../services/firebase-admin'
 import { getTwimoClient, TwimoClient } from '../../services/twitter'

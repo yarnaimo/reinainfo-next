@@ -1,4 +1,4 @@
-import dayjs from 'dayjs'
+import { dayjs } from '../../../src/utils/date'
 
 export const now = dayjs('2019-01-18T22:00')
 

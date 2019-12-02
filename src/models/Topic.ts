@@ -1,6 +1,6 @@
 import { Blue, MSpark, MTimestamp, Spark } from 'bluespark'
-import dayjs from 'dayjs'
 import { Merge } from 'type-fest'
+import { dayjs } from '../utils/date'
 
 export type ITopic = Blue.Interface<{
     type: 'retweet' | 'tweet'
