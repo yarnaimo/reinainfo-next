@@ -11,6 +11,7 @@ import {
 } from '../../models/Schedule'
 import { db } from '../../services/firebase'
 import { formDatePattern, parseFormDate, toFormDate } from '../../utils/date'
+import { micon } from '../../utils/icon'
 import { FormBlock as Block } from '../blocks/FormBlock'
 import { Section } from '../blocks/Section'
 import { createUseTypedForm, optional, required, toggle } from './Form'
@@ -114,6 +115,19 @@ export const useScheduleForm = createUseTypedForm<
 
         const _ticketForm = useTicketForm()
 
+        const AddTicketButton_ = (
+            <Button
+                outlined
+                icon={micon('plus')}
+                label="チケットの追加"
+                onClick={() =>
+                    _ticketForm.edit(model!.collectionRef.doc(), (data, _ref) =>
+                        model!.create(_ref, data),
+                    )
+                }
+            ></Button>
+        )
+
         const ticketTableHeaders = [['', 'ラベル', '開始日時', '終了日時']]
 
         const ticketTableData = tickets.array.map(t => {
@@ -134,6 +148,13 @@ export const useScheduleForm = createUseTypedForm<
             ]
         })
 
+        const TicketTable_ = (
+            <SimpleDataTable
+                headers={ticketTableHeaders}
+                data={ticketTableData}
+            ></SimpleDataTable>
+        )
+
         const TicketsSection_ = (
             <Section>
                 {_ticketForm.render()}
@@ -141,23 +162,8 @@ export const useScheduleForm = createUseTypedForm<
                 <Block>
                     <Checkbox disabled {...props('hasTickets')}></Checkbox>
                 </Block>
-                <Block>
-                    <Button
-                        label="チケットの追加"
-                        onClick={() =>
-                            _ticketForm.edit(
-                                model!.collectionRef.doc(),
-                                (data, _ref) => model!.create(_ref, data),
-                            )
-                        }
-                    ></Button>
-                </Block>
-                <Block>
-                    <SimpleDataTable
-                        headers={ticketTableHeaders}
-                        data={ticketTableData}
-                    ></SimpleDataTable>
-                </Block>
+                <Block>{AddTicketButton_}</Block>
+                <Block>{TicketTable_}</Block>
             </Section>
         )
 
