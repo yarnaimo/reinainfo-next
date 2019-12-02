@@ -1,25 +1,21 @@
-import styled from '@emotion/styled'
 import { useSCollection } from 'bluespark'
-import React, { FC, useEffect, useMemo } from 'react'
+import dayjs from 'dayjs'
+import React, { useEffect, useMemo, useState } from 'react'
 import { RHFInput } from 'react-hook-form-input'
+import { Button, Checkbox, Select, SimpleDataTable, TextField } from 'rmwc'
 import {
-    Button,
-    Checkbox,
-    Dialog,
-    Select,
-    SimpleDataTable,
-    TextField,
-} from 'rmwc'
-import { categories, ISchedule, MSchedule } from '../../models/Schedule'
-import { ITicket } from '../../models/Ticket'
+    categories,
+    ISchedule,
+    IScheduleSerialized,
+    MSchedule,
+} from '../../models/Schedule'
 import { db } from '../../services/firebase'
-import { margin, padding } from '../../utils/css'
 import { formDatePattern, parseFormDate, toFormDate } from '../../utils/date'
-import { useBool, UseBool } from '../../utils/hooks'
-import { Solid } from '../blocks/Flex'
+import { FormBlock as Block } from '../blocks/FormBlock'
 import { Section } from '../blocks/Section'
 import { createUseTypedForm, optional, required, toggle } from './Form'
-import { TicketForm, useTicketForm } from './TicketForm'
+import { ScheduleDetailContent } from './ScheduleDetailContent'
+import { useTicketForm } from './TicketForm'
 
 const schema = {
     active: toggle(true, 'アクティブ?'),
@@ -47,6 +43,7 @@ export const useScheduleForm = createUseTypedForm<
 >({
     name: 'schedule',
     schema,
+
     decoder: s => ({
         ...s,
         date: toFormDate(s.date.toDate()),
@@ -62,178 +59,174 @@ export const useScheduleForm = createUseTypedForm<
                 : null,
             parts: MSchedule.deserializeParts(data.parts ?? ''),
         } as ISchedule['_E']),
-})
 
-const Block = styled(Solid)({
-    ...padding({ y: 6 }),
-    '& > * + *': {
-        ...margin({ left: 8 }),
+    dialogTitle: { create: 'スケジュールの登録', update: 'スケジュールの編集' },
+    dialogStyles: {
+        '& > .mdc-dialog__container': {
+            width: '100%',
+        },
+        '& > * > .mdc-dialog__surface': {
+            width: '100%',
+        },
+    },
+
+    renderer: ({ props: _props, setValue, register, handleSubmit, _ref }) => {
+        const props: typeof _props = (key, noRegister) => ({
+            ..._props(key, noRegister),
+            css: { width: '100%' },
+        })
+
+        const model = useMemo(() => _ref && db._ticketsIn(_ref), [_ref])
+        const tickets = useSCollection({
+            model,
+            q: q => q.orderBy('opensAt'),
+        })
+        useEffect(() => {
+            setValue('hasTickets', !!tickets.array.length)
+        }, [tickets.array.length])
+
+        const textarea = {
+            textarea: true,
+            outlined: true,
+            rows: 2,
+        }
+
+        const [previewSchedule, setPreviewSchedule] = useState<
+            IScheduleSerialized
+        >()
+
+        const CategorySelect_ = (
+            <RHFInput
+                as={
+                    <Select
+                        {...props('category', true)}
+                        options={Object.entries(categories).map(([k, v]) => ({
+                            value: k,
+                            label: v.name,
+                        }))}
+                    />
+                }
+                register={register}
+                setValue={(key, value) => setValue('category', value as string)}
+                name="category"
+            />
+        )
+
+        const _ticketForm = useTicketForm()
+
+        const ticketTableHeaders = [['', 'ラベル', '開始日時', '終了日時']]
+
+        const ticketTableData = tickets.array.map(t => {
+            const dt = _ticketForm.decoder(t)
+            return [
+                <Button
+                    label="Edit"
+                    onClick={() =>
+                        _ticketForm.edit(t, (data, _ref) =>
+                            model!.update(_ref, data),
+                        )
+                    }
+                    css={{ margin: '0 -8px' }}
+                ></Button>,
+                dt.label,
+                dt.opensAt,
+                dt.closesAt,
+            ]
+        })
+
+        const TicketsSection_ = (
+            <Section>
+                {_ticketForm.render()}
+
+                <Block>
+                    <Checkbox disabled {...props('hasTickets')}></Checkbox>
+                </Block>
+                <Block>
+                    <Button
+                        label="チケットの追加"
+                        onClick={() =>
+                            _ticketForm.edit(
+                                model!.collectionRef.doc(),
+                                (data, _ref) => model!.create(_ref, data),
+                            )
+                        }
+                    ></Button>
+                </Block>
+                <Block>
+                    <SimpleDataTable
+                        headers={ticketTableHeaders}
+                        data={ticketTableData}
+                    ></SimpleDataTable>
+                </Block>
+            </Section>
+        )
+
+        return (
+            <>
+                {previewSchedule && (
+                    <ScheduleDetailContent
+                        compact={false}
+                        schedule={previewSchedule}
+                    ></ScheduleDetailContent>
+                )}
+                <Button
+                    label="プレビュー"
+                    onClick={handleSubmit(data => {
+                        console.log(data)
+                        const dataD = {
+                            ...data,
+                            _updatedAt: dayjs().toISOString(),
+                            date: data.date.toISOString(),
+                            formattedDate: MSchedule.formatDate(data),
+                        }
+                        setPreviewSchedule(dataD as any)
+                    })}
+                ></Button>
+
+                <Section>
+                    <Block>
+                        <Checkbox {...props('active')}></Checkbox>
+                        <Checkbox {...props('isSerial')}></Checkbox>
+                    </Block>
+                    <Block>
+                        {CategorySelect_}
+                        <TextField {...props('customIcon')}></TextField>
+                    </Block>
+                    <Block>
+                        <TextField {...props('ribbonColors')}></TextField>
+                    </Block>
+                </Section>
+
+                <Section>
+                    <Block>
+                        <TextField {...props('date')}></TextField>
+                        <Checkbox {...props('hasTime')}></Checkbox>
+                    </Block>
+                    <Block>
+                        <TextField {...props('parts')}></TextField>
+                    </Block>
+                    <Block>
+                        <TextField
+                            {...textarea}
+                            {...props('title')}
+                        ></TextField>
+                    </Block>
+                    <Block>
+                        <TextField {...textarea} {...props('url')}></TextField>
+                    </Block>
+                    <Block>
+                        <TextField {...props('venue')}></TextField>
+                    </Block>
+                </Section>
+
+                {TicketsSection_}
+
+                <Section>
+                    <Block>
+                        <TextField {...props('thumbUrl')}></TextField>
+                    </Block>
+                </Section>
+            </>
+        )
     },
 })
-
-const TicketDialog: FC<{
-    ticketForm: ReturnType<typeof useTicketForm>
-    open: boolean
-    onCancel: () => void
-    onAccept: (data: ITicket['_E']) => Promise<void>
-}> = ({ ticketForm, open, onCancel, onAccept }) => {
-    return (
-        <Dialog open={open}>
-            {ticketForm.dialogTitle('チケットの追加', 'チケットの編集')}
-
-            {ticketForm.dialogContent(
-                <TicketForm {...ticketForm}></TicketForm>,
-            )}
-
-            {ticketForm.dialogActions({
-                onCancel,
-                onAccept,
-            })}
-        </Dialog>
-    )
-}
-
-type Props = ReturnType<typeof useScheduleForm>
-
-export const ScheduleForm: FC<Props> = ({
-    props: _props,
-    register,
-    setValue,
-    docRef: scheduleRef,
-}) => {
-    const dialog = useBool(false)
-    const ticketForm = useTicketForm()
-
-    const model = useMemo(() => scheduleRef && db._ticketsIn(scheduleRef), [
-        scheduleRef,
-    ])
-    const tickets = useSCollection({
-        model,
-        q: q => q.orderBy('opensAt'),
-        // decoder: ticketForm.decoder,
-        // decoder: (t: ITicket['_D']) => t,
-    })
-    useEffect(() => {
-        setValue('hasTickets', !!tickets.array.length)
-    }, [tickets.array.length])
-
-    const editTicket = (t?: ITicket['_D']) => {
-        if (!model) {
-            return
-        }
-        ticketForm.init({
-            data: t,
-            ref: t ? t._ref : model.collectionRef.doc(),
-        })
-        dialog.on()
-    }
-
-    const props: typeof _props = (key, noRegister) => ({
-        ..._props(key, noRegister),
-        css: { width: '100%' },
-    })
-
-    const textarea = {
-        textarea: true,
-        outlined: true,
-        rows: 2,
-    }
-
-    const CategorySelect_ = (
-        <RHFInput
-            as={
-                <Select
-                    {...props('category', true)}
-                    options={Object.entries(categories).map(([k, v]) => ({
-                        value: k,
-                        label: v.name,
-                    }))}
-                />
-            }
-            register={register}
-            setValue={setValue}
-            name="category"
-        />
-    )
-
-    const TicketsSection_ = (
-        <Section>
-            <TicketDialog
-                ticketForm={ticketForm}
-                open={dialog.state}
-                onCancel={dialog.off}
-                onAccept={async data => {
-                    dialog.off()
-                    await model![ticketForm.action](ticketForm.docRef!, data)
-                }}
-            ></TicketDialog>
-
-            <Block>
-                <Checkbox disabled {...props('hasTickets')}></Checkbox>
-            </Block>
-            <Block>
-                <SimpleDataTable
-                    headers={[['', 'ラベル', '開始日時', '終了日時']]}
-                    data={tickets.array.map(t => {
-                        const dt = ticketForm.decoder(t)
-                        return [
-                            <Button
-                                label="Edit"
-                                onClick={() => editTicket(t)}
-                                css={{ margin: '0 -8px' }}
-                            ></Button>,
-                            dt.label,
-                            dt.opensAt,
-                            dt.closesAt,
-                        ]
-                    })}
-                ></SimpleDataTable>
-            </Block>
-        </Section>
-    )
-
-    return (
-        <>
-            <Section>
-                <Block>
-                    <Checkbox {...props('active')}></Checkbox>
-                    <Checkbox {...props('isSerial')}></Checkbox>
-                </Block>
-                <Block>
-                    {CategorySelect_}
-                    <TextField {...props('customIcon')}></TextField>
-                </Block>
-                <Block>
-                    <TextField {...props('ribbonColors')}></TextField>
-                </Block>
-            </Section>
-
-            <Section>
-                <Block>
-                    <TextField {...props('date')}></TextField>
-                    <Checkbox {...props('hasTime')}></Checkbox>
-                </Block>
-                <Block>
-                    <TextField {...props('parts')}></TextField>
-                </Block>
-                <Block>
-                    <TextField {...textarea} {...props('title')}></TextField>
-                </Block>
-                <Block>
-                    <TextField {...textarea} {...props('url')}></TextField>
-                </Block>
-                <Block>
-                    <TextField {...props('venue')}></TextField>
-                </Block>
-            </Section>
-
-            {TicketsSection_}
-
-            <Section>
-                <Block>
-                    <TextField {...props('thumbUrl')}></TextField>
-                </Block>
-            </Section>
-        </>
-    )
-}

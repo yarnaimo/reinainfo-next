@@ -1,33 +1,16 @@
 import { useSCollection } from 'bluespark'
-import dayjs from 'dayjs'
 import { NextPage } from 'next'
 import React, { FC, useMemo, useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
-import {
-    Button,
-    Dialog,
-    List,
-    SimpleDataTable,
-    SimpleListItem,
-    TextField,
-} from 'rmwc'
+import { Button, List, SimpleDataTable, SimpleListItem, TextField } from 'rmwc'
 import { _retweetManually } from '../../../server/api/retweet-manually'
 import { AdminContainer } from '../../components/blocks/Container'
 import { Section } from '../../components/blocks/Section'
-import { ScheduleDetailContent } from '../../components/molecules/ScheduleDetailContent'
-import {
-    ScheduleForm,
-    useScheduleForm,
-} from '../../components/molecules/ScheduleForm'
+import { useScheduleForm } from '../../components/molecules/ScheduleForm'
 import { Title } from '../../components/templates/Title'
-import {
-    ISchedule,
-    IScheduleSerialized,
-    MSchedule,
-} from '../../models/Schedule'
+import { MSchedule } from '../../models/Schedule'
 import { app, callable, db } from '../../services/firebase'
 import { toFormDate } from '../../utils/date'
-import { useBool } from '../../utils/hooks'
 import { micon } from '../../utils/icon'
 
 const RetweetSection: FC<{}> = () => {
@@ -129,67 +112,6 @@ const RetweetSection: FC<{}> = () => {
     )
 }
 
-const ScheduleDialog: FC<{
-    scheduleForm: ReturnType<typeof useScheduleForm>
-    open: boolean
-    onCancel: () => void
-    onAccept: (data: ISchedule['_E']) => Promise<void>
-}> = ({ scheduleForm, open, onCancel, onAccept }) => {
-    const [previewSchedule, setPreviewSchedule] = useState<
-        IScheduleSerialized
-    >()
-
-    return (
-        <Dialog
-            open={open}
-            css={{
-                '& > .mdc-dialog__container': {
-                    width: '100%',
-                },
-                '& > * > .mdc-dialog__surface': {
-                    width: '100%',
-                },
-            }}
-        >
-            {scheduleForm.dialogTitle(
-                'スケジュールの登録',
-                'スケジュールの編集',
-            )}
-
-            {scheduleForm.dialogContent(
-                <>
-                    {previewSchedule && (
-                        <ScheduleDetailContent
-                            compact={false}
-                            schedule={previewSchedule}
-                        ></ScheduleDetailContent>
-                    )}
-                    <Button
-                        label="プレビュー"
-                        onClick={scheduleForm.handleSubmit(data => {
-                            console.log(data)
-                            const dataD = {
-                                ...data,
-                                _updatedAt: dayjs().toISOString(),
-                                date: data.date.toISOString(),
-                                formattedDate: MSchedule.formatDate(data),
-                            }
-                            setPreviewSchedule(dataD as any)
-                        })}
-                    ></Button>
-
-                    <ScheduleForm {...scheduleForm}></ScheduleForm>
-                </>,
-            )}
-
-            {scheduleForm.dialogActions({
-                onCancel,
-                onAccept,
-            })}
-        </Dialog>
-    )
-}
-
 const ScheduleSection: FC<{}> = () => {
     const bool = (value: any) => (value ? <b>*</b> : '')
 
@@ -230,9 +152,14 @@ const ScheduleSection: FC<{}> = () => {
             schedules.array.map(s => [
                 <Button
                     label="Edit"
-                    onClick={() => editSchedule(s)}
+                    onClick={() =>
+                        scheduleForm.edit(s, (data, _ref) =>
+                            db.schedules.update(_ref, data),
+                        )
+                    }
                     css={{ margin: '0 -8px' }}
                 ></Button>,
+
                 bool(s.active),
 
                 MSchedule.getCategory(s.category).name,
@@ -252,40 +179,25 @@ const ScheduleSection: FC<{}> = () => {
         [schedules.array],
     )
 
-    const dialog = useBool(false)
     const scheduleForm = useScheduleForm()
-
-    const editSchedule = (s?: ISchedule['_D']) => {
-        scheduleForm.init({
-            data: s,
-            ref: s ? s._ref : db.schedules.collectionRef.doc(),
-        })
-        dialog.on()
-    }
 
     return (
         <>
             <h2>Schedules</h2>
 
             <Section>
-                <ScheduleDialog
-                    open={dialog.state}
-                    scheduleForm={scheduleForm}
-                    onCancel={dialog.off}
-                    onAccept={async data => {
-                        dialog.off()
-                        await db.schedules[scheduleForm.action](
-                            scheduleForm.docRef!,
-                            data,
-                        )
-                    }}
-                ></ScheduleDialog>
+                {scheduleForm.render()}
 
                 <Button
                     outlined
                     icon={micon('plus')}
                     label={'スケジュールの登録'}
-                    onClick={() => editSchedule()}
+                    onClick={() =>
+                        scheduleForm.edit(
+                            db.schedules.collectionRef.doc(),
+                            (data, _ref) => db.schedules.create(_ref, data),
+                        )
+                    }
                 ></Button>
             </Section>
 
@@ -320,9 +232,5 @@ const AdminIndexPage: NextPage<Props> = props => {
         </AdminContainer>
     )
 }
-
-// AdminSchedulesPage.getInitialProps = async ctx => {
-//     return {}
-// }
 
 export default AdminIndexPage

@@ -1,15 +1,19 @@
+import { InterpolationWithTheme } from '@emotion/core'
 import is from '@sindresorhus/is'
 import { Blue } from 'bluespark'
-import React, { ReactNode, useMemo, useState } from 'react'
+import React, { FC, useRef, useState } from 'react'
 import useForm from 'react-hook-form'
+import { ElementLike } from 'react-hook-form/dist/types'
 import {
     CircularProgress,
+    Dialog,
     DialogActions,
     DialogButton,
     DialogContent,
     DialogTitle,
 } from 'rmwc'
 import { Merge } from 'type-fest'
+import { firestore } from '../../services/firebase'
 import { useBool } from '../../utils/hooks'
 import { micon } from '../../utils/icon'
 
@@ -56,7 +60,7 @@ type Schema = {
 }
 
 type GetFormValuesType<S extends Schema> = {
-    [K in keyof S]: S[K]['initialValue']
+    [K in keyof S & string]: S[K]['initialValue']
 }
 
 const replaceEmptyStringWithNull = <T extends { [key: string]: any }>(
@@ -76,9 +80,26 @@ export type RefRequired<T extends (...args: any) => any> = Merge<
     { docRef: Blue.DocRef }
 >
 
+type PropsFn<S extends Schema> = (
+    key: keyof S & string,
+    noRegister?: boolean,
+) => {
+    name: string
+    label: string
+    inputRef: ((ref: ElementLike | null) => void) | undefined
+    required: boolean
+    pattern: string | undefined
+}
+
+type RegisterFn = ReturnType<typeof useForm>['register']
+
+type HandleSubmitFn<E> = (
+    callback: (s: E) => void | Promise<void>,
+) => (e: React.BaseSyntheticEvent<object, any, any>) => Promise<void>
+
 export const createUseTypedForm = <
     S extends Schema,
-    D extends object,
+    D extends Blue.Meta,
     E extends unknown,
     FormValues extends GetFormValuesType<S> = GetFormValuesType<S>
 >({
@@ -86,95 +107,148 @@ export const createUseTypedForm = <
     schema,
     decoder,
     encoder,
+    dialogTitle,
+    dialogStyles,
+    renderer: Renderer,
 }: {
     name: string
     schema: S
+
     decoder: (data: D) => FormValues
     encoder: (data: FormValues) => E
+
+    dialogTitle: { create: string; update: string }
+    dialogStyles?: InterpolationWithTheme<any>
+    renderer: FC<{
+        props: PropsFn<S>
+        setValue: <K extends keyof FormValues & string>(
+            key: K,
+            value: FormValues[K],
+        ) => void
+        register: RegisterFn
+        handleSubmit: HandleSubmitFn<E>
+        _ref?: Blue.DocRef
+    }>
 }) => {
+    type CallbackFn = (data: E, _ref: Blue.DocRef) => Promise<any>
+
     const log = (type: string, data: any) =>
         console.log(`[${name} form] ${type}`, data)
 
+    const initialValues = Object.entries(schema).reduce(
+        (pre, [key, value]) => ({
+            ...pre,
+            [key]: value.initialValue,
+        }),
+        {} as FormValues,
+    )
+
+    const trim = (data: FormValues) =>
+        Object.entries(data).reduce(
+            (pre, [key, value]) => ({
+                ...pre,
+                [key]: is.string(value) ? value.trim() : value,
+            }),
+            {} as FormValues,
+        )
+
+    const _props = (
+        registerFn: RegisterFn,
+        key: keyof S & string,
+        noRegister = false,
+    ) => {
+        const { type, pattern } = schema[key]
+
+        const required = type === 'required'
+
+        const inputRef = noRegister
+            ? undefined
+            : required
+            ? registerFn({ required: true })
+            : registerFn
+
+        return {
+            name: key,
+            label: schema[key].label,
+            inputRef,
+            required,
+            pattern,
+        }
+    }
+
     return () => {
+        const props: PropsFn<S> = (key, noRegister) =>
+            _props(register, key, noRegister)
+
+        const callbackRef = useRef<CallbackFn>()
+        const dialog = useBool(false)
         const isSaving = useBool(false)
         const [action, setAction] = useState<'create' | 'update'>('create')
-        const [editingTicketRef, setDocRef] = useState<Blue.DocRef>()
+        const [_ref, _setRef] = useState<Blue.DocRef>()
 
-        const dialogTitle = (toCreate: string, toUpdate: string) => (
-            <DialogTitle>
-                {action === 'create' ? toCreate : toUpdate}
-            </DialogTitle>
-        )
+        const edit = (dataOrRef: D | Blue.DocRef, callback: CallbackFn) => {
+            callbackRef.current = callback
+            const _dataOrRef = dataOrRef as D | firestore.DocumentReference
 
-        const dialogContent = (children: ReactNode) => (
-            <DialogContent>{children}</DialogContent>
-        )
-
-        const dialogActions = ({
-            onCancel,
-            onAccept,
-        }: {
-            onCancel: () => void
-            onAccept: (data: E) => Promise<void>
-        }) => (
-            <DialogActions>
-                <DialogButton action="cancel" onClick={onCancel}>
-                    キャンセル
-                </DialogButton>
-
-                <DialogButton
-                    action="accept"
-                    unelevated
-                    // disabled={isSaving.state}
-                    icon={
-                        isSaving.state ? (
-                            <CircularProgress></CircularProgress>
-                        ) : (
-                            micon('check')
-                        )
-                    }
-                    onClick={async e => {
-                        isSaving.on()
-                        await handleSubmit(onAccept)(e)
-                        isSaving.off()
-                    }}
-                >
-                    保存
-                </DialogButton>
-            </DialogActions>
-        )
-
-        const initialValues = useMemo(
-            () =>
-                Object.entries(schema).reduce(
-                    (pre, [key, value]) => ({
-                        ...pre,
-                        [key]: value.initialValue,
-                    }),
-                    {} as FormValues,
-                ),
-            [schema],
-        )
-
-        const props = (key: keyof S, noRegister = false) => {
-            const { type, pattern } = schema[key]
-
-            const required = type === 'required'
-
-            const inputRef = noRegister
-                ? undefined
-                : required
-                ? register({ required: true })
-                : register
-
-            return {
-                name: key as string,
-                label: schema[key].label,
-                inputRef,
-                required,
-                pattern,
+            if (_dataOrRef instanceof firestore.DocumentReference) {
+                setAction('create')
+                _setRef(_dataOrRef)
+                init()
+            } else {
+                setAction('update')
+                _setRef(_dataOrRef._ref)
+                init(_dataOrRef)
             }
+            dialog.on()
         }
+
+        const render = () => (
+            <Dialog open={dialog.state} css={dialogStyles}>
+                <DialogTitle>{dialogTitle[action]}</DialogTitle>
+
+                <DialogContent>
+                    <Renderer
+                        {...{
+                            props,
+                            setValue,
+                            register,
+                            handleSubmit,
+                            _ref,
+                        }}
+                    ></Renderer>
+                </DialogContent>
+
+                <DialogActions>
+                    <DialogButton onClick={dialog.off}>キャンセル</DialogButton>
+
+                    <DialogButton
+                        unelevated
+                        disabled={isSaving.state}
+                        icon={
+                            isSaving.state ? (
+                                <CircularProgress></CircularProgress>
+                            ) : (
+                                micon('check')
+                            )
+                        }
+                        onClick={async e => {
+                            isSaving.on()
+
+                            await handleSubmit(async data => {
+                                if (callbackRef.current && _ref) {
+                                    await callbackRef.current(data, _ref)
+                                }
+                            })(e)
+
+                            dialog.off()
+                            isSaving.off()
+                        }}
+                    >
+                        保存
+                    </DialogButton>
+                </DialogActions>
+            </Dialog>
+        )
 
         const {
             register,
@@ -186,20 +260,13 @@ export const createUseTypedForm = <
         } = useForm<FormValues>()
 
         const trimData = () => {
-            const trimmed = Object.entries(getValues()).reduce(
-                (pre, [key, value]) => ({
-                    ...pre,
-                    [key]: is.string(value) ? value.trim() : value,
-                }),
-                {} as FormValues,
-            )
+            const trimmed = trim(getValues())
             reset(trimmed)
+            return trimmed
         }
 
-        const init = ({ data, ref }: { data?: D; ref: Blue.DocRef }) => {
+        const init = (data?: D) => {
             log('init', data)
-            setAction(data ? 'update' : 'create')
-            setDocRef(ref)
 
             if (!data) {
                 reset(initialValues)
@@ -223,27 +290,24 @@ export const createUseTypedForm = <
         }
 
         const handleSubmit = (callback: (s: E) => void | Promise<void>) =>
-            _handleSubmit(data => {
-                trimData()
+            _handleSubmit(async data => {
+                const trimmed = trimData()
 
-                const encoded = encode(data)
+                const encoded = encode(trimmed)
                 log('encoded', encoded)
-                return callback(encoded)
+                await callback(encoded)
             })
 
         return {
-            dialogTitle,
-            dialogContent,
-            dialogActions,
+            edit,
+            render,
             action,
-            docRef: editingTicketRef,
             decoder,
             encoder,
-            props,
-            register,
-            setValue,
-            init,
-            handleSubmit,
+            // props,
+            // register,
+            // setValue,
+            // handleSubmit,
         }
     }
 }
