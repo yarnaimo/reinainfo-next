@@ -12,6 +12,12 @@ export const getTwimoClient = async () => {
     return {
         ...twimo,
 
+        lookupTweets: (ids: string[]) =>
+            twimo.get<IStatus[]>('statuses/lookup', {
+                ...twimo.defaultParams,
+                id: ids.join(),
+            }),
+
         getLists: () => twimo.get<ListInfo[]>('lists/list'),
 
         getListTweets: (listId: string) =>
@@ -28,7 +34,7 @@ export const getTwimoClient = async () => {
             return new Set(ids)
         },
 
-        addTopic: ({
+        addTweetToCollection: ({
             collectionId,
             tweetId,
         }: {

@@ -1,6 +1,7 @@
 import { getUrlOfTweet } from '@yarnaimo/twimo'
 import dayjs from 'dayjs'
 import { prray } from 'prray'
+import { env } from '../../src/env'
 import { dbAdmin } from './firebase-admin'
 import { TwimoClient } from './twitter'
 import { sendMessageToAllWebhooks } from './webhook'
@@ -8,6 +9,7 @@ import { sendMessageToAllWebhooks } from './webhook'
 export const retweetWithLoggingAndNotification = async (
     twimo: TwimoClient,
     ids: string[],
+    isMyTweet: boolean,
 ) => {
     const twitterCollection = await dbAdmin.twitterCollections.getDoc({
         doc: 'topics',
@@ -16,35 +18,41 @@ export const retweetWithLoggingAndNotification = async (
         throw new Error('twitterCollections/topics not found')
     }
 
-    const retweetResults = await twimo.retweet(ids)
+    //
 
-    await prray(retweetResults).mapAsync(async ({ retweeted_status }) => {
-        const { id_str: tweetId, created_at } = retweeted_status!
+    const tweetResults = isMyTweet
+        ? await twimo.lookupTweets(ids)
+        : (await twimo.retweet(ids)).map(r => r.retweeted_status!)
 
-        await twimo.addTopic({
-            tweetId,
-            collectionId: twitterCollection.collectionId,
-        })
+    await prray(tweetResults).mapAsync(
+        async ({ id_str: tweetId, created_at }) => {
+            await twimo.addTweetToCollection({
+                tweetId,
+                collectionId: twitterCollection.collectionId,
+            })
 
-        return dbAdmin.topics.create(null, {
-            type: 'retweet',
-            tweetId,
-            origCreatedAt: dayjs(created_at).toDate(),
-        })
-    })
+            return dbAdmin.topics.create(null, {
+                type: isMyTweet ? 'tweet' : 'retweet',
+                tweetId,
+                origCreatedAt: dayjs(created_at).toDate(),
+            })
+        },
+    )
 
-    if (!retweetResults.length) {
-        return { retweetResults }
+    if (!tweetResults.length) {
+        return { tweetResults }
     }
 
     const webhookResults = await sendMessageToAllWebhooks({
         text: [
-            `⚡ ${retweetResults.length} 件のツイートをリツイートしました`,
-            ...retweetResults.map(r => getUrlOfTweet(r)),
+            isMyTweet
+                ? `⚡ @${env.screenName} がツイートしました`
+                : `⚡ ${tweetResults.length} 件リツイートしました`,
+            ...tweetResults.map(r => getUrlOfTweet(r)),
         ].join('\n'),
     })
 
-    return { retweetResults, webhookResults }
+    return { tweetResults, webhookResults }
 }
 
 export const sendCrossNotification = async (

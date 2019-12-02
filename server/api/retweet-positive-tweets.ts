@@ -38,6 +38,7 @@ export const _retweetPositiveTweets = async (
     const results = await retweetWithLoggingAndNotification(
         twimo,
         pickedTweets.map(t => t.id_str),
+        false,
     )
 
     if (timeFilteredTweets.length) {

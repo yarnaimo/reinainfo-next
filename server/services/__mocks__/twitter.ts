@@ -26,7 +26,7 @@ export const getTwimoClient = async () => {
                 (full_text, i) => ({ full_text, id_str: String(i) } as Status),
             )
         },
-        addTopic: ({
+        addTweetToCollection: ({
             collectionId,
             tweetId,
         }: {

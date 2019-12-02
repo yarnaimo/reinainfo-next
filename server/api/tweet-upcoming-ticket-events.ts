@@ -39,13 +39,9 @@ export const _tweetUpcomingTicketEvents = async (
     const clTickets = await getTickets('closesAt', since, until)
 
     const opTextsToTweet = opTickets.map((pair, i) => {
-        // const header = `🚩 チケットの受付が始まります <${i + 1}>`
-
         return MSchedule.buildNotificationTextOfTicketEvent(pair, 'open')
     })
     const clTextsToTweet = clTickets.map((pair, i) => {
-        // const header = `⚠ チケットの申込期限が近づいています <${i + 1}>`
-
         return MSchedule.buildNotificationTextOfTicketEvent(pair, 'close')
     })
 

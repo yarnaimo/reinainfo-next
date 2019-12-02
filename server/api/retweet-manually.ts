@@ -5,7 +5,7 @@ import { getTwimoClient } from '../services/twitter'
 
 export const _retweetManually = createCallable<
     'retweetManually',
-    { ids: string[] },
+    { ids: string[]; isMyTweet: boolean },
     { retweetCount: number }
 >(async (data, ctx) => {
     if (!ctx.auth) {
@@ -23,7 +23,11 @@ export const _retweetManually = createCallable<
     }
 
     const twimo = await getTwimoClient()
-    const results = await retweetWithLoggingAndNotification(twimo, data.ids)
+    const results = await retweetWithLoggingAndNotification(
+        twimo,
+        data.ids,
+        data.isMyTweet,
+    )
 
-    return { retweetCount: results.retweetResults.length }
+    return { retweetCount: results.tweetResults.length }
 })

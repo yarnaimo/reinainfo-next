@@ -36,27 +36,35 @@ const RetweetSection: FC<{}> = () => {
         { screenName: string; id: string }[]
     >([])
 
+    const retweet = (isMyTweet: boolean) =>
+        callable<typeof _retweetManually>('retweetManually', {
+            ids: retweetTargets.map(t => t.id),
+            isMyTweet,
+        })
+
     return (
         <>
             <h2>Retweet</h2>
 
             <Section>
-                <List>
-                    {retweetTargets.map(({ screenName, id }, i) => (
-                        <SimpleListItem
-                            key={i}
-                            text={`${screenName}/${id}`}
-                            metaIcon={{
-                                icon: 'close',
-                                onClick: () => {
-                                    setRetweetTargets(pre =>
-                                        pre.filter((_, _i) => i !== _i),
-                                    )
-                                },
-                            }}
-                        />
-                    ))}
-                </List>
+                {!!retweetTargets.length && (
+                    <List>
+                        {retweetTargets.map(({ screenName, id }, i) => (
+                            <SimpleListItem
+                                key={i}
+                                text={`${screenName}/${id}`}
+                                metaIcon={{
+                                    icon: 'close',
+                                    onClick: () => {
+                                        setRetweetTargets(pre =>
+                                            pre.filter((_, _i) => i !== _i),
+                                        )
+                                    },
+                                }}
+                            />
+                        ))}
+                    </List>
+                )}
 
                 <TextField
                     label="Paste Tweet URL"
@@ -89,11 +97,24 @@ const RetweetSection: FC<{}> = () => {
 
             <Section>
                 <Button
-                    label="リツイート"
+                    label="トピックに追加"
+                    css={{ marginRight: 12 }}
                     onClick={() => {
-                        callable<typeof _retweetManually>('retweetManually', {
-                            ids: retweetTargets.map(t => t.id),
-                        }).then(res => {
+                        retweet(true).then(res => {
+                            if (res) {
+                                setRetweetTargets([])
+                                window.alert(
+                                    `${res.retweetCount} 件追加しました`,
+                                )
+                            }
+                        })
+                    }}
+                ></Button>
+                <Button
+                    label="リツイート"
+                    unelevated
+                    onClick={() => {
+                        retweet(false).then(res => {
                             if (res) {
                                 setRetweetTargets([])
                                 window.alert(
