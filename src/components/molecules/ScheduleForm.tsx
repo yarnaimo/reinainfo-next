@@ -2,18 +2,19 @@ import { useSCollection } from 'bluespark'
 import dayjs from 'dayjs'
 import React, { useEffect, useMemo, useState } from 'react'
 import { RHFInput } from 'react-hook-form-input'
-import { Button, Checkbox, Select, SimpleDataTable, TextField } from 'rmwc'
+import { Button, Checkbox, Select, TextField } from 'rmwc'
 import {
     categories,
     ISchedule,
     IScheduleSerialized,
     MSchedule,
 } from '../../models/Schedule'
+import { ITicket } from '../../models/Ticket'
 import { db } from '../../services/firebase'
 import { formDatePattern, parseFormDate, toFormDate } from '../../utils/date'
-import { micon } from '../../utils/icon'
 import { FormBlock as Block } from '../blocks/FormBlock'
 import { Section } from '../blocks/Section'
+import { AdminDataTable } from './AdminDataTable'
 import { createUseTypedForm, optional, required, toggle } from './Form'
 import { ScheduleDetailContent } from './ScheduleDetailContent'
 import { useTicketForm } from './TicketForm'
@@ -77,10 +78,34 @@ export const useScheduleForm = createUseTypedForm<
             css: { width: '100%' },
         })
 
+        const ticketTableHeader = ['', 'ラベル', '開始日時', '終了日時']
+        const ticketForm = useTicketForm()
         const model = useMemo(() => _ref && db._ticketsIn(_ref), [_ref])
+
         const tickets = useSCollection({
             model,
             q: q => q.orderBy('opensAt'),
+            decoder: (t: ITicket['_D']) => {
+                const dt = ticketForm.decoder(t)
+
+                return {
+                    ...dt,
+                    tableRow: [
+                        <Button
+                            label="Edit"
+                            onClick={() =>
+                                ticketForm.edit(t, (data, _ref) =>
+                                    model!.update(_ref, data),
+                                )
+                            }
+                            css={{ margin: '0 -8px' }}
+                        ></Button>,
+                        dt.label,
+                        dt.opensAt,
+                        dt.closesAt,
+                    ],
+                }
+            },
         })
         useEffect(() => {
             setValue('hasTickets', !!tickets.array.length)
@@ -113,57 +138,22 @@ export const useScheduleForm = createUseTypedForm<
             />
         )
 
-        const _ticketForm = useTicketForm()
-
-        const AddTicketButton_ = (
-            <Button
-                outlined
-                icon={micon('plus')}
-                label="チケットの追加"
-                onClick={() =>
-                    _ticketForm.edit(model!.collectionRef.doc(), (data, _ref) =>
-                        model!.create(_ref, data),
-                    )
-                }
-            ></Button>
-        )
-
-        const ticketTableHeaders = [['', 'ラベル', '開始日時', '終了日時']]
-
-        const ticketTableData = tickets.array.map(t => {
-            const dt = _ticketForm.decoder(t)
-            return [
-                <Button
-                    label="Edit"
-                    onClick={() =>
-                        _ticketForm.edit(t, (data, _ref) =>
-                            model!.update(_ref, data),
-                        )
-                    }
-                    css={{ margin: '0 -8px' }}
-                ></Button>,
-                dt.label,
-                dt.opensAt,
-                dt.closesAt,
-            ]
-        })
-
-        const TicketTable_ = (
-            <SimpleDataTable
-                headers={ticketTableHeaders}
-                data={ticketTableData}
-            ></SimpleDataTable>
-        )
-
         const TicketsSection_ = (
             <Section>
-                {_ticketForm.render()}
+                {ticketForm.render()}
 
                 <Block>
                     <Checkbox disabled {...props('hasTickets')}></Checkbox>
                 </Block>
-                <Block>{AddTicketButton_}</Block>
-                <Block>{TicketTable_}</Block>
+                {ticketForm.renderAddButton(() =>
+                    ticketForm.edit(model!.collectionRef.doc(), (data, _ref) =>
+                        model!.create(_ref, data),
+                    ),
+                )}
+                <AdminDataTable
+                    header={ticketTableHeader}
+                    data={tickets.array}
+                ></AdminDataTable>
             </Section>
         )
 

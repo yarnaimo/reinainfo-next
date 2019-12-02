@@ -7,6 +7,7 @@ import { useEffectOnce } from 'react-use'
 import { Heading2 } from '../../components/atoms/Heading2'
 import { MainContainer } from '../../components/blocks/Container'
 import { Solid } from '../../components/blocks/Flex'
+import { PageSection } from '../../components/blocks/PageSection'
 import { Section } from '../../components/blocks/Section'
 import { ScheduleCard } from '../../components/molecules/ScheduleCard'
 import { Store } from '../../components/templates/Store'
@@ -140,29 +141,31 @@ const SchedulesPage: NextPage<Props> = ({ schedules: pSchedules }) => {
         <MainContainer>
             <Title title="Schedules" path="schedules"></Title>
 
-            <Heading2 text="Schedules">
-                <Solid ai="center" css={{ transform: 'translateY(-1px)' }}>
-                    <FilterLabel
-                        active={!excludeSerials.state}
-                        onClick={excludeSerials.off}
-                        label="すべて"
-                    ></FilterLabel>
+            <PageSection>
+                <Heading2 text="Schedules">
+                    <Solid ai="center" css={{ transform: 'translateY(-1px)' }}>
+                        <FilterLabel
+                            active={!excludeSerials.state}
+                            onClick={excludeSerials.off}
+                            label="すべて"
+                        ></FilterLabel>
 
-                    <div css={{ width: 16 }}></div>
+                        <div css={{ width: 16 }}></div>
 
-                    <FilterLabel
-                        active={excludeSerials.state}
-                        onClick={excludeSerials.on}
-                        label="定期更新を除く"
-                    ></FilterLabel>
-                </Solid>
-            </Heading2>
+                        <FilterLabel
+                            active={excludeSerials.state}
+                            onClick={excludeSerials.on}
+                            label="定期更新を除く"
+                        ></FilterLabel>
+                    </Solid>
+                </Heading2>
 
-            <Section>
-                <ScheduleList
-                    chunkedSchedules={chunkedSchedules}
-                ></ScheduleList>
-            </Section>
+                <Section>
+                    <ScheduleList
+                        chunkedSchedules={chunkedSchedules}
+                    ></ScheduleList>
+                </Section>
+            </PageSection>
         </MainContainer>
     )
 }

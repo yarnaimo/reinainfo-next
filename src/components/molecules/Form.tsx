@@ -5,6 +5,7 @@ import React, { FC, useRef, useState } from 'react'
 import useForm from 'react-hook-form'
 import { ElementLike } from 'react-hook-form/dist/types'
 import {
+    Button,
     CircularProgress,
     Dialog,
     DialogActions,
@@ -250,6 +251,15 @@ export const createUseTypedForm = <
             </Dialog>
         )
 
+        const renderAddButton = (onClick: () => void) => (
+            <Button
+                outlined
+                icon={micon('plus')}
+                label={dialogTitle.create}
+                onClick={onClick}
+            ></Button>
+        )
+
         const {
             register,
             handleSubmit: _handleSubmit,
@@ -301,6 +311,7 @@ export const createUseTypedForm = <
         return {
             edit,
             render,
+            renderAddButton,
             action,
             decoder,
             encoder,

@@ -3,6 +3,7 @@ import { NextPage } from 'next'
 import React from 'react'
 import { Heading2 } from '../components/atoms/Heading2'
 import { MainContainer } from '../components/blocks/Container'
+import { PageSection } from '../components/blocks/PageSection'
 import { Section } from '../components/blocks/Section'
 import { CollectionTimeline } from '../components/molecules/CollectionTimeline'
 import { Title } from '../components/templates/Title'
@@ -20,13 +21,15 @@ const TopicsPage: NextPage<Props> = () => {
         <MainContainer>
             <Title title="Topics" path="topics"></Title>
 
-            <Heading2 text="Topics"></Heading2>
+            <PageSection>
+                <Heading2 text="Topics"></Heading2>
 
-            <Section>
-                <CollectionTimeline
-                    collectionId={twitterCollection.data?.collectionId}
-                ></CollectionTimeline>
-            </Section>
+                <Section>
+                    <CollectionTimeline
+                        collectionId={twitterCollection.data?.collectionId}
+                    ></CollectionTimeline>
+                </Section>
+            </PageSection>
         </MainContainer>
     )
 }

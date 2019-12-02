@@ -23,6 +23,8 @@ export const ellipsis: CSSObject = {
     whiteSpace: 'nowrap',
 }
 
+export const verticalScrollable: CSSObject = { overflowX: 'scroll' }
+
 export const size = (width: string | number, height: string | number) => ({
     width,
     height,

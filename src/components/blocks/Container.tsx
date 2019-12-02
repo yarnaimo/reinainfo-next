@@ -15,7 +15,7 @@ export const Container = styled.div({
     width: '70%',
     maxWidth: 640,
     margin: '0px auto',
-    padding: '8px 0',
+    // padding: '8px 0',
 
     [responsive.isMobile]: {
         width: 'calc(100% - 24px)', // padding: '8px 12px',
