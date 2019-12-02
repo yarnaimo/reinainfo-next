@@ -1,9 +1,9 @@
 import React from 'react'
 import { Checkbox, TextField } from 'rmwc'
-import { ISerial } from '../../models/Serial'
-import { FormBlock as Block } from '../blocks/FormBlock'
-import { Section } from '../blocks/Section'
-import { createUseTypedForm, required, toggle } from './Form'
+import { ISerial } from '../../../models/Serial'
+import { FormBlock as Block } from '../../blocks/FormBlock'
+import { Section } from '../../blocks/Section'
+import { createUseTypedForm, required, toggle } from '../../templates/Form'
 
 const schema = {
     active: toggle(true, 'アクティブ?'),
@@ -22,8 +22,8 @@ export const useSerialForm = createUseTypedForm<
     encoder: data => data as ISerial['_E'],
 
     dialogTitle: {
-        create: '定期更新コンテンツの追加',
-        update: '定期更新コンテンツの編集',
+        create: 'Serialの追加',
+        update: 'Serialの編集',
     },
 
     renderer: ({ props, setValue, register, handleSubmit, _ref }) => {

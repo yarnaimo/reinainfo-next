@@ -1,10 +1,10 @@
 import React from 'react'
 import { TextField } from 'rmwc'
-import { ITicket } from '../../models/Ticket'
-import { formDatePattern, parseFormDate, toFormDate } from '../../utils/date'
-import { FormBlock as Block } from '../blocks/FormBlock'
-import { Section } from '../blocks/Section'
-import { createUseTypedForm, optional, required } from './Form'
+import { ITicket } from '../../../models/Ticket'
+import { formDatePattern, parseFormDate, toFormDate } from '../../../utils/date'
+import { FormBlock as Block } from '../../blocks/FormBlock'
+import { Section } from '../../blocks/Section'
+import { createUseTypedForm, optional, required } from '../../templates/Form'
 
 const schema = {
     label: required('', 'ラベル'),

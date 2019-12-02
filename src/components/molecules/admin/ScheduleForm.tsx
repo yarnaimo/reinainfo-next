@@ -8,15 +8,20 @@ import {
     ISchedule,
     IScheduleSerialized,
     MSchedule,
-} from '../../models/Schedule'
-import { ITicket } from '../../models/Ticket'
-import { db } from '../../services/firebase'
-import { formDatePattern, parseFormDate, toFormDate } from '../../utils/date'
-import { FormBlock as Block } from '../blocks/FormBlock'
-import { Section } from '../blocks/Section'
+} from '../../../models/Schedule'
+import { ITicket } from '../../../models/Ticket'
+import { db } from '../../../services/firebase'
+import { formDatePattern, parseFormDate, toFormDate } from '../../../utils/date'
+import { FormBlock as Block } from '../../blocks/FormBlock'
+import { Section } from '../../blocks/Section'
+import {
+    createUseTypedForm,
+    optional,
+    required,
+    toggle,
+} from '../../templates/Form'
+import { ScheduleDetailContent } from '../ScheduleDetailContent'
 import { AdminDataTable } from './AdminDataTable'
-import { createUseTypedForm, optional, required, toggle } from './Form'
-import { ScheduleDetailContent } from './ScheduleDetailContent'
 import { useTicketForm } from './TicketForm'
 
 const schema = {
@@ -62,7 +67,7 @@ export const useScheduleForm = createUseTypedForm<
             parts: MSchedule.deserializeParts(data.parts ?? ''),
         } as ISchedule['_E']),
 
-    dialogTitle: { create: 'スケジュールの登録', update: 'スケジュールの編集' },
+    dialogTitle: { create: 'スケジュールの追加', update: 'スケジュールの編集' },
     dialogStyles: {
         '& > .mdc-dialog__container': {
             width: '100%',
