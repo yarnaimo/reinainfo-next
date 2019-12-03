@@ -1,7 +1,7 @@
 import { InterpolationWithTheme } from '@emotion/core'
 import is from '@sindresorhus/is'
 import { Blue } from 'bluespark'
-import React, { FC, useRef, useState } from 'react'
+import React, { FC, MutableRefObject, useRef, useState } from 'react'
 import useForm from 'react-hook-form'
 import { ElementLike } from 'react-hook-form/dist/types'
 import {
@@ -96,7 +96,7 @@ type RegisterFn = ReturnType<typeof useForm>['register']
 
 type HandleSubmitFn<E> = (
     callback: (s: E) => void | Promise<void>,
-) => (e: React.BaseSyntheticEvent<object, any, any>) => Promise<void>
+) => (e: React.BaseSyntheticEvent<object, any, any>) => void
 
 export type Renderer<
     S extends Schema,
@@ -104,6 +104,7 @@ export type Renderer<
     FormValues extends GetFormValuesType<S> = GetFormValuesType<S>
 > = FC<{
     props: PropsFn<S>
+    formRef: MutableRefObject<HTMLFormElement | null>
     setValue: <K extends keyof FormValues & string>(
         key: K,
         value: FormValues[K],
@@ -165,14 +166,9 @@ export const createUseTypedForm = <
         noRegister = false,
     ) => {
         const { type, pattern } = schema[key]
-
         const required = type === 'required'
 
-        const inputRef = noRegister
-            ? undefined
-            : required
-            ? registerFn({ required: true })
-            : registerFn
+        const inputRef = noRegister ? undefined : registerFn
 
         return {
             name: key,
@@ -187,8 +183,21 @@ export const createUseTypedForm = <
         const props: PropsFn<S> = (key, noRegister) =>
             _props(register, key, noRegister)
 
+        const formRef = useRef<HTMLFormElement>(null)
         const callbackRef = useRef<CallbackFn>()
-        const dialog = useBool(false)
+
+        const dialogOpen = useBool(false)
+        const formRendered = useBool(false)
+        const dialog = {
+            on: () => {
+                formRendered.on()
+                dialogOpen.on()
+            },
+            off: () => {
+                dialogOpen.off()
+                formRendered.off()
+            },
+        }
         const isSaving = useBool(false)
         const [action, setAction] = useState<'create' | 'update'>('create')
         const [_ref, _setRef] = useState<Blue.DocRef>()
@@ -210,26 +219,33 @@ export const createUseTypedForm = <
         }
 
         const renderDialog = () => (
-            <Dialog open={dialog.state} css={dialogStyles}>
+            <Dialog open={dialogOpen.state} css={dialogStyles}>
                 <DialogTitle>{dialogTitle[action]}</DialogTitle>
 
                 <DialogContent>
-                    <Renderer
-                        {...{
-                            props,
-                            setValue,
-                            register,
-                            handleSubmit,
-                            _ref,
-                        }}
-                    ></Renderer>
+                    {formRendered && (
+                        <Renderer
+                            {...{
+                                props,
+                                formRef,
+                                setValue,
+                                register,
+                                handleSubmit,
+                                _ref,
+                            }}
+                        ></Renderer>
+                    )}
                 </DialogContent>
 
                 <DialogActions>
-                    <DialogButton onClick={dialog.off}>キャンセル</DialogButton>
+                    <DialogButton
+                        label="キャンセル"
+                        onClick={dialog.off}
+                    ></DialogButton>
 
                     <DialogButton
                         unelevated
+                        label="保存"
                         disabled={isSaving.state}
                         icon={
                             isSaving.state ? (
@@ -238,27 +254,24 @@ export const createUseTypedForm = <
                                 micon('check')
                             )
                         }
-                        onClick={async e => {
+                        onClick={handleSubmit(async data => {
                             isSaving.on()
 
-                            await handleSubmit(async data => {
-                                if (callbackRef.current && _ref) {
-                                    await callbackRef.current(_ref, data)
-                                }
-                            })(e)
+                            if (callbackRef.current && _ref) {
+                                await callbackRef.current(_ref, data)
+                            }
 
                             dialog.off()
                             isSaving.off()
-                        }}
-                    >
-                        保存
-                    </DialogButton>
+                        })}
+                    ></DialogButton>
                 </DialogActions>
             </Dialog>
         )
 
         const renderAddButton = (onClick: () => void) => (
             <Button
+                type="button"
                 outlined
                 icon={micon('plus')}
                 label={dialogTitle.create}
@@ -268,7 +281,9 @@ export const createUseTypedForm = <
 
         const {
             register,
-            handleSubmit: _handleSubmit,
+            // handleSubmit: _handleSubmit,
+            // formState,
+            // clearError,
             setValue,
             getValues,
             reset,
@@ -283,6 +298,7 @@ export const createUseTypedForm = <
 
         const init = (data?: D) => {
             log('init', data)
+            // formRef.current?.reset()
 
             if (!data) {
                 reset(initialValues)
@@ -305,16 +321,20 @@ export const createUseTypedForm = <
             return encoded
         }
 
-        const handleSubmit = (callback: (s: E) => void | Promise<void>) =>
-            _handleSubmit(async data => {
-                const trimmed = trimData()
+        const handleSubmit = (callback: (s: E) => void | Promise<void>) => {
+            return () => {
+                if (formRef.current?.reportValidity()) {
+                    const trimmed = trimData()
 
-                const encoded = encode(trimmed)
-                log('encoded', encoded)
-                await callback(encoded)
-            })
+                    const encoded = encode(trimmed)
+                    log('encoded', encoded)
+                    callback(encoded)
+                }
+            }
+        }
 
         return {
+            formRef,
             edit,
             renderDialog,
             renderAddButton,

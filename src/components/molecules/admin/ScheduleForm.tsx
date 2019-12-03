@@ -29,11 +29,11 @@ import { ScheduleDetailContent } from '../ScheduleDetailContent'
 import { AdminDataTable } from './AdminDataTable'
 import { useTicketForm } from './TicketForm'
 
-const schema = {
+const createSchema = (serial: boolean) => ({
     active: toggle(true, 'アクティブ?'),
-    isSerial: toggle(false, '定期更新?'),
+    isSerial: toggle(serial, '定期更新?'),
 
-    category: required('event', 'カテゴリ'),
+    category: required(serial ? 'up' : 'event', 'カテゴリ'),
     customIcon: optional(null, 'アイコン'),
     ribbonColors: optional(null, '色'),
 
@@ -46,12 +46,15 @@ const schema = {
     hasTickets: toggle(false, 'チケットあり?'),
 
     thumbUrl: optional(null, 'サムネイルURL'),
-}
+})
+
+type Schema = ReturnType<typeof createSchema>
 
 const createRenderer = (
     serial: boolean,
-): Renderer<typeof schema, ISchedule['_E']> => ({
+): Renderer<Schema, ISchedule['_E']> => ({
     props: _props,
+    formRef,
     setValue,
     register,
     handleSubmit,
@@ -92,10 +95,6 @@ const createRenderer = (
         setValue('hasTickets', !!tickets.array.length)
     }, [tickets.array.length])
 
-    useEffect(() => {
-        setValue('isSerial', serial)
-    }, [_ref])
-
     const textarea = {
         textarea: true,
         outlined: true,
@@ -123,23 +122,6 @@ const createRenderer = (
         />
     )
 
-    const TicketsSection_ = !serial && (
-        <Section>
-            {ticketForm.renderDialog()}
-
-            <Block>
-                <Checkbox disabled {...props('hasTickets')}></Checkbox>
-            </Block>
-            {ticketForm.renderAddButton(() =>
-                ticketForm.edit(model!.collectionRef.doc(), model!.create),
-            )}
-            <AdminDataTable
-                header={ticketTableHeader}
-                data={tickets.array}
-            ></AdminDataTable>
-        </Section>
-    )
-
     return (
         <>
             {previewSchedule && (
@@ -162,58 +144,84 @@ const createRenderer = (
                 })}
             ></Button>
 
-            <Section>
-                <Block>
-                    <Checkbox {...props('active')}></Checkbox>
-                    <Checkbox disabled {...props('isSerial')}></Checkbox>
-                </Block>
-                <Block>
-                    {CategorySelect_}
-                    <TextField {...props('customIcon')}></TextField>
-                </Block>
-                <Block>
-                    <TextField {...props('ribbonColors')}></TextField>
-                </Block>
-            </Section>
+            {!serial && ticketForm.renderDialog()}
 
-            <Section>
-                <Block>
-                    <TextField {...props('date')}></TextField>
-                    <Checkbox {...props('hasTime')}></Checkbox>
-                </Block>
-                {!serial && (
-                    <Block>
-                        <TextField {...props('parts')}></TextField>
-                    </Block>
-                )}
-                <Block>
-                    <TextField {...textarea} {...props('title')}></TextField>
-                </Block>
-                <Block>
-                    <TextField {...textarea} {...props('url')}></TextField>
-                </Block>
-                <Block>
-                    <TextField {...props('venue')}></TextField>
-                </Block>
-            </Section>
-
-            {TicketsSection_}
-
-            {!serial && (
+            <form ref={formRef}>
                 <Section>
                     <Block>
-                        <TextField {...props('thumbUrl')}></TextField>
+                        <Checkbox {...props('active')}></Checkbox>
+                        <Checkbox disabled {...props('isSerial')}></Checkbox>
+                    </Block>
+                    <Block>
+                        {CategorySelect_}
+                        <TextField {...props('customIcon')}></TextField>
+                    </Block>
+                    <Block>
+                        <TextField {...props('ribbonColors')}></TextField>
                     </Block>
                 </Section>
-            )}
+
+                <Section>
+                    <Block>
+                        <TextField {...props('date')}></TextField>
+                        <Checkbox {...props('hasTime')}></Checkbox>
+                    </Block>
+                    {!serial && (
+                        <Block>
+                            <TextField {...props('parts')}></TextField>
+                        </Block>
+                    )}
+                    <Block>
+                        <TextField
+                            {...textarea}
+                            {...props('title')}
+                        ></TextField>
+                    </Block>
+                    <Block>
+                        <TextField {...textarea} {...props('url')}></TextField>
+                    </Block>
+                    <Block>
+                        <TextField {...props('venue')}></TextField>
+                    </Block>
+                </Section>
+
+                {!serial && (
+                    <Section>
+                        <Block>
+                            <Checkbox
+                                disabled
+                                {...props('hasTickets')}
+                            ></Checkbox>
+                        </Block>
+                        {ticketForm.renderAddButton(() =>
+                            ticketForm.edit(
+                                model!.collectionRef.doc(),
+                                model!.create,
+                            ),
+                        )}
+                        <AdminDataTable
+                            header={ticketTableHeader}
+                            data={tickets.array}
+                        ></AdminDataTable>
+                    </Section>
+                )}
+
+                {!serial && (
+                    <Section>
+                        <Block>
+                            <TextField {...props('thumbUrl')}></TextField>
+                        </Block>
+                    </Section>
+                )}
+            </form>
         </>
     )
 }
 
 const createUseScheduleForm = (serial: boolean) =>
-    createUseTypedForm<typeof schema, ISchedule['_D'], ISchedule['_E']>({
+    createUseTypedForm<Schema, ISchedule['_D'], ISchedule['_E']>({
         name: 'schedule',
-        schema,
+        schema: createSchema(serial),
 
         decoder: s => ({
             ...s,

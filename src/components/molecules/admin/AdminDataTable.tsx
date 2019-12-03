@@ -12,7 +12,12 @@ export const AdminDataTable: FC<Props> = ({ header, data }) => (
     <Section css={verticalScrollable}>
         <SimpleDataTable
             headers={[header]}
-            data={data.map(({ tableRow }) => tableRow)}
+            data={data.map(({ tableRow }, i) => {
+                if (i === 0 && tableRow.length !== header.length) {
+                    console.error('tableRow length not equal to header length')
+                }
+                return tableRow
+            })}
         ></SimpleDataTable>
     </Section>
 )

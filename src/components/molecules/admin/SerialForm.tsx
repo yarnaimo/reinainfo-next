@@ -26,16 +26,18 @@ export const useSerialForm = createUseTypedForm<
         update: 'Serialの編集',
     },
 
-    renderer: ({ props, setValue, register, handleSubmit, _ref }) => {
+    renderer: ({ props, formRef, setValue, register, handleSubmit, _ref }) => {
         return (
-            <Section>
-                <Block>
-                    <Checkbox {...props('active')}></Checkbox>
-                </Block>
-                <Block>
-                    <TextField {...props('label')}></TextField>
-                </Block>
-            </Section>
+            <form ref={formRef}>
+                <Section>
+                    <Block>
+                        <Checkbox {...props('active')}></Checkbox>
+                    </Block>
+                    <Block>
+                        <TextField {...props('label')}></TextField>
+                    </Block>
+                </Section>
+            </form>
         )
     },
 })

@@ -34,19 +34,21 @@ export const useTicketForm = createUseTypedForm<
 
     dialogTitle: { create: 'チケットの追加', update: 'チケットの編集' },
 
-    renderer: ({ props }) => {
+    renderer: ({ props, formRef }) => {
         return (
-            <Section>
-                <Block>
-                    <TextField {...props('label')}></TextField>
-                </Block>
-                <Block>
-                    <TextField {...props('opensAt')}></TextField>
-                </Block>
-                <Block>
-                    <TextField {...props('closesAt')}></TextField>
-                </Block>
-            </Section>
+            <form ref={formRef}>
+                <Section>
+                    <Block>
+                        <TextField {...props('label')}></TextField>
+                    </Block>
+                    <Block>
+                        <TextField {...props('opensAt')}></TextField>
+                    </Block>
+                    <Block>
+                        <TextField {...props('closesAt')}></TextField>
+                    </Block>
+                </Section>
+            </form>
         )
     },
 })
