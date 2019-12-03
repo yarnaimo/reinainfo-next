@@ -98,6 +98,21 @@ type HandleSubmitFn<E> = (
     callback: (s: E) => void | Promise<void>,
 ) => (e: React.BaseSyntheticEvent<object, any, any>) => Promise<void>
 
+export type Renderer<
+    S extends Schema,
+    E extends unknown,
+    FormValues extends GetFormValuesType<S> = GetFormValuesType<S>
+> = FC<{
+    props: PropsFn<S>
+    setValue: <K extends keyof FormValues & string>(
+        key: K,
+        value: FormValues[K],
+    ) => void
+    register: RegisterFn
+    handleSubmit: HandleSubmitFn<E>
+    _ref?: Blue.DocRef
+}>
+
 export const createUseTypedForm = <
     S extends Schema,
     D extends Blue.Meta,
@@ -120,18 +135,9 @@ export const createUseTypedForm = <
 
     dialogTitle: { create: string; update: string }
     dialogStyles?: InterpolationWithTheme<any>
-    renderer: FC<{
-        props: PropsFn<S>
-        setValue: <K extends keyof FormValues & string>(
-            key: K,
-            value: FormValues[K],
-        ) => void
-        register: RegisterFn
-        handleSubmit: HandleSubmitFn<E>
-        _ref?: Blue.DocRef
-    }>
+    renderer: Renderer<S, E, FormValues>
 }) => {
-    type CallbackFn = (data: E, _ref: Blue.DocRef) => Promise<any>
+    type CallbackFn = (_ref: Blue.DocRef, data: E) => Promise<any>
 
     const log = (type: string, data: any) =>
         console.log(`[${name} form] ${type}`, data)
@@ -203,7 +209,7 @@ export const createUseTypedForm = <
             dialog.on()
         }
 
-        const render = () => (
+        const renderDialog = () => (
             <Dialog open={dialog.state} css={dialogStyles}>
                 <DialogTitle>{dialogTitle[action]}</DialogTitle>
 
@@ -237,7 +243,7 @@ export const createUseTypedForm = <
 
                             await handleSubmit(async data => {
                                 if (callbackRef.current && _ref) {
-                                    await callbackRef.current(data, _ref)
+                                    await callbackRef.current(_ref, data)
                                 }
                             })(e)
 
@@ -310,7 +316,7 @@ export const createUseTypedForm = <
 
         return {
             edit,
-            render,
+            renderDialog,
             renderAddButton,
             action,
             decoder,

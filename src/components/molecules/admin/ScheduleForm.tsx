@@ -21,6 +21,7 @@ import { Section } from '../../blocks/Section'
 import {
     createUseTypedForm,
     optional,
+    Renderer,
     required,
     toggle,
 } from '../../templates/Form'
@@ -47,191 +48,204 @@ const schema = {
     thumbUrl: optional(null, 'サムネイルURL'),
 }
 
-export const useScheduleForm = createUseTypedForm<
-    typeof schema,
-    ISchedule['_D'],
-    ISchedule['_E']
->({
-    name: 'schedule',
-    schema,
+const createRenderer = (
+    serial: boolean,
+): Renderer<typeof schema, ISchedule['_E']> => ({
+    props: _props,
+    setValue,
+    register,
+    handleSubmit,
+    _ref,
+}) => {
+    const props: typeof _props = (key, noRegister) => ({
+        ..._props(key, noRegister),
+        css: { width: '100%' },
+    })
 
-    decoder: s => ({
-        ...s,
-        date: toFormDate(s.date.toDate()),
-        ribbonColors: s.ribbonColors?.join('/') ?? null,
-        parts: s.parts && MSchedule.serializeParts(s.parts),
-    }),
-    encoder: data =>
-        ({
-            ...data,
-            date: parseFormDate(data.date) ?? new Date(0),
-            ribbonColors: data.ribbonColors
-                ? data.ribbonColors.split('/')
-                : null,
-            parts: MSchedule.deserializeParts(data.parts ?? ''),
-        } as ISchedule['_E']),
+    const ticketTableHeader = ['', 'ラベル', '開始日時', '終了日時']
+    const ticketForm = useTicketForm()
+    const model = useMemo(() => _ref && db._ticketsIn(_ref), [_ref])
 
-    dialogTitle: { create: 'スケジュールの追加', update: 'スケジュールの編集' },
-    dialogStyles: {
-        '& > .mdc-dialog__container': {
-            width: '100%',
+    const tickets = useSCollection({
+        model,
+        q: q => q.orderBy('opensAt'),
+        decoder: (t: ITicket['_D']) => {
+            const dt = ticketForm.decoder(t)
+
+            return {
+                ...dt,
+                tableRow: [
+                    <Button
+                        label="Edit"
+                        onClick={() => ticketForm.edit(t, model!.update)}
+                        css={{ margin: '0 -8px' }}
+                    ></Button>,
+                    dt.label,
+                    dt.opensAt,
+                    dt.closesAt,
+                ],
+            }
         },
-        '& > * > .mdc-dialog__surface': {
-            width: '100%',
-        },
-    },
+    })
 
-    renderer: ({ props: _props, setValue, register, handleSubmit, _ref }) => {
-        const props: typeof _props = (key, noRegister) => ({
-            ..._props(key, noRegister),
-            css: { width: '100%' },
-        })
+    useEffect(() => {
+        setValue('hasTickets', !!tickets.array.length)
+    }, [tickets.array.length])
 
-        const ticketTableHeader = ['', 'ラベル', '開始日時', '終了日時']
-        const ticketForm = useTicketForm()
-        const model = useMemo(() => _ref && db._ticketsIn(_ref), [_ref])
+    useEffect(() => {
+        setValue('isSerial', serial)
+    }, [_ref])
 
-        const tickets = useSCollection({
-            model,
-            q: q => q.orderBy('opensAt'),
-            decoder: (t: ITicket['_D']) => {
-                const dt = ticketForm.decoder(t)
+    const textarea = {
+        textarea: true,
+        outlined: true,
+        rows: 2,
+    }
 
-                return {
-                    ...dt,
-                    tableRow: [
-                        <Button
-                            label="Edit"
-                            onClick={() =>
-                                ticketForm.edit(t, (data, _ref) =>
-                                    model!.update(_ref, data),
-                                )
-                            }
-                            css={{ margin: '0 -8px' }}
-                        ></Button>,
-                        dt.label,
-                        dt.opensAt,
-                        dt.closesAt,
-                    ],
-                }
-            },
-        })
-        useEffect(() => {
-            setValue('hasTickets', !!tickets.array.length)
-        }, [tickets.array.length])
+    const [previewSchedule, setPreviewSchedule] = useState<
+        IScheduleSerialized
+    >()
 
-        const textarea = {
-            textarea: true,
-            outlined: true,
-            rows: 2,
-        }
+    const CategorySelect_ = (
+        <RHFInput
+            as={
+                <Select
+                    {...props('category', true)}
+                    options={Object.entries(categories).map(([k, v]) => ({
+                        value: k,
+                        label: v.name,
+                    }))}
+                />
+            }
+            register={register}
+            setValue={(key, value) => setValue('category', value as string)}
+            name="category"
+        />
+    )
 
-        const [previewSchedule, setPreviewSchedule] = useState<
-            IScheduleSerialized
-        >()
+    const TicketsSection_ = !serial && (
+        <Section>
+            {ticketForm.renderDialog()}
 
-        const CategorySelect_ = (
-            <RHFInput
-                as={
-                    <Select
-                        {...props('category', true)}
-                        options={Object.entries(categories).map(([k, v]) => ({
-                            value: k,
-                            label: v.name,
-                        }))}
-                    />
-                }
-                register={register}
-                setValue={(key, value) => setValue('category', value as string)}
-                name="category"
-            />
-        )
+            <Block>
+                <Checkbox disabled {...props('hasTickets')}></Checkbox>
+            </Block>
+            {ticketForm.renderAddButton(() =>
+                ticketForm.edit(model!.collectionRef.doc(), model!.create),
+            )}
+            <AdminDataTable
+                header={ticketTableHeader}
+                data={tickets.array}
+            ></AdminDataTable>
+        </Section>
+    )
 
-        const TicketsSection_ = (
+    return (
+        <>
+            {previewSchedule && (
+                <ScheduleDetailContent
+                    compact={false}
+                    schedule={previewSchedule}
+                ></ScheduleDetailContent>
+            )}
+            <Button
+                label="プレビュー"
+                onClick={handleSubmit(data => {
+                    console.log(data)
+                    const dataD = {
+                        ...data,
+                        _updatedAt: dayjs().toISOString(),
+                        date: data.date.toISOString(),
+                        formattedDate: MSchedule.formatDate(data),
+                    }
+                    setPreviewSchedule(dataD as any)
+                })}
+            ></Button>
+
             <Section>
-                {ticketForm.render()}
-
                 <Block>
-                    <Checkbox disabled {...props('hasTickets')}></Checkbox>
+                    <Checkbox {...props('active')}></Checkbox>
+                    <Checkbox disabled {...props('isSerial')}></Checkbox>
                 </Block>
-                {ticketForm.renderAddButton(() =>
-                    ticketForm.edit(model!.collectionRef.doc(), (data, _ref) =>
-                        model!.create(_ref, data),
-                    ),
-                )}
-                <AdminDataTable
-                    header={ticketTableHeader}
-                    data={tickets.array}
-                ></AdminDataTable>
+                <Block>
+                    {CategorySelect_}
+                    <TextField {...props('customIcon')}></TextField>
+                </Block>
+                <Block>
+                    <TextField {...props('ribbonColors')}></TextField>
+                </Block>
             </Section>
-        )
 
-        return (
-            <>
-                {previewSchedule && (
-                    <ScheduleDetailContent
-                        compact={false}
-                        schedule={previewSchedule}
-                    ></ScheduleDetailContent>
-                )}
-                <Button
-                    label="プレビュー"
-                    onClick={handleSubmit(data => {
-                        console.log(data)
-                        const dataD = {
-                            ...data,
-                            _updatedAt: dayjs().toISOString(),
-                            date: data.date.toISOString(),
-                            formattedDate: MSchedule.formatDate(data),
-                        }
-                        setPreviewSchedule(dataD as any)
-                    })}
-                ></Button>
-
-                <Section>
-                    <Block>
-                        <Checkbox {...props('active')}></Checkbox>
-                        <Checkbox {...props('isSerial')}></Checkbox>
-                    </Block>
-                    <Block>
-                        {CategorySelect_}
-                        <TextField {...props('customIcon')}></TextField>
-                    </Block>
-                    <Block>
-                        <TextField {...props('ribbonColors')}></TextField>
-                    </Block>
-                </Section>
-
-                <Section>
-                    <Block>
-                        <TextField {...props('date')}></TextField>
-                        <Checkbox {...props('hasTime')}></Checkbox>
-                    </Block>
+            <Section>
+                <Block>
+                    <TextField {...props('date')}></TextField>
+                    <Checkbox {...props('hasTime')}></Checkbox>
+                </Block>
+                {!serial && (
                     <Block>
                         <TextField {...props('parts')}></TextField>
                     </Block>
-                    <Block>
-                        <TextField
-                            {...textarea}
-                            {...props('title')}
-                        ></TextField>
-                    </Block>
-                    <Block>
-                        <TextField {...textarea} {...props('url')}></TextField>
-                    </Block>
-                    <Block>
-                        <TextField {...props('venue')}></TextField>
-                    </Block>
-                </Section>
+                )}
+                <Block>
+                    <TextField {...textarea} {...props('title')}></TextField>
+                </Block>
+                <Block>
+                    <TextField {...textarea} {...props('url')}></TextField>
+                </Block>
+                <Block>
+                    <TextField {...props('venue')}></TextField>
+                </Block>
+            </Section>
 
-                {TicketsSection_}
+            {TicketsSection_}
 
+            {!serial && (
                 <Section>
                     <Block>
                         <TextField {...props('thumbUrl')}></TextField>
                     </Block>
                 </Section>
-            </>
-        )
-    },
-})
+            )}
+        </>
+    )
+}
+
+const createUseScheduleForm = (serial: boolean) =>
+    createUseTypedForm<typeof schema, ISchedule['_D'], ISchedule['_E']>({
+        name: 'schedule',
+        schema,
+
+        decoder: s => ({
+            ...s,
+            date: toFormDate(s.date.toDate()),
+            ribbonColors: s.ribbonColors?.join('/') ?? null,
+            parts: s.parts && MSchedule.serializeParts(s.parts),
+        }),
+        encoder: data =>
+            ({
+                ...data,
+                date: parseFormDate(data.date) ?? new Date(0),
+                ribbonColors: data.ribbonColors
+                    ? data.ribbonColors.split('/')
+                    : null,
+                parts: MSchedule.deserializeParts(data.parts ?? ''),
+            } as ISchedule['_E']),
+
+        dialogTitle: {
+            create: serial ? 'スケジュールの一括追加' : 'スケジュールの追加',
+            update: 'スケジュールの編集',
+        },
+        dialogStyles: {
+            '& > .mdc-dialog__container': {
+                width: '100%',
+            },
+            '& > * > .mdc-dialog__surface': {
+                width: '100%',
+            },
+        },
+
+        renderer: createRenderer(serial),
+    })
+
+export const useScheduleForm = createUseScheduleForm(false)
+export const useSerialScheduleForm = createUseScheduleForm(true)

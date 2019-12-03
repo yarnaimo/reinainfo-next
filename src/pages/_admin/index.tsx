@@ -149,11 +149,11 @@ const SerialSection: FC<{}> = () => {
             <Heading2 text="Serials" marginY={16} noColor></Heading2>
 
             <Section>
-                {serialForm.render()}
+                {serialForm.renderDialog()}
                 {serialForm.renderAddButton(() =>
                     serialForm.edit(
                         db.serials.collectionRef.doc(),
-                        (data, _ref) => db.serials.create(_ref, data),
+                        db.serials.create,
                     ),
                 )}
             </Section>

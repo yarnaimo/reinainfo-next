@@ -9,7 +9,7 @@ import { Heading2 } from '../../atoms/Heading2'
 import { PageSection } from '../../blocks/PageSection'
 import { Section } from '../../blocks/Section'
 import { AdminDataTable } from './AdminDataTable'
-import { useScheduleForm } from './ScheduleForm'
+import { useScheduleForm, useSerialScheduleForm } from './ScheduleForm'
 
 type Props = { parent?: Blue.DocRef; heading?: string }
 
@@ -45,11 +45,7 @@ export const ScheduleSection: FC<Props> = ({
             tableRow: [
                 <Button
                     label="編集"
-                    onClick={() =>
-                        scheduleForm.edit(s, (data, _ref) =>
-                            model.update(_ref, data),
-                        )
-                    }
+                    onClick={() => scheduleForm.edit(s, model.update)}
                     css={{ margin: '0 -8px' }}
                 ></Button>,
 
@@ -72,18 +68,16 @@ export const ScheduleSection: FC<Props> = ({
         }),
     })
 
-    const scheduleForm = useScheduleForm()
+    const scheduleForm = parent ? useSerialScheduleForm() : useScheduleForm()
 
     return (
         <PageSection>
             <Heading2 text={heading} marginY={16} noColor></Heading2>
 
             <Section>
-                {scheduleForm.render()}
+                {scheduleForm.renderDialog()}
                 {scheduleForm.renderAddButton(() =>
-                    scheduleForm.edit(model.collectionRef.doc(), (data, _ref) =>
-                        model.create(_ref, data),
-                    ),
+                    scheduleForm.edit(model.collectionRef.doc(), model.create),
                 )}
             </Section>
 
