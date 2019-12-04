@@ -3,30 +3,32 @@ import { Checkbox, TextField } from 'rmwc'
 import { ISerial } from '../../../models/Serial'
 import { FormBlock as Block } from '../../blocks/FormBlock'
 import { Section } from '../../blocks/Section'
-import { createUseTypedForm, required, toggle } from '../../templates/Form'
+import { createUseTypedForm, Schema } from '../../templates/Form'
+import { createScheduleSeedSchema } from './ScheduleForm'
 
-const schema = {
-    active: toggle(true, 'アクティブ?'),
-    label: required('', 'ラベル'),
-}
+const schemaOptions = Schema<ISerial['_D'], ISerial['_E']>()({
+    active: { type: 'toggle', initial: true, label: 'アクティブ?' },
+    label: { type: 'required', initial: '', label: 'ラベル' },
 
-export const useSerialForm = createUseTypedForm<
-    typeof schema,
-    ISerial['_D'],
-    ISerial['_E']
->({
+    ...createScheduleSeedSchema(true).schema,
+})
+
+export const useSerialForm = createUseTypedForm({
     name: 'serial',
-    schema,
-
-    decoder: r => r,
-    encoder: data => data as ISerial['_E'],
-
+    schemaOptions,
     dialogTitle: {
         create: 'Serialの追加',
         update: 'Serialの編集',
     },
 
-    renderer: ({ props, formRef, setValue, register, handleSubmit, _ref }) => {
+    renderer: ({
+        field: props,
+        formRef,
+        setValue,
+        register,
+        handleSubmit,
+        _ref,
+    }) => {
         return (
             <form ref={formRef}>
                 <Section>

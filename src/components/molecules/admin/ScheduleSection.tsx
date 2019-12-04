@@ -44,6 +44,7 @@ export const ScheduleSection: FC<Props> = ({
             ...s,
             tableRow: [
                 <Button
+                    type="button"
                     label="編集"
                     onClick={() => scheduleForm.edit(s, model.update)}
                     css={{ margin: '0 -8px' }}

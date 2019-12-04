@@ -161,6 +161,17 @@ export type ISchedule = Blue.Interface<{
     thumbUrl: string | null
 }>
 
+export type ScheduleSeedKeys =
+    | 'category'
+    | 'customIcon'
+    | 'ribbonColors'
+    | 'title'
+    | 'url'
+    | 'hasTime'
+    | 'venue'
+
+export type IScheduleSeed = Pick<ISchedule['_A'], ScheduleSeedKeys>
+
 export type IScheduleSerialized = Merge<
     SparkSerialized<ISchedule['_D']>,
     {
@@ -218,7 +229,11 @@ export class MSchedule {
         return categories[key]
     }
 
-    static deserializeParts(str: string) {
+    static formEncodeParts(str: string | null) {
+        if (is.null_(str)) {
+            return []
+        }
+
         const matches = Rstring.globalMatch(str, partPattern)
 
         const parts = matches.map(
@@ -241,7 +256,7 @@ export class MSchedule {
         return parts
     }
 
-    static serializeParts(parts: IPart[]) {
+    static formDecodeParts(parts: IPart[]) {
         return parts
             .map(p =>
                 [

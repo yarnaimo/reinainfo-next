@@ -1,40 +1,49 @@
+import is from '@sindresorhus/is'
+import { Blue } from 'bluespark'
 import React from 'react'
 import { TextField } from 'rmwc'
 import { ITicket } from '../../../models/Ticket'
 import { formDatePattern, parseFormDate, toFormDate } from '../../../utils/date'
 import { FormBlock as Block } from '../../blocks/FormBlock'
 import { Section } from '../../blocks/Section'
-import { createUseTypedForm, optional, required } from '../../templates/Form'
+import { createUseTypedForm, Schema } from '../../templates/Form'
 
-const schema = {
-    label: required('', 'ラベル'),
-    opensAt: optional(null, '開始日時', formDatePattern),
-    closesAt: optional(null, '終了日時', formDatePattern),
-}
+const decode = (timestamp: Blue.Timestamp | null) =>
+    timestamp ? toFormDate(timestamp.toDate()) : null
 
-export const useTicketForm = createUseTypedForm<
-    typeof schema,
-    ITicket['_D'],
-    ITicket['_E']
->({
+const encode = (str: string | null) =>
+    is.string(str) ? parseFormDate(str) : null
+
+const schemaOptions = Schema<ITicket['_D'], ITicket['_E']>()({
+    scheduleId: { type: 'required', initial: '', label: 'スケジュールID' },
+    label: { type: 'required', initial: '', label: 'ラベル' },
+    opensAt: {
+        type: 'optional',
+        initial: null,
+        label: '開始日時',
+        pattern: formDatePattern,
+        decode,
+        encode,
+    },
+    closesAt: {
+        type: 'optional',
+        initial: null,
+        label: '終了日時',
+        pattern: formDatePattern,
+        decode,
+        encode,
+    },
+})
+
+export const useTicketForm = createUseTypedForm({
     name: 'ticket',
-    schema,
+    schemaOptions,
+    dialogTitle: {
+        create: 'チケットの追加',
+        update: 'チケットの編集',
+    },
 
-    decoder: t => ({
-        ...t,
-        opensAt: t.opensAt ? toFormDate(t.opensAt.toDate()) : null,
-        closesAt: t.closesAt ? toFormDate(t.closesAt.toDate()) : null,
-    }),
-    encoder: data =>
-        ({
-            ...data,
-            opensAt: data.opensAt && parseFormDate(data.opensAt),
-            closesAt: data.closesAt && parseFormDate(data.closesAt),
-        } as ITicket['_E']),
-
-    dialogTitle: { create: 'チケットの追加', update: 'チケットの編集' },
-
-    renderer: ({ props, formRef }) => {
+    renderer: ({ field: props, formRef }) => {
         return (
             <form ref={formRef}>
                 <Section>
