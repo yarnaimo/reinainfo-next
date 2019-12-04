@@ -24,7 +24,7 @@ const AdminSerialPage: NextPage<Props> = ({ id }) => {
             ></Title>
 
             <ScheduleSection
-                parent={serial._ref}
+                serial={serial}
                 heading={`Serial: ${serial.label}`}
             ></ScheduleSection>
         </AdminLayout>

@@ -1,7 +1,6 @@
 import { useSCollection } from 'bluespark'
 import React, { useEffect, useMemo, useState } from 'react'
-import { RHFInput } from 'react-hook-form-input'
-import { Button, Checkbox, Select, TextField } from 'rmwc'
+import { Button, Checkbox, TextField } from 'rmwc'
 import {
     categories,
     ISchedule,
@@ -17,7 +16,9 @@ import {
     parseFormDate,
     toFormDate,
 } from '../../../utils/date'
-import { FormBlock as Block } from '../../blocks/FormBlock'
+import { textarea } from '../../../utils/html'
+import { FormSelect } from '../../atoms/FormSelect'
+import { FormRow } from '../../blocks/FormRow'
 import { Section } from '../../blocks/Section'
 import { createUseTypedForm, Renderer, Schema } from '../../templates/Form'
 import { ScheduleDetailContent } from '../ScheduleDetailContent'
@@ -78,23 +79,23 @@ const createSchema = (serial: boolean) =>
 
 type _SchemaType = ReturnType<typeof createSchema>
 
-const categoryOptions = Object.entries(categories).map(([k, v]) => ({
+export const categoryOptions = Object.entries(categories).map(([k, v]) => ({
     value: k,
     label: v.name,
 }))
 
 const renderer: Renderer<_SchemaType> = ({
-    field: _field,
+    field,
     formRef,
     setValue,
     register,
     handleSubmit,
     _ref,
 }) => {
-    const field: typeof _field = (key, noRegister) => ({
-        ..._field(key, noRegister),
-        css: { width: '100%' },
-    })
+    // const field: typeof _field = (key, noRegister) => ({
+    //     ..._field(key, noRegister),
+    //     css: { width: '100%' },
+    // })
 
     const ticketTableHeader = ['', 'ラベル', '開始日時', '終了日時']
     const ticketForm = useTicketForm()
@@ -127,29 +128,9 @@ const renderer: Renderer<_SchemaType> = ({
         setValue('hasTickets', !!tickets.array.length)
     }, [tickets.array.length])
 
-    const textarea = {
-        textarea: true,
-        outlined: true,
-        rows: 2,
-    }
-
     const [previewSchedule, setPreviewSchedule] = useState<
         IScheduleSerialized
     >()
-
-    const CategorySelect_ = (
-        <RHFInput
-            as={
-                <Select
-                    {...field('category', true)}
-                    options={categoryOptions}
-                />
-            }
-            register={register}
-            setValue={(key, value) => setValue('category', value as string)}
-            name="category"
-        />
-    )
 
     return (
         <>
@@ -177,45 +158,52 @@ const renderer: Renderer<_SchemaType> = ({
 
             <form ref={formRef}>
                 <Section>
-                    <Block>
+                    <FormRow>
                         <Checkbox {...field('active')}></Checkbox>
                         <Checkbox disabled {...field('isSerial')}></Checkbox>
-                    </Block>
-                    <Block>
-                        {CategorySelect_}
+                    </FormRow>
+                    <FormRow>
+                        <FormSelect
+                            {...field('category', true)}
+                            options={categoryOptions}
+                            register={register}
+                            setValue={(key, value) =>
+                                setValue('category', value as string)
+                            }
+                        ></FormSelect>
                         <TextField {...field('customIcon')}></TextField>
-                    </Block>
-                    <Block>
+                    </FormRow>
+                    <FormRow>
                         <TextField {...field('ribbonColors')}></TextField>
-                    </Block>
+                    </FormRow>
                 </Section>
 
                 <Section>
-                    <Block>
+                    <FormRow>
                         <TextField {...field('date')}></TextField>
                         <Checkbox {...field('hasTime')}></Checkbox>
-                    </Block>
-                    <Block>
+                    </FormRow>
+                    <FormRow>
                         <TextField {...field('parts')}></TextField>
-                    </Block>
-                    <Block>
+                    </FormRow>
+                    <FormRow>
                         <TextField
                             {...textarea}
                             {...field('title')}
                         ></TextField>
-                    </Block>
-                    <Block>
+                    </FormRow>
+                    <FormRow>
                         <TextField {...textarea} {...field('url')}></TextField>
-                    </Block>
-                    <Block>
+                    </FormRow>
+                    <FormRow>
                         <TextField {...field('venue')}></TextField>
-                    </Block>
+                    </FormRow>
                 </Section>
 
                 <Section>
-                    <Block>
+                    <FormRow>
                         <Checkbox disabled {...field('hasTickets')}></Checkbox>
-                    </Block>
+                    </FormRow>
                     {ticketForm.renderAddButton(() =>
                         ticketForm.edit(
                             model!.collectionRef.doc(),
@@ -229,9 +217,9 @@ const renderer: Renderer<_SchemaType> = ({
                 </Section>
 
                 <Section>
-                    <Block>
+                    <FormRow>
                         <TextField {...field('thumbUrl')}></TextField>
-                    </Block>
+                    </FormRow>
                 </Section>
             </form>
         </>

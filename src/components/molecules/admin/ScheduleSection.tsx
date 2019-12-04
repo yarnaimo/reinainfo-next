@@ -1,7 +1,8 @@
-import { Blue, useSCollection } from 'bluespark'
+import { useSCollection } from 'bluespark'
 import React, { FC, useMemo } from 'react'
-import { Button } from 'rmwc'
+import { Button, SimpleDataTable } from 'rmwc'
 import { ISchedule, MSchedule } from '../../../models/Schedule'
+import { ISerial } from '../../../models/Serial'
 import { db } from '../../../services/firebase'
 import { toFormDate } from '../../../utils/date'
 import { bool } from '../../../utils/html'
@@ -10,13 +11,17 @@ import { PageSection } from '../../blocks/PageSection'
 import { Section } from '../../blocks/Section'
 import { AdminDataTable } from './AdminDataTable'
 import { useScheduleForm, useSerialScheduleForm } from './ScheduleForm'
+import { useSerialForm } from './SerialForm'
 
-type Props = { parent?: Blue.DocRef; heading?: string }
+type Props = { serial?: ISerial['_D']; heading?: string }
 
 export const ScheduleSection: FC<Props> = ({
-    parent,
+    serial,
     heading = 'Schedules',
 }) => {
+    const scheduleForm = parent ? useSerialScheduleForm() : useScheduleForm()
+    const serialForm = useSerialForm()
+
     const tableHeader = [
         '',
         '',
@@ -33,10 +38,39 @@ export const ScheduleSection: FC<Props> = ({
         'サムネイルURL',
     ]
     const model = useMemo(
-        () => (parent ? db._schedulesIn(parent) : db.schedules),
-        [parent],
+        () => (serial ? db._schedulesIn(serial._ref) : db.schedules),
+        [serial?._ref],
     )
     const q = useMemo(() => MSchedule.whereSinceNow(), [])
+
+    const SerialDetail_ = serial && (
+        <Section>
+            {serialForm.renderDialog()}
+            <Button
+                label="編集"
+                onClick={() => serialForm.edit(serial, db.serials.update)}
+            ></Button>
+
+            <Section>
+                <SimpleDataTable
+                    // header={[]}
+                    data={[
+                        ['アクティブ?', bool(serial.active)],
+                        ['ラベル', serial.label],
+
+                        ['カテゴリ', serial.category],
+                        ['アイコン', serial.customIcon],
+                        ['色', serial.ribbonColors],
+                        ['タイトル', serial.title],
+                        ['URL', serial.url],
+                        ['時刻あり?', bool(serial.hasTime)],
+                        ['場所', serial.venue],
+                    ]}
+                ></SimpleDataTable>
+            </Section>
+        </Section>
+    )
+
     const schedules = useSCollection({
         model,
         q,
@@ -69,23 +103,30 @@ export const ScheduleSection: FC<Props> = ({
         }),
     })
 
-    const scheduleForm = parent ? useSerialScheduleForm() : useScheduleForm()
-
     return (
-        <PageSection>
-            <Heading2 text={heading} marginY={16} noColor></Heading2>
+        <>
+            <PageSection>
+                <Heading2 text={heading} marginY={16} noColor></Heading2>
 
-            <Section>
-                {scheduleForm.renderDialog()}
-                {scheduleForm.renderAddButton(() =>
-                    scheduleForm.edit(model.collectionRef.doc(), model.create),
-                )}
-            </Section>
+                {SerialDetail_}
+            </PageSection>
 
-            <AdminDataTable
-                header={tableHeader}
-                data={schedules.array}
-            ></AdminDataTable>
-        </PageSection>
+            <PageSection>
+                <Section>
+                    {scheduleForm.renderDialog()}
+                    {scheduleForm.renderAddButton(() =>
+                        scheduleForm.edit(
+                            model.collectionRef.doc(),
+                            model.create,
+                        ),
+                    )}
+                </Section>
+
+                <AdminDataTable
+                    header={tableHeader}
+                    data={schedules.array}
+                ></AdminDataTable>
+            </PageSection>
+        </>
     )
 }

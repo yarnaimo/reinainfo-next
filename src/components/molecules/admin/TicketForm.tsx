@@ -4,7 +4,7 @@ import React from 'react'
 import { TextField } from 'rmwc'
 import { ITicket } from '../../../models/Ticket'
 import { formDatePattern, parseFormDate, toFormDate } from '../../../utils/date'
-import { FormBlock as Block } from '../../blocks/FormBlock'
+import { FormRow } from '../../blocks/FormRow'
 import { Section } from '../../blocks/Section'
 import { createUseTypedForm, Schema } from '../../templates/Form'
 
@@ -43,19 +43,19 @@ export const useTicketForm = createUseTypedForm({
         update: 'チケットの編集',
     },
 
-    renderer: ({ field: props, formRef }) => {
+    renderer: ({ field, formRef }) => {
         return (
             <form ref={formRef}>
                 <Section>
-                    <Block>
-                        <TextField {...props('label')}></TextField>
-                    </Block>
-                    <Block>
-                        <TextField {...props('opensAt')}></TextField>
-                    </Block>
-                    <Block>
-                        <TextField {...props('closesAt')}></TextField>
-                    </Block>
+                    <FormRow>
+                        <TextField {...field('label')}></TextField>
+                    </FormRow>
+                    <FormRow>
+                        <TextField {...field('opensAt')}></TextField>
+                    </FormRow>
+                    <FormRow>
+                        <TextField {...field('closesAt')}></TextField>
+                    </FormRow>
                 </Section>
             </form>
         )

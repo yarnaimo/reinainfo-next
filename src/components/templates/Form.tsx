@@ -85,7 +85,7 @@ export type GetFormValuesType<
 
 //
 
-type FieldFn<S extends SchemaBody<object, object>> = (
+export type FieldFn<S extends SchemaBody<object, object>> = (
     key: SK<S>,
     noRegister?: boolean,
 ) => {
@@ -193,6 +193,7 @@ export const createUseTypedForm = <SO extends SchemaOptions<any, any, any>>({
             inputRef,
             required,
             pattern,
+            css: { width: '100%' },
         }
     }
 
@@ -246,24 +247,24 @@ export const createUseTypedForm = <SO extends SchemaOptions<any, any, any>>({
             dialog.on()
         }
 
+        const renderForm = () => (
+            <Renderer
+                {...{
+                    field,
+                    formRef,
+                    setValue,
+                    register,
+                    handleSubmit,
+                    _ref,
+                }}
+            ></Renderer>
+        )
+
         const renderDialog = () => (
             <Dialog open={dialogOpen.state} css={dialogStyles}>
                 <DialogTitle>{dialogTitle[action]}</DialogTitle>
 
-                <DialogContent>
-                    {formRendered && (
-                        <Renderer
-                            {...{
-                                field,
-                                formRef,
-                                setValue,
-                                register,
-                                handleSubmit,
-                                _ref,
-                            }}
-                        ></Renderer>
-                    )}
-                </DialogContent>
+                <DialogContent>{formRendered && renderForm()}</DialogContent>
 
                 <DialogActions>
                     <DialogButton
