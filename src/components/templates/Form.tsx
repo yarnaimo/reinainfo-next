@@ -1,7 +1,7 @@
 import { InterpolationWithTheme } from '@emotion/core'
 import is from '@sindresorhus/is'
 import { Blue } from 'bluespark'
-import React, { FC, MutableRefObject, useRef, useState } from 'react'
+import React, { FC, MutableRefObject, ReactNode, useRef, useState } from 'react'
 import useForm from 'react-hook-form'
 import { ElementLike } from 'react-hook-form/dist/types'
 import {
@@ -15,6 +15,7 @@ import {
 } from 'rmwc'
 import { firestore } from '../../services/firebase'
 import { useBool } from '../../utils/hooks'
+import { bool } from '../../utils/html'
 import { micon } from '../../utils/icon'
 
 type TypeMap = {
@@ -62,9 +63,10 @@ type SchemaOptions<
     E extends object
 > = {
     schema: S
-    __D__: D
-    __E__: E
-    __F__: GetFormValuesType<S, D, E>
+    _D: D
+    _E: E
+    _F: GetFormValuesType<S, D, E>
+    // _K: keyof S
 }
 
 type SK<S extends SchemaBody<any, any>> = keyof S & string
@@ -105,16 +107,20 @@ type HandleSubmitFn<E> = (
 export type Renderer<SO extends SchemaOptions<any, any, any>> = FC<{
     field: FieldFn<SO['schema']>
     formRef: MutableRefObject<HTMLFormElement | null>
-    setValue: <K extends keyof SO['__F__'] & string>(
+    setValue: <K extends keyof SO['_F'] & string>(
         key: K,
-        value: SO['__F__'][K],
+        value: SO['_F'][K],
     ) => void
     register: RegisterFn
-    handleSubmit: HandleSubmitFn<SO['__E__']>
+    handleSubmit: HandleSubmitFn<SO['_E']>
     _ref?: Blue.DocRef
 }>
 
-export const createUseTypedForm = <SO extends SchemaOptions<any, any, any>>({
+export const createUseTypedForm = <
+    SO extends SchemaOptions<SchemaBody<D, E>, D, E>,
+    D extends Blue.Meta = any,
+    E extends object = any
+>({
     name,
     schemaOptions,
     dialogTitle,
@@ -128,10 +134,10 @@ export const createUseTypedForm = <SO extends SchemaOptions<any, any, any>>({
     renderer: Renderer<SO>
 }) => {
     type S = SO['schema']
-    type D = SO['__D__']
-    type E = SO['__E__']
-    type FormValues = SO['__F__']
-    const { schema } = schemaOptions
+    // type D = SO['__D__']
+    // type E = SO['__E__']
+    type FormValues = SO['_F']
+    const schema = schemaOptions.schema as S
 
     type CallbackFn = (_ref: Blue.DocRef, data: E) => Promise<any>
 
@@ -155,6 +161,11 @@ export const createUseTypedForm = <SO extends SchemaOptions<any, any, any>>({
             {} as FormValues,
         )
 
+    const decodeForCell = (key: SK<S>, value: any) => {
+        const decoded = decodeValue(key, value)
+        return is.boolean(decoded) ? bool(decoded) : decoded
+    }
+
     const decodeValue = (key: SK<S>, value: any) =>
         schema[key as SK<S>].decode?.(value) ?? value
 
@@ -162,22 +173,44 @@ export const createUseTypedForm = <SO extends SchemaOptions<any, any, any>>({
         Object.entries(data).reduce(
             (pre, [key, value]: [string, any]) =>
                 key in schema
-                    ? { ...pre, [key]: decodeValue(key, value) }
+                    ? { ...pre, [key]: decodeValue(key as SK<S>, value) }
                     : pre,
             {} as FormValues,
         )
 
     const encodeValue = (key: SK<S>, value: any) =>
-        schema[key as SK<S>].encode?.(value) ?? value
+        schema[key].encode?.(value) ?? value
 
     const encode = (data: FormValues) =>
         Object.entries(data).reduce((pre, [key, value]: [string, any]) => {
             const nullableValue = is.emptyString(value) ? null : value
             return {
                 ...pre,
-                [key]: encodeValue(key, nullableValue),
+                [key]: encodeValue(key as SK<S>, nullableValue),
             }
         }, {} as E)
+
+    const tablePairs = (data: D, fieldNames: SK<S>[]) => {
+        return fieldNames.map(key => [
+            schema[key].label,
+            decodeForCell(key, data[key as keyof D]),
+        ])
+    }
+
+    const tableHeader = (fieldNames: SK<S>[], leadCells: string[] = []) => {
+        return [...leadCells, ...fieldNames.map(key => schema[key].label)]
+    }
+
+    const tableRow = (
+        data: D,
+        fieldNames: SK<S>[],
+        leadCells: ReactNode[] = [],
+    ) => {
+        return [
+            ...leadCells,
+            ...fieldNames.map(key => decodeForCell(key, data[key as keyof D])),
+        ]
+    }
 
     //
 
@@ -197,7 +230,9 @@ export const createUseTypedForm = <SO extends SchemaOptions<any, any, any>>({
         }
     }
 
-    return () => {
+    //
+
+    const fn = () => {
         const {
             register,
             // handleSubmit: _handleSubmit,
@@ -349,10 +384,15 @@ export const createUseTypedForm = <SO extends SchemaOptions<any, any, any>>({
             action,
             decode,
             encode,
+            tablePairs,
+            tableHeader,
+            tableRow,
             // props,
             // register,
             // setValue,
             // handleSubmit,
         }
     }
+
+    return fn as typeof fn & SO & { _K: keyof S }
 }

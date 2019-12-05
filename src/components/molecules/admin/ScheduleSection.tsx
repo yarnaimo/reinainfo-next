@@ -4,8 +4,6 @@ import { Button, SimpleDataTable } from 'rmwc'
 import { ISchedule, MSchedule } from '../../../models/Schedule'
 import { ISerial } from '../../../models/Serial'
 import { db } from '../../../services/firebase'
-import { toFormDate } from '../../../utils/date'
-import { bool } from '../../../utils/html'
 import { Heading2 } from '../../atoms/Heading2'
 import { PageSection } from '../../blocks/PageSection'
 import { Section } from '../../blocks/Section'
@@ -15,6 +13,21 @@ import { useSerialForm } from './SerialForm'
 
 type Props = { serial?: ISerial['_D']; heading?: string }
 
+const scheduleTableKeys = [
+    'active',
+    'category',
+    'date',
+    'hasTime',
+    'title',
+    'url',
+    'parts',
+    'venue',
+    'hasTickets',
+    'customIcon',
+    'ribbonColors',
+    'thumbUrl',
+] as (keyof typeof useScheduleForm.schema)[]
+
 export const ScheduleSection: FC<Props> = ({
     serial,
     heading = 'Schedules',
@@ -22,21 +35,6 @@ export const ScheduleSection: FC<Props> = ({
     const scheduleForm = parent ? useSerialScheduleForm() : useScheduleForm()
     const serialForm = useSerialForm()
 
-    const tableHeader = [
-        '',
-        '',
-        'カテゴリ',
-        '日時',
-        '時刻あり?',
-        'アイコン',
-        '色',
-        'タイトル',
-        'URL',
-        'パート',
-        '場所',
-        'チケットあり?',
-        'サムネイルURL',
-    ]
     const model = useMemo(
         () => (serial ? db._schedulesIn(serial._ref) : db.schedules),
         [serial?._ref],
@@ -55,16 +53,21 @@ export const ScheduleSection: FC<Props> = ({
                 <SimpleDataTable
                     // header={[]}
                     data={[
-                        ['アクティブ?', bool(serial.active)],
-                        ['ラベル', serial.label],
-
-                        ['カテゴリ', serial.category],
-                        ['アイコン', serial.customIcon],
-                        ['色', serial.ribbonColors],
-                        ['タイトル', serial.title],
-                        ['URL', serial.url],
-                        ['時刻あり?', bool(serial.hasTime)],
-                        ['場所', serial.venue],
+                        ...serialForm.tablePairs(serial, [
+                            'active',
+                            'label',
+                            'dayOfWeek',
+                            'timeOfDay',
+                            'weekNumbers',
+                            'weekInterval',
+                            'category',
+                            'customIcon',
+                            'ribbonColors',
+                            'title',
+                            'url',
+                            'hasTime',
+                            'venue',
+                        ]),
                     ]}
                 ></SimpleDataTable>
             </Section>
@@ -76,30 +79,14 @@ export const ScheduleSection: FC<Props> = ({
         q,
         decoder: (s: ISchedule['_D']) => ({
             ...s,
-            tableRow: [
+            tableRow: scheduleForm.tableRow(s, scheduleTableKeys, [
                 <Button
                     type="button"
                     label="編集"
                     onClick={() => scheduleForm.edit(s, model.update)}
                     css={{ margin: '0 -8px' }}
                 ></Button>,
-
-                bool(s.active),
-
-                MSchedule.getCategory(s.category).name,
-                toFormDate(s.date.toDate()),
-                bool(s.hasTime),
-
-                s.customIcon,
-                s.ribbonColors?.length || '',
-
-                s.title,
-                s.url,
-                s.parts.toString(),
-                s.venue,
-                bool(s.hasTickets),
-                s.thumbUrl,
-            ],
+            ]),
         }),
     })
 
@@ -123,7 +110,7 @@ export const ScheduleSection: FC<Props> = ({
                 </Section>
 
                 <AdminDataTable
-                    header={tableHeader}
+                    header={scheduleForm.tableHeader(scheduleTableKeys, [''])}
                     data={schedules.array}
                 ></AdminDataTable>
             </PageSection>

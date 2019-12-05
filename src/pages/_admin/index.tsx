@@ -14,7 +14,6 @@ import { AdminLayout } from '../../components/templates/AdminLayout'
 import { Title } from '../../components/templates/Title'
 import { ISerial } from '../../models/Serial'
 import { callable, db } from '../../services/firebase'
-import { bool } from '../../utils/html'
 
 const RetweetSection: FC<{}> = () => {
     const [tweetIdField, setTweetIdField] = useState('')
@@ -115,34 +114,31 @@ const RetweetSection: FC<{}> = () => {
     )
 }
 
+const serialTableKeys: typeof useSerialForm._K[] = ['active', 'label']
+
 const SerialSection: FC<{}> = () => {
+    const serialForm = useSerialForm()
+
     const serials = useSCollection({
         model: db.serials,
         q: q => q.where('active', '==', true),
-        decoder: (r: ISerial['_D']) => {
-            return {
-                ...r,
-                tableRow: [
-                    <Link
-                        href="/_admin/serials/[id]"
-                        as={`/_admin/serials/${r._id}`}
-                        passHref
-                    >
-                        <Button
-                            tag="a"
-                            label="開く"
-                            css={{ margin: '0 -8px' }}
-                        ></Button>
-                    </Link>,
-                    bool(r.active),
-                    r.label,
-                ],
-            }
-        },
+        decoder: (r: ISerial['_D']) => ({
+            ...r,
+            tableRow: serialForm.tableRow(r, serialTableKeys, [
+                <Link
+                    href="/_admin/serials/[id]"
+                    as={`/_admin/serials/${r._id}`}
+                    passHref
+                >
+                    <Button
+                        tag="a"
+                        label="開く"
+                        css={{ margin: '0 -8px' }}
+                    ></Button>
+                </Link>,
+            ]),
+        }),
     })
-
-    const tableHeader = ['', '', 'ラベル']
-    const serialForm = useSerialForm()
 
     return (
         <PageSection>
@@ -159,7 +155,7 @@ const SerialSection: FC<{}> = () => {
             </Section>
 
             <AdminDataTable
-                header={tableHeader}
+                header={serialForm.tableHeader(serialTableKeys, [''])}
                 data={serials.array}
             ></AdminDataTable>
         </PageSection>

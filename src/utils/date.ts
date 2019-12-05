@@ -9,6 +9,18 @@ export { dayjs }
 // export const formatDate = (date: Dayjs) =>
 //     date.format(date.isSame(dayjs(), 'day') ? 'H:mm' : 'D日 H:mm')
 
+export const stringifyTimeArray = (arr: [number, number]) => {
+    return dayjs()
+        .set('hour', arr[0])
+        .set('minute', arr[1])
+        .format('HHmm')
+}
+
+export const toTimeArray = (str: string) => {
+    const d = dayjs(str, 'HHmm')
+    return [d.hour(), d.minute()] as [number, number]
+}
+
 export const formDatePattern =
     '^(?:\\d{2}|\\d{4}|\\d{8})(?:\\.(?:\\d{2}|\\d{4}))?$'
 
@@ -64,7 +76,7 @@ type WNumber = 0 | 1 | 2 | 3 | 4 | 5 | 6
 
 export const createSerialDates = ({
     dayOfWeek,
-    timeOfDay: [hour, minute] = [0, 0],
+    timeOfDay: [hour, minute],
     weekNumbers,
     weekInterval = 1,
     count = 25,
@@ -72,7 +84,7 @@ export const createSerialDates = ({
     until = dayjs().add(6, 'month'),
 }: {
     dayOfWeek: WNumber
-    timeOfDay?: [number, number]
+    timeOfDay: [number, number]
     weekNumbers?: number[]
     weekInterval?: number
     count?: number

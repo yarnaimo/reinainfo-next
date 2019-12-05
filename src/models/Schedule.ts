@@ -146,18 +146,16 @@ export type ISchedule = Blue.Interface<{
     isSerial: boolean
 
     category: CategoryKey
-    customIcon: string | null
-    ribbonColors: string[] | null
-
-    title: string
-    url: string
     date: Blue.IO<Blue.Timestamp, Date>
     hasTime: boolean
+    title: string
+    url: string
     parts: IPart[]
     venue: string | null
-    // way: string | null
     hasTickets: boolean
 
+    customIcon: string | null
+    ribbonColors: string[] | null
     thumbUrl: string | null
 }>
 
@@ -165,9 +163,9 @@ export type ScheduleSeedKeys =
     | 'category'
     | 'customIcon'
     | 'ribbonColors'
+    | 'hasTime'
     | 'title'
     | 'url'
-    | 'hasTime'
     | 'venue'
 
 export type IScheduleSeed = Pick<ISchedule['_A'], ScheduleSeedKeys>

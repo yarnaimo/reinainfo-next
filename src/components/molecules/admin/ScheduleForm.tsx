@@ -44,9 +44,9 @@ export const createScheduleSeedSchema = (serial: boolean) =>
             encode: str => str?.split('/') ?? null,
         },
 
+        hasTime: { type: 'toggle', initial: true, label: '時刻あり?' },
         title: { type: 'required', initial: '', label: 'タイトル' },
         url: { type: 'required', initial: '', label: 'URL' },
-        hasTime: { type: 'toggle', initial: true, label: '時刻あり?' },
         venue: { type: 'optional', initial: null, label: '場所' },
     })
 
@@ -84,6 +84,12 @@ export const categoryOptions = Object.entries(categories).map(([k, v]) => ({
     label: v.name,
 }))
 
+const ticketTableKeys: typeof useTicketForm._K[] = [
+    'label',
+    'opensAt',
+    'closesAt',
+]
+
 const renderer: Renderer<_SchemaType> = ({
     field,
     formRef,
@@ -97,31 +103,23 @@ const renderer: Renderer<_SchemaType> = ({
     //     css: { width: '100%' },
     // })
 
-    const ticketTableHeader = ['', 'ラベル', '開始日時', '終了日時']
     const ticketForm = useTicketForm()
     const model = useMemo(() => _ref && db._ticketsIn(_ref), [_ref])
 
     const tickets = useSCollection({
         model,
         q: q => q.orderBy('opensAt'),
-        decoder: (t: ITicket['_D']) => {
-            const dt = ticketForm.decode(t)
-
-            return {
-                ...dt,
-                tableRow: [
-                    <Button
-                        type="button"
-                        label="編集"
-                        onClick={() => ticketForm.edit(t, model!.update)}
-                        css={{ margin: '0 -8px' }}
-                    ></Button>,
-                    dt.label,
-                    dt.opensAt,
-                    dt.closesAt,
-                ],
-            }
-        },
+        decoder: (t: ITicket['_D']) => ({
+            ...t,
+            tableRow: ticketForm.tableRow(t, ticketTableKeys, [
+                <Button
+                    type="button"
+                    label="編集"
+                    onClick={() => ticketForm.edit(t, model!.update)}
+                    css={{ margin: '0 -8px' }}
+                ></Button>,
+            ]),
+        }),
     })
 
     useEffect(() => {
@@ -211,7 +209,7 @@ const renderer: Renderer<_SchemaType> = ({
                         ),
                     )}
                     <AdminDataTable
-                        header={ticketTableHeader}
+                        header={ticketForm.tableHeader(ticketTableKeys, [''])}
                         data={tickets.array}
                     ></AdminDataTable>
                 </Section>
