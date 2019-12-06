@@ -151,9 +151,7 @@ export const ScheduleSection: FC<Props> = ({
                 <Heading2 text={heading} marginY={16} noColor></Heading2>
 
                 {SerialDetail_}
-            </PageSection>
 
-            <PageSection>
                 <Section>
                     {scheduleForm.renderDialog()}
                     {scheduleForm.renderAddButton(() =>

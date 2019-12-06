@@ -1,4 +1,3 @@
-import { useSDocOnce } from 'bluespark'
 import { NextPage } from 'next'
 import React from 'react'
 import { Heading2 } from '../components/atoms/Heading2'
@@ -7,16 +6,15 @@ import { PageSection } from '../components/blocks/PageSection'
 import { Section } from '../components/blocks/Section'
 import { CollectionTimeline } from '../components/molecules/CollectionTimeline'
 import { Title } from '../components/templates/Title'
+import {
+    ITwitterCollectionSerialized,
+    MTwitterCollection,
+} from '../models/TwitterCollection'
 import { db } from '../services/firebase'
 
-type Props = {}
+type Props = { twitterCollection?: ITwitterCollectionSerialized }
 
-const TopicsPage: NextPage<Props> = () => {
-    const twitterCollection = useSDocOnce({
-        model: db.twitterCollections,
-        doc: 'topics',
-    })
-
+const TopicsPage: NextPage<Props> = ({ twitterCollection }) => {
     return (
         <MainContainer>
             <Title title="Topics" path="topics"></Title>
@@ -26,7 +24,7 @@ const TopicsPage: NextPage<Props> = () => {
 
                 <Section>
                     <CollectionTimeline
-                        collectionId={twitterCollection.data?.collectionId}
+                        collectionId={twitterCollection?.collectionId}
                     ></CollectionTimeline>
                 </Section>
             </PageSection>
@@ -34,7 +32,12 @@ const TopicsPage: NextPage<Props> = () => {
     )
 }
 
-// TopicsPage.getInitialProps = async ctx => {
-// }
+TopicsPage.getInitialProps = async ctx => {
+    const twitterCollection = await db.twitterCollections.getDoc({
+        doc: 'topics',
+        decoder: MTwitterCollection.serialize,
+    })
+    return { twitterCollection }
+}
 
 export default TopicsPage
