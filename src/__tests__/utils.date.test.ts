@@ -19,7 +19,7 @@ test('create cyclic dates with weekNumber', () => {
             since: dayjs('2018-08-04T00:00'), // saturday
             until: dayjs('2018-08-24T06:05'),
         }),
-    ).toEqual([new Date('2018-08-10T06:05'), new Date('2018-08-24T06:05')])
+    ).toEqual([dayjs('2018-08-10T06:05'), dayjs('2018-08-24T06:05')])
 })
 
 test('create cyclic dates with weekInterval', () => {
@@ -31,7 +31,7 @@ test('create cyclic dates with weekInterval', () => {
             since: dayjs('2018-08-11T00:00'),
             count: 2,
         }),
-    ).toEqual([new Date('2018-08-13T00:00'), new Date('2018-08-27T00:00')])
+    ).toEqual([dayjs('2018-08-13T00:00'), dayjs('2018-08-27T00:00')])
 })
 
 // test('duration string to minutes', () => {
