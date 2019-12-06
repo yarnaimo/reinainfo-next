@@ -34,11 +34,7 @@ export const toTableDate = (date: Dayjs | Date) =>
 export const stringifyWDate = (date: Dayjs, omitSpace = false) => {
     const now = dayjs()
 
-    const template = date.isSame(now, 'month')
-        ? 'D'
-        : date.isSame(now, 'year')
-        ? 'M/D'
-        : 'YYYY/M/D'
+    const template = date.isSame(now, 'year') ? 'M/D' : 'YYYY/M/D'
 
     const dateString = date.format(template)
     const w = date.format('ddd').slice(0, 1)
