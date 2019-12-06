@@ -10,7 +10,9 @@ import { TwimoClient } from '../services/twitter'
 const combineSchedule = async (
     ticket: ITicket['_D'],
 ): Promise<SetOptional<ITicketSchedulePair, 'schedule'>> => {
-    const schedule = await dbAdmin.schedules.getDoc({ doc: ticket.scheduleId })
+    const schedule = await dbAdmin.schedules.getDoc({
+        doc: ticket._ref.parent.parent!.id,
+    })
     return { ticket, schedule }
 }
 

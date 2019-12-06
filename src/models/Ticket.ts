@@ -5,7 +5,6 @@ import { env } from '../env'
 import { stringifyWDate, stringifyWDateTime } from '../utils/date'
 
 export type ITicket = Blue.Interface<{
-    scheduleId: string
     label: string
     opensAt: Blue.IO<Blue.Timestamp | null, Date | null>
     closesAt: Blue.IO<Blue.Timestamp | null, Date | null>

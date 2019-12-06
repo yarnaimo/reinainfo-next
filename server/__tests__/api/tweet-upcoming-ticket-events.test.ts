@@ -48,29 +48,24 @@ beforeEach(async () => {
     const scheduleDoc = await dbInstanceAdmin
         .collection('schedules')
         .add(schedule)
-    const { id: scheduleId } = scheduleDoc
 
     const tickets = prray<ITicket['_E']>([
         {
-            scheduleId,
             label: 'ticket0',
             opensAt: day0End.toDate(),
             closesAt: null,
         },
         {
-            scheduleId,
             label: 'ticket1-open',
             opensAt: day1Noon.toDate(),
             closesAt: day2Start.toDate(),
         },
         {
-            scheduleId,
             label: 'ticket1-close',
             opensAt: null,
             closesAt: day1.toDate(),
         },
         {
-            scheduleId,
             label: 'ticket2',
             opensAt: null,
             closesAt: day2Start.toDate(),

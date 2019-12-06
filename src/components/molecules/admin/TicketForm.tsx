@@ -15,7 +15,6 @@ const encode = (str: string | null) =>
     is.string(str) ? parseFormDate(str) : null
 
 const schemaOptions = Schema<ITicket['_D'], ITicket['_E']>()({
-    scheduleId: { type: 'required', initial: '', label: 'スケジュールID' },
     label: { type: 'required', initial: '', label: 'ラベル' },
     opensAt: {
         type: 'optional',
