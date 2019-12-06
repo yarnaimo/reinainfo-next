@@ -26,7 +26,7 @@ test('create cyclic dates with weekInterval', () => {
     expect(
         createSerialDates({
             dayOfWeek: 1,
-            timeOfDay: undefined,
+            timeOfDay: [0, 0],
             weekInterval: 2,
             since: dayjs('2018-08-11T00:00'),
             count: 2,
