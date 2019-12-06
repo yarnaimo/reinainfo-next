@@ -117,7 +117,7 @@ const SchedulesPage: NextPage<Props> = ({ schedules: pSchedules }) => {
     const excludeSerials = useBool(false)
 
     const filteredSchedules = schedules.filter(
-        s => !excludeSerials || !s.isSerial,
+        s => !excludeSerials.state || !s.isSerial,
     )
 
     const chunkedSchedules = filteredSchedules
