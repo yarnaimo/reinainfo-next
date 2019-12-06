@@ -115,7 +115,7 @@ const renderer: Renderer<_SchemaType> = ({
                 <Button
                     type="button"
                     label="編集"
-                    onClick={() => ticketForm.edit(t, model!.update)}
+                    onClick={() => ticketForm.editDoc(t, model!.update)}
                     css={{ margin: '0 -8px' }}
                 ></Button>,
             ]),
@@ -203,7 +203,7 @@ const renderer: Renderer<_SchemaType> = ({
                         <Checkbox disabled {...field('hasTickets')}></Checkbox>
                     </FormRow>
                     {ticketForm.renderAddButton(() =>
-                        ticketForm.edit(
+                        ticketForm.editDoc(
                             model!.collectionRef.doc(),
                             model!.create,
                         ),

@@ -147,7 +147,7 @@ const SerialSection: FC<{}> = () => {
             <Section>
                 {serialForm.renderDialog()}
                 {serialForm.renderAddButton(() =>
-                    serialForm.edit(
+                    serialForm.editDoc(
                         db.serials.collectionRef.doc(),
                         db.serials.create,
                     ),

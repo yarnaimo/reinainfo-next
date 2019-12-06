@@ -161,12 +161,12 @@ export type ISchedule = Blue.Interface<{
 
 export type ScheduleSeedKeys =
     | 'category'
-    | 'customIcon'
-    | 'ribbonColors'
     | 'hasTime'
     | 'title'
     | 'url'
     | 'venue'
+    | 'customIcon'
+    | 'ribbonColors'
 
 export type IScheduleSeed = Pick<ISchedule['_A'], ScheduleSeedKeys>
 

@@ -6,6 +6,7 @@ import useForm from 'react-hook-form'
 import { ElementLike } from 'react-hook-form/dist/types'
 import {
     Button,
+    ButtonProps,
     CircularProgress,
     Dialog,
     DialogActions,
@@ -14,7 +15,7 @@ import {
     DialogTitle,
 } from 'rmwc'
 import { firestore } from '../../services/firebase'
-import { useBool } from '../../utils/hooks'
+import { useBool, UseBool } from '../../utils/hooks'
 import { bool } from '../../utils/html'
 import { micon } from '../../utils/icon'
 
@@ -60,22 +61,25 @@ type SchemaBody<D extends object, E extends object> = {
 type SchemaOptions<
     S extends SchemaBody<D, E>,
     D extends object,
-    E extends object
+    E extends object,
+    OP extends any
 > = {
     schema: S
     _D: D
     _E: E
     _F: GetFormValuesType<S, D, E>
+    _OP: OP
     // _K: keyof S
 }
 
 type SK<S extends SchemaBody<any, any>> = keyof S & string
 
-export const Schema = <D extends object, E extends object>() => <
-    S extends SchemaBody<D, E>
->(
-    schema: S,
-) => ({ schema } as SchemaOptions<S, D, E>)
+export const Schema = <
+    D extends object,
+    E extends object,
+    OP extends any = any
+>() => <S extends SchemaBody<D, E>>(schema: S) =>
+    ({ schema } as SchemaOptions<S, D, E, OP>)
 
 export type GetFormValuesType<
     S extends SchemaBody<D, E>,
@@ -104,7 +108,7 @@ type HandleSubmitFn<E> = (
     callback: (s: E) => void | Promise<void>,
 ) => (e: React.BaseSyntheticEvent<object, any, any>) => void
 
-export type Renderer<SO extends SchemaOptions<any, any, any>> = FC<{
+export type Renderer<SO extends SchemaOptions<any, any, any, any>> = FC<{
     field: FieldFn<SO['schema']>
     formRef: MutableRefObject<HTMLFormElement | null>
     setValue: <K extends keyof SO['_F'] & string>(
@@ -114,12 +118,59 @@ export type Renderer<SO extends SchemaOptions<any, any, any>> = FC<{
     register: RegisterFn
     handleSubmit: HandleSubmitFn<SO['_E']>
     _ref?: Blue.DocRef
+    optionalData?: SO['_OP']
+    setOptionalData: (data: SO['_OP']) => void
 }>
 
+//
+
+type FDialogProps = {
+    dialogState: UseBool
+    title: string
+    styles?: InterpolationWithTheme<any>
+    savingState: UseBool
+    onAccept: () => void
+}
+
+const FDialog: FC<FDialogProps> = ({
+    dialogState,
+    title,
+    styles,
+    savingState,
+    onAccept,
+    children,
+}) => (
+    <Dialog open={dialogState.state} css={styles}>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogContent>{children}</DialogContent>
+        <DialogActions>
+            <DialogButton
+                label="キャンセル"
+                onClick={dialogState.off}
+            ></DialogButton>
+
+            <DialogButton
+                unelevated
+                label="保存"
+                disabled={savingState.state}
+                icon={
+                    savingState.state ? (
+                        <CircularProgress></CircularProgress>
+                    ) : (
+                        micon('check')
+                    )
+                }
+                onClick={onAccept}
+            ></DialogButton>
+        </DialogActions>
+    </Dialog>
+)
+
 export const createUseTypedForm = <
-    SO extends SchemaOptions<SchemaBody<D, E>, D, E>,
-    D extends Blue.Meta = any,
-    E extends object = any
+    SO extends SchemaOptions<SchemaBody<_D, _E>, _D, _E, _OP>,
+    _D extends object = any,
+    _E extends object = any,
+    _OP extends any = any
 >({
     name,
     schemaOptions,
@@ -134,12 +185,15 @@ export const createUseTypedForm = <
     renderer: Renderer<SO>
 }) => {
     type S = SO['schema']
-    // type D = SO['__D__']
-    // type E = SO['__E__']
+    type D = SO['_D']
+    type E = SO['_E']
+    type OP = SO['_OP']
     type FormValues = SO['_F']
     const schema = schemaOptions.schema as S
 
-    type CallbackFn = (_ref: Blue.DocRef, data: E) => Promise<any>
+    type Action = 'create' | 'update'
+    type DocCallbackFn = (_ref: Blue.DocRef, data: E) => any | Promise<any>
+    type CallbackFn = (data: E, optionalData: OP) => any | Promise<any>
 
     const log = (type: string, data: any) =>
         console.log(`[${name} form] ${type}`, data)
@@ -167,7 +221,7 @@ export const createUseTypedForm = <
     }
 
     const decodeValue = (key: SK<S>, value: any) =>
-        schema[key as SK<S>].decode?.(value) ?? value
+        schema[key].decode?.(value) ?? value
 
     const decode = (data: D) =>
         Object.entries(data).reduce(
@@ -248,6 +302,7 @@ export const createUseTypedForm = <
             _field(register, key, noRegister)
 
         const formRef = useRef<HTMLFormElement>(null)
+        const docCallbackRef = useRef<DocCallbackFn>()
         const callbackRef = useRef<CallbackFn>()
 
         const dialogOpen = useBool(false)
@@ -263,12 +318,17 @@ export const createUseTypedForm = <
             },
         }
         const isSaving = useBool(false)
-        const [action, setAction] = useState<'create' | 'update'>('create')
-        const [_ref, _setRef] = useState<Blue.DocRef>()
 
-        const edit = (dataOrRef: D | Blue.DocRef, callback: CallbackFn) => {
-            callbackRef.current = callback
-            const _dataOrRef = dataOrRef as D | firestore.DocumentReference
+        const [action, setAction] = useState<Action>('create')
+        const [_ref, _setRef] = useState<Blue.DocRef>()
+        const [optionalData, setOptionalData] = useState<OP>()
+
+        const editDoc = <D2 extends D & Blue.Meta>(
+            dataOrRef: D2 | Blue.DocRef,
+            callback: DocCallbackFn,
+        ) => {
+            docCallbackRef.current = callback
+            const _dataOrRef = dataOrRef as D2 | firestore.DocumentReference
 
             if (_dataOrRef instanceof firestore.DocumentReference) {
                 setAction('create')
@@ -282,66 +342,23 @@ export const createUseTypedForm = <
             dialog.on()
         }
 
-        const renderForm = () => (
-            <Renderer
-                {...{
-                    field,
-                    formRef,
-                    setValue,
-                    register,
-                    handleSubmit,
-                    _ref,
-                }}
-            ></Renderer>
-        )
+        const edit = (
+            data: D | null,
+            optionalData: OP,
+            callback: CallbackFn,
+        ) => {
+            callbackRef.current = callback
+            setOptionalData(optionalData)
 
-        const renderDialog = () => (
-            <Dialog open={dialogOpen.state} css={dialogStyles}>
-                <DialogTitle>{dialogTitle[action]}</DialogTitle>
-
-                <DialogContent>{formRendered && renderForm()}</DialogContent>
-
-                <DialogActions>
-                    <DialogButton
-                        label="キャンセル"
-                        onClick={dialog.off}
-                    ></DialogButton>
-
-                    <DialogButton
-                        unelevated
-                        label="保存"
-                        disabled={isSaving.state}
-                        icon={
-                            isSaving.state ? (
-                                <CircularProgress></CircularProgress>
-                            ) : (
-                                micon('check')
-                            )
-                        }
-                        onClick={handleSubmit(async data => {
-                            isSaving.on()
-
-                            if (callbackRef.current && _ref) {
-                                await callbackRef.current(_ref, data)
-                            }
-
-                            dialog.off()
-                            isSaving.off()
-                        })}
-                    ></DialogButton>
-                </DialogActions>
-            </Dialog>
-        )
-
-        const renderAddButton = (onClick: () => void) => (
-            <Button
-                type="button"
-                outlined
-                icon={micon('plus')}
-                label={dialogTitle.create}
-                onClick={onClick}
-            ></Button>
-        )
+            if (is.null_(data)) {
+                setAction('create')
+                init()
+            } else {
+                setAction('update')
+                init(data)
+            }
+            dialog.on()
+        }
 
         const trimData = () => {
             const trimmed = trim(getValues())
@@ -376,8 +393,58 @@ export const createUseTypedForm = <
             }
         }
 
+        const onAccept = handleSubmit(async data => {
+            isSaving.on()
+
+            if (_ref && docCallbackRef.current) {
+                await docCallbackRef.current(_ref, data)
+            } else if (callbackRef.current) {
+                await callbackRef.current(data, optionalData!)
+            }
+
+            dialog.off()
+            isSaving.off()
+        })
+
+        const renderDialog = () => (
+            <FDialog
+                dialogState={dialogOpen}
+                title={dialogTitle[action]}
+                styles={dialogStyles}
+                savingState={isSaving}
+                onAccept={onAccept}
+            >
+                {formRendered && (
+                    <Renderer
+                        {...{
+                            field,
+                            formRef,
+                            setValue,
+                            register,
+                            handleSubmit,
+                            _ref,
+                            optionalData,
+                            setOptionalData,
+                        }}
+                    ></Renderer>
+                )}
+            </FDialog>
+        )
+
+        const renderAddButton = (onClick: () => void, props?: ButtonProps) => (
+            <Button
+                type="button"
+                outlined
+                icon={micon('plus')}
+                label={dialogTitle.create}
+                onClick={onClick}
+                {...props}
+            ></Button>
+        )
+
         return {
             formRef,
+            editDoc,
             edit,
             renderDialog,
             renderAddButton,

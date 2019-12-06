@@ -1,4 +1,6 @@
 import { useSCollection } from 'bluespark'
+import { Dayjs } from 'dayjs'
+import { prray } from 'prray'
 import React, { FC, useMemo } from 'react'
 import { Button, SimpleDataTable } from 'rmwc'
 import { ISchedule, MSchedule } from '../../../models/Schedule'
@@ -8,7 +10,8 @@ import { Heading2 } from '../../atoms/Heading2'
 import { PageSection } from '../../blocks/PageSection'
 import { Section } from '../../blocks/Section'
 import { AdminDataTable } from './AdminDataTable'
-import { useScheduleForm, useSerialScheduleForm } from './ScheduleForm'
+import { useScheduleForm } from './ScheduleForm'
+import { useSerialBatchForm } from './SerialBatchForm'
 import { useSerialForm } from './SerialForm'
 
 type Props = { serial?: ISerial['_D']; heading?: string }
@@ -32,8 +35,9 @@ export const ScheduleSection: FC<Props> = ({
     serial,
     heading = 'Schedules',
 }) => {
-    const scheduleForm = parent ? useSerialScheduleForm() : useScheduleForm()
+    const scheduleForm = parent ? useScheduleForm() : useScheduleForm()
     const serialForm = useSerialForm()
+    const serialBatchForm = useSerialBatchForm()
 
     const model = useMemo(
         () => (serial ? db._schedulesIn(serial._ref) : db.schedules),
@@ -41,12 +45,49 @@ export const ScheduleSection: FC<Props> = ({
     )
     const q = useMemo(() => MSchedule.whereSinceNow(), [])
 
+    const createSerialSchedules = async (dates: Dayjs[]) => {
+        if (!serial) {
+            return
+        }
+        const {
+            category,
+            customIcon,
+            ribbonColors,
+            hasTime,
+            title,
+            url,
+            venue,
+        } = serial
+
+        await prray(dates).mapAsync(async date => {
+            const data: ISchedule['_E'] = {
+                active: true,
+                isSerial: true,
+
+                category,
+                date: date.toDate(),
+                hasTime,
+                title,
+                url,
+                parts: [],
+                venue,
+                hasTickets: false,
+
+                customIcon,
+                ribbonColors,
+                thumbUrl: null,
+            }
+
+            await model.create(null, data)
+        })
+    }
+
     const SerialDetail_ = serial && (
         <Section>
             {serialForm.renderDialog()}
             <Button
                 label="編集"
-                onClick={() => serialForm.edit(serial, db.serials.update)}
+                onClick={() => serialForm.editDoc(serial, db.serials.update)}
             ></Button>
 
             <Section>
@@ -71,6 +112,20 @@ export const ScheduleSection: FC<Props> = ({
                     ]}
                 ></SimpleDataTable>
             </Section>
+
+            {serialBatchForm.renderDialog()}
+            {serialBatchForm.renderAddButton(
+                () =>
+                    serialBatchForm.edit(
+                        null,
+                        { ...serial, dates: [] },
+                        async (_, { dates }) => {
+                            console.log(dates)
+                            await createSerialSchedules(dates)
+                        },
+                    ),
+                { outlined: false, unelevated: true },
+            )}
         </Section>
     )
 
@@ -83,7 +138,7 @@ export const ScheduleSection: FC<Props> = ({
                 <Button
                     type="button"
                     label="編集"
-                    onClick={() => scheduleForm.edit(s, model.update)}
+                    onClick={() => scheduleForm.editDoc(s, model.update)}
                     css={{ margin: '0 -8px' }}
                 ></Button>,
             ]),
@@ -102,7 +157,7 @@ export const ScheduleSection: FC<Props> = ({
                 <Section>
                     {scheduleForm.renderDialog()}
                     {scheduleForm.renderAddButton(() =>
-                        scheduleForm.edit(
+                        scheduleForm.editDoc(
                             model.collectionRef.doc(),
                             model.create,
                         ),

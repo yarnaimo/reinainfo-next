@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is'
 import dayjs, { Dayjs } from 'dayjs'
 import 'dayjs/locale/ja'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
@@ -72,6 +73,14 @@ export const parseFormDate = (str: string) => {
     return null
 }
 
+export const parseFormDateNullable = (str: string | null) => {
+    if (!is.string(str)) {
+        return null
+    }
+    const date = parseFormDate(str)
+    return date ? dayjs(date) : null
+}
+
 type WNumber = 0 | 1 | 2 | 3 | 4 | 5 | 6
 
 export const createSerialDates = ({
@@ -79,7 +88,7 @@ export const createSerialDates = ({
     timeOfDay: [hour, minute],
     weekNumbers,
     weekInterval = 1,
-    count = 25,
+    count = 16,
     since = dayjs(),
     until = dayjs().add(6, 'month'),
 }: {
@@ -120,5 +129,5 @@ export const createSerialDates = ({
         },
         { dates: [] as Dayjs[], currentDate },
     )
-    return dates.map(d => d.toDate())
+    return dates
 }
