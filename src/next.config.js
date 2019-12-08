@@ -9,7 +9,7 @@ const projectId = firebaserc.projects.default
 const dev = process.env.NODE_ENV !== 'production'
 
 const nextConfig = {
-    assetPrefix: dev ? '' : `https://static-${projectId}.web.app`,
+    // assetPrefix: dev ? '' : `https://static-${projectId}.web.app`,
     distDir: '.next',
     pwa: {
         dest: 'public',
