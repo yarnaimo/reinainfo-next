@@ -17,7 +17,18 @@
     },
     {
       "target": "static",
-      "public": ".static"
+      "public": ".static",
+      "headers": [
+        {
+          "source": "**/*.@(eot|otf|ttf|ttc|woff|font.css)",
+          "headers": [
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ]
+        }
+      ]
     }
   ],
   "functions": {
