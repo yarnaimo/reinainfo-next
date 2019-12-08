@@ -10,8 +10,8 @@ export const env = {
         ? `https://localhost:${port()}`
         : 'https://reinainfo-next.web.app',
     appName: 'ReinaInfo Next',
-    longAppName: 'ReinaInfo Next - 上田麗奈さん非公式info',
-    description: '',
+    longAppName: 'ReinaInfo Next',
+    description: '上田麗奈さん非公式info',
     screenName: 'Unoffishama',
     twitterCardSize: [310, 162] as const,
 }

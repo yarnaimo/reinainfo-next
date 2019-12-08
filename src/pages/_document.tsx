@@ -16,7 +16,7 @@ class MyDocument extends Document {
 
     render() {
         return (
-            <Html>
+            <Html lang="ja">
                 <Head>
                     <meta charSet="utf-8" />
                     <meta

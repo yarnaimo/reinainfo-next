@@ -88,6 +88,7 @@ const Tabs = () => {
                                 tag="a"
                                 jc="center"
                                 ai="center"
+                                aria-label={tab.label}
                                 css={{
                                     // color: 'inherit',
                                     position: 'relative',
