@@ -2,7 +2,7 @@ import { Rstring } from '@yarnaimo/rain'
 import { Blue, Spark, SparkQuery } from 'bluespark'
 import dayjs, { Dayjs } from 'dayjs'
 import { env } from '../env'
-import { stringifyWDate, stringifyWDateTime } from '../utils/date'
+import { toWDateStr, toWDateTimeStr } from '../utils/date'
 
 export type ITicket = Blue.Interface<{
     label: string
@@ -21,8 +21,7 @@ export const GTicket = SparkQuery<ITicket>()({
 
 const dateTimeOrDate = (withTime: boolean, date: Dayjs | null) => {
     return (
-        date &&
-        (withTime ? stringifyWDateTime(date, true) : stringifyWDate(date, true))
+        date && (withTime ? toWDateTimeStr(date, true) : toWDateStr(date, true))
     )
 }
 

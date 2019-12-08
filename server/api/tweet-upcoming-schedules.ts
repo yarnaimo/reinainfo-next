@@ -2,7 +2,7 @@ import { MTimestamp } from 'bluespark'
 import { Dayjs } from 'dayjs'
 import { prray } from 'prray'
 import { MSchedule } from '../../src/models/Schedule'
-import { stringifyWDate } from '../../src/utils/date'
+import { toWDateStr } from '../../src/utils/date'
 import { dbAdmin } from '../services/firebase-admin'
 import { sendCrossNotification } from '../services/integrated'
 import { TwimoClient } from '../services/twitter'
@@ -23,8 +23,8 @@ export const _tweetUpcomingSchedules = async (
 
     const dateRange =
         freq === 'daily'
-            ? `明日 ${stringifyWDate(since)}`
-            : `${stringifyWDate(since)} - ${stringifyWDate(untilDate)}`
+            ? `明日 ${toWDateStr(since)}`
+            : `${toWDateStr(since)} - ${toWDateStr(untilDate)}`
 
     const texts = schedules.array.map((s, i) => {
         const header =

@@ -13,7 +13,7 @@ import dayjs, { Dayjs } from 'dayjs'
 import { Merge } from 'type-fest'
 import { env } from '../env'
 import { hsl } from '../utils/color'
-import { stringifyTime, stringifyWDate } from '../utils/date'
+import { toTimeStr, toWDateStr } from '../utils/date'
 import { ITicket } from './Ticket'
 
 const colorSet = {
@@ -311,7 +311,7 @@ export class MSchedule {
                 ? s.date
                 : s.date.toDate(),
         )
-        const wdateString = stringifyWDate(date)
+        const wdateString = toWDateStr(date)
 
         if (s.hasTime) {
             return {
@@ -319,7 +319,7 @@ export class MSchedule {
 
                 timeString: s.parts.length
                     ? MSchedule.stringifyTimeFromParts(s.parts)
-                    : stringifyTime(date),
+                    : toTimeStr(date),
 
                 parts: s.parts.length ? MSchedule.formatParts(s.parts) : null,
             }
@@ -370,9 +370,8 @@ export class MSchedule {
         const formattedDate = MSchedule.formatDate(schedule)
 
         const [openTime, closeTime] = [
-            ticket.opensAt && stringifyTime(MTimestamp.toDayjs(ticket.opensAt)),
-            ticket.closesAt &&
-                stringifyTime(MTimestamp.toDayjs(ticket.closesAt)),
+            ticket.opensAt && toTimeStr(MTimestamp.toDayjs(ticket.opensAt)),
+            ticket.closesAt && toTimeStr(MTimestamp.toDayjs(ticket.closesAt)),
         ]
 
         return Rstring.joinOnlyStrings()([

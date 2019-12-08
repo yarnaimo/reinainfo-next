@@ -31,7 +31,7 @@ export const toFormDate = (date: Dayjs | Date) =>
 export const toTableDate = (date: Dayjs | Date) =>
     dayjs(date).format('YYYY-MM-DD HH:mm')
 
-export const stringifyWDate = (date: Dayjs, omitSpace = false) => {
+export const toWDateStr = (date: Dayjs, omitSpace = false) => {
     const now = dayjs()
 
     const template = date.isSame(now, 'year') ? 'M/D' : 'YYYY/M/D'
@@ -42,10 +42,10 @@ export const stringifyWDate = (date: Dayjs, omitSpace = false) => {
     return `${dateString}${omitSpace ? '' : ' '}(${w})`
 }
 
-export const stringifyTime = (date: Dayjs) => date.format('H:mm')
+export const toTimeStr = (date: Dayjs) => date.format('H:mm')
 
-export const stringifyWDateTime = (date: Dayjs, omitSpace = false) =>
-    `${stringifyWDate(date, omitSpace)} ${stringifyTime(date)}`
+export const toWDateTimeStr = (date: Dayjs, omitSpace = false) =>
+    `${toWDateStr(date, omitSpace)} ${toTimeStr(date)}`
 
 export const parseFormDate = (str: string) => {
     const [date, time] = [...str.split('.'), '']
