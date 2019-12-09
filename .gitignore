@@ -26,6 +26,7 @@ Thumbs.db
 .firebaserc
 .next
 .static
+_next
 config
 coverage
 dist/**/*

@@ -12,7 +12,7 @@
     "deploy": "ts-node server/scripts/migrate.ts && firebase deploy",
     "logs": "firebase functions:log",
     "next:append-skip-waiting": "cat node_modules/@yarnaimo/next-config/sw-skip-waiting.js >> src/public/sw.js",
-    "next:build": "NODE_ENV=production next build src && yarn next:append-skip-waiting && mkdir -p .static/_next && cp -r src/.next/static .static/_next/",
+    "next:build": "NODE_ENV=production rm -r src/.next src/public/_next && next build src && yarn next:append-skip-waiting && cp -r src/.next src/public/_next",
     "next:debug": "node -r ts-node/register --inspect server/next-dev",
     "next:dev": "ts-node server/next-dev",
     "np": "np --yolo --no-publish",

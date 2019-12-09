@@ -10,23 +10,8 @@
       "predeploy": "yarn next:build",
       "rewrites": [
         {
-          "source": "**/**",
+          "source": "!/_next/static/**",
           "function": "next"
-        }
-      ]
-    },
-    {
-      "target": "static",
-      "public": ".static",
-      "headers": [
-        {
-          "source": "**/*.@(eot|otf|ttf|ttc|woff|font.css)",
-          "headers": [
-            {
-              "key": "Access-Control-Allow-Origin",
-              "value": "*"
-            }
-          ]
         }
       ]
     }
