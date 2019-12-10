@@ -13,6 +13,17 @@
           "source": "!/_next/static/**",
           "function": "next"
         }
+      ],
+      "headers": [
+        {
+          "source": "/_next/static/**",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "max-age=31536000"
+            }
+          ]
+        }
       ]
     }
   ],
