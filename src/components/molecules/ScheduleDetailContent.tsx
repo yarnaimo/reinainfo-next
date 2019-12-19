@@ -296,7 +296,7 @@ export const ScheduleDetailContent = memo<Props>(
                         onClick={() =>
                             openTweetDialog(
                                 MSchedule.getPageUrl(s as IScheduleSerialized)!,
-                                s.title,
+                                `${s.title}\n\n${s.url}`,
                             )
                         }
                     ></Button>
