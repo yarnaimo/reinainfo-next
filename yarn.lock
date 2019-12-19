@@ -3156,10 +3156,10 @@
   resolved "https://registry.yarnpkg.com/@yarnaimo/firebase-testing/-/firebase-testing-0.0.6.tgz#84154b6c1b1d5044c5f9574be8f5407291b2ef43"
   integrity sha512-TrHztaBcVm5xOR94lf2xyXrJzCOnRGiUfbCWQXhrORgvp99v+3FD7a9SK1q3Z/Q8qyZjUOM/rv6Ik7l+XO/L6A==
 
-"@yarnaimo/next-config@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@yarnaimo/next-config/-/next-config-0.0.3.tgz#20016da05f3d7a3685dee97fd33a868f80d935e2"
-  integrity sha512-XzW5wdX2Q9WnGcXOI8BaFJ9xCi2WV2SNBNz98y2Gf09mb9uA6IbvqwWeOYbXxIjjxurz9rrkUIjT35iKIjJlyw==
+"@yarnaimo/next-config@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@yarnaimo/next-config/-/next-config-0.0.4.tgz#87609f36161ec1b61a836cd9f9eaa36f2587926c"
+  integrity sha512-3xDmHBoDtrwwtSLjYjqsrvTtWssG5vEiaZEnb9pVRJa7gQI1o4Xe2H/hR7EpaXczik6Yo1750sNtjh86AQD1HA==
   dependencies:
     "@babel/plugin-proposal-nullish-coalescing-operator" "^7.7.4"
     "@babel/plugin-proposal-optional-chaining" "^7.7.5"
