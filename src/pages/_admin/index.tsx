@@ -21,11 +21,20 @@ const RetweetSection: FC<{}> = () => {
         { screenName: string; id: string }[]
     >([])
 
-    const retweet = (isMyTweet: boolean) =>
-        callable<typeof _retweetManually>('retweetManually', {
-            ids: retweetTargets.map(t => t.id),
-            isMyTweet,
-        })
+    const retweet = async (isMyTweet: boolean) => {
+        if (
+            window.confirm(
+                isMyTweet ? 'トピックに追加しますか?' : 'リツイートしますか?',
+            )
+        ) {
+            return callable<typeof _retweetManually>('retweetManually', {
+                ids: retweetTargets.map(t => t.id),
+                isMyTweet,
+            })
+        }
+
+        return
+    }
 
     return (
         <PageSection>
