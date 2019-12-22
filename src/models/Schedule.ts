@@ -60,6 +60,11 @@ const colorSet = {
         color: [hsl(191, 20, 93), hsl(185, 18, 90)],
         textColor: hsl(205, 23, 57),
     },
+
+    special: {
+        color: [hsl(2, 63, 78), hsl(2, 63, 74)],
+        textColor: null,
+    },
 }
 
 export const categories = {
@@ -129,6 +134,12 @@ export const categories = {
         name: 'リリース | その他',
         micon: 'cat',
         ...colorSet.releaseBlue,
+    },
+    special: {
+        emoji: '🎁',
+        name: 'Special',
+        micon: 'gift',
+        ...colorSet.special,
     },
 }
 
