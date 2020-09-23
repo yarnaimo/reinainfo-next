@@ -72,6 +72,6 @@
     "@yarnaimo/tss": "^0.1.15"
   },
   "engines": {
-    "node": "10"
+    "node": "12"
   }
 }
