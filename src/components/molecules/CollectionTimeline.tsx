@@ -20,83 +20,83 @@ const styles = `
 `
 
 const insertStyles = (iframe: HTMLIFrameElement) => {
-    const iframeDocument = iframe.contentDocument
+  const iframeDocument = iframe.contentDocument
 
-    if (!iframeDocument) {
-        return
-    }
+  if (!iframeDocument) {
+    return
+  }
 
-    const style = iframeDocument.createElement('style')
-    style.innerHTML = styles
-    iframeDocument.head.appendChild(style)
+  const style = iframeDocument.createElement('style')
+  style.innerHTML = styles
+  iframeDocument.head.appendChild(style)
 }
 
 type Props = {
-    collectionId?: string
+  collectionId?: string
 }
 
 export const CollectionTimeline: FC<Props> = memo(
-    ({ collectionId }) => {
-        const ref = useRef<HTMLDivElement>(null)
+  ({ collectionId }) => {
+    const ref = useRef<HTMLDivElement>(null)
 
-        useEffect(() => {
-            const { twttr } = window as any
-            if (!twttr || !collectionId) {
-                return
-            }
+    useEffect(() => {
+      const { twttr } = window as any
+      if (!twttr || !collectionId) {
+        return
+      }
 
-            twttr.ready().then(({ widgets }: { widgets: any }) => {
-                if (!ref.current) {
-                    return
-                }
+      twttr.ready().then(({ widgets }: { widgets: any }) => {
+        if (!ref.current) {
+          return
+        }
 
-                const observer = new MutationObserver(records => {
-                    records
-                        .map(r => [...r.addedNodes])
-                        .flat(1)
-                        .map(node => {
-                            if (node instanceof HTMLIFrameElement) {
-                                insertStyles(node)
-                            }
-                        })
-                })
-
-                observer.observe(ref.current, {
-                    childList: true,
-                })
-
-                ref.current.innerHTML = ''
-
-                widgets.createTimeline(
-                    {
-                        sourceType: 'collection',
-                        id: collectionId.replace(/^custom-/, ''),
-                    },
-                    ref.current,
-                    {
-                        chrome: 'noheader noborders transparent',
-                        lang: 'ja',
-                        linkColor: '#6490BE',
-                    },
-                )
-                // .then((twitterWidgetElement: any) => {
-                // this.setState({
-                //     isLoading: false,
-                // })
-                // onTweetLoadSuccess &&
-                //     onTweetLoadSuccess(twitterWidgetElement)
-                // })
-                // .catch(onTweetLoadError)
+        const observer = new MutationObserver((records) => {
+          records
+            .map((r) => [...r.addedNodes])
+            .flat(1)
+            .map((node) => {
+              if (node instanceof HTMLIFrameElement) {
+                insertStyles(node)
+              }
             })
-        }, [collectionId])
+        })
 
-        return (
-            <div ref={ref} css={{ ...margin({ x: -12 }) }}></div>
-            // <Embed
-            //     id={id}
-            //     options={{ lang: 'ja', width: '100%', overflow: 'hidden' }}
-            // ></Embed>
+        observer.observe(ref.current, {
+          childList: true,
+        })
+
+        ref.current.innerHTML = ''
+
+        widgets.createTimeline(
+          {
+            sourceType: 'collection',
+            id: collectionId.replace(/^custom-/, ''),
+          },
+          ref.current,
+          {
+            chrome: 'noheader noborders transparent',
+            lang: 'ja',
+            linkColor: '#6490BE',
+          },
         )
-    },
-    (a, b) => a.collectionId === b.collectionId,
+        // .then((twitterWidgetElement: any) => {
+        // this.setState({
+        //     isLoading: false,
+        // })
+        // onTweetLoadSuccess &&
+        //     onTweetLoadSuccess(twitterWidgetElement)
+        // })
+        // .catch(onTweetLoadError)
+      })
+    }, [collectionId])
+
+    return (
+      <div ref={ref} css={{ ...margin({ x: -12 }) }}></div>
+      // <Embed
+      //     id={id}
+      //     options={{ lang: 'ja', width: '100%', overflow: 'hidden' }}
+      // ></Embed>
+    )
+  },
+  (a, b) => a.collectionId === b.collectionId,
 )

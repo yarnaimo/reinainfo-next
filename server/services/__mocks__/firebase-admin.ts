@@ -8,11 +8,11 @@ export let dbInstanceAdmin: FirebaseFirestore.Firestore
 export let dbAdmin: ReturnType<typeof createCollections>
 
 beforeEach(() => {
-    provider.next()
-    dbInstanceAdmin = provider.getFirestoreWithAuth() as any
-    dbAdmin = createCollections(dbInstanceAdmin) as any
+  provider.next()
+  dbInstanceAdmin = provider.getFirestoreWithAuth() as any
+  dbAdmin = createCollections(dbInstanceAdmin) as any
 })
 
 afterEach(async () => {
-    await provider.cleanup()
+  await provider.cleanup()
 })

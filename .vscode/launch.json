@@ -1,34 +1,34 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "chrome",
-            "request": "attach",
-            "name": "Attach to Chrome",
-            "port": 9222,
-            "webRoot": "${workspaceFolder}/src"
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Next: Chrome",
-            "url": "https://localhost:3000",
-            "webRoot": "${workspaceFolder}/src"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Next: Node",
-            "runtimeExecutable": "yarn",
-            "runtimeArgs": ["debug"],
-            "port": 9229,
-            "console": "integratedTerminal"
-        }
-    ],
-    "compounds": [
-        {
-            "name": "Next: Full",
-            "configurations": ["Next: Node", "Next: Chrome"]
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "attach",
+      "name": "Attach to Chrome",
+      "port": 9222,
+      "webRoot": "${workspaceFolder}/src"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Next: Chrome",
+      "url": "https://localhost:3000",
+      "webRoot": "${workspaceFolder}/src"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Next: Node",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["debug"],
+      "port": 9229,
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Next: Full",
+      "configurations": ["Next: Node", "Next: Chrome"]
+    }
+  ]
 }

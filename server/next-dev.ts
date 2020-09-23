@@ -5,26 +5,26 @@ import next from 'next'
 import { env } from '../src/env'
 
 const options = {
-    key: readFileSync('server/.config/key.pem'),
-    cert: readFileSync('server/.config/cert.pem'),
+  key: readFileSync('server/.config/key.pem'),
+  cert: readFileSync('server/.config/cert.pem'),
 }
 
 const nextServer = next({
-    dev: true,
-    dir: 'src',
+  dev: true,
+  dir: 'src',
 })
 
 const handle = nextServer.getRequestHandler()
 
 nextServer.prepare().then(async () => {
-    const app = express()
+  const app = express()
 
-    app.all('*', (req, res) => {
-        return handle(req, res)
-    })
+  app.all('*', (req, res) => {
+    return handle(req, res)
+  })
 
-    createServer(options, app).listen(env.port(), () => {
-        // if (err) throw err
-        console.log(`> Ready on http://localhost:${env.port()}`)
-    })
+  createServer(options, app).listen(env.port(), () => {
+    // if (err) throw err
+    console.log(`> Ready on http://localhost:${env.port()}`)
+  })
 })

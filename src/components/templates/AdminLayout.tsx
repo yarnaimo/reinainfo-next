@@ -7,11 +7,11 @@ import { AdminContainer } from '../blocks/Container'
 type Props = {}
 
 export const AdminLayout: FC<Props> = ({ children }) => {
-    const [user, loading, error] = useAuthState(app.auth())
+  const [user, loading, error] = useAuthState(app.auth())
 
-    if (!user) {
-        return <></>
-    }
+  if (!user) {
+    return <></>
+  }
 
-    return <AdminContainer>{children}</AdminContainer>
+  return <AdminContainer>{children}</AdminContainer>
 }

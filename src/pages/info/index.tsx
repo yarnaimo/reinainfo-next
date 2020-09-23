@@ -10,38 +10,38 @@ import { Title } from '../../components/templates/Title'
 
 type Props = {}
 
-const InfoPage: NextPage<Props> = props => {
-    return (
-        <MainContainer>
-            <Title title="Info" path="info"></Title>
+const InfoPage: NextPage<Props> = (props) => {
+  return (
+    <MainContainer>
+      <Title title="Info" path="info"></Title>
 
-            <PageSection>
-                <Heading2 text="Info"></Heading2>
+      <PageSection>
+        <Heading2 text="Info"></Heading2>
 
-                <Section>
-                    <p>上田麗奈さん非公式info</p>
-                    <p>
-                        Twitter アカウント -{' '}
-                        <ExternalLink href="https://twitter.com/Unoffishama">
-                            @Unoffishama
-                        </ExternalLink>
-                    </p>
-                    <p>
-                        管理者 -{' '}
-                        <ExternalLink href="https://twitter.com/yarnaimo">
-                            @yarnaimo
-                        </ExternalLink>
-                    </p>
-                    <p>
-                        Github リポジトリ -{' '}
-                        <ExternalLink href="https://github.com/yarnaimo/reinainfo-next">
-                            yarnaimo/reinainfo-next
-                        </ExternalLink>
-                    </p>
-                </Section>
-            </PageSection>
-        </MainContainer>
-    )
+        <Section>
+          <p>上田麗奈さん非公式info</p>
+          <p>
+            Twitter アカウント -{' '}
+            <ExternalLink href="https://twitter.com/Unoffishama">
+              @Unoffishama
+            </ExternalLink>
+          </p>
+          <p>
+            管理者 -{' '}
+            <ExternalLink href="https://twitter.com/yarnaimo">
+              @yarnaimo
+            </ExternalLink>
+          </p>
+          <p>
+            Github リポジトリ -{' '}
+            <ExternalLink href="https://github.com/yarnaimo/reinainfo-next">
+              yarnaimo/reinainfo-next
+            </ExternalLink>
+          </p>
+        </Section>
+      </PageSection>
+    </MainContainer>
+  )
 }
 
 // InfoPage.getInitialProps = async ctx => {

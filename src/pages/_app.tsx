@@ -17,94 +17,94 @@ import { useGA } from '../utils/ga'
 const { PageTransition } = require('next-page-transitions')
 
 const Spacer = styled.div({
-    height: appbarHeight.default + 4,
-    [responsive.isMobile]: { height: appbarHeight.mobile + 4 },
+  height: appbarHeight.default + 4,
+  [responsive.isMobile]: { height: appbarHeight.mobile + 4 },
 })
 
 export const MyApp: AppType = ({ Component, pageProps }) => {
-    const router = useRouter()
-    useGA(config.trackingId)
+  const router = useRouter()
+  useGA(config.trackingId)
 
-    if (router.pathname.startsWith('/_headless/')) {
-        return (
-            <Provider>
-                <Global styles={{ html: { overflow: 'hidden' } }}></Global>
-
-                <Component {...pageProps} />
-            </Provider>
-        )
-    }
-
-    // https://github.com/illinois/next-page-transitions/blob/master/src/PageTransition.js
-    // const [originalScrollTo, setOriginalScrollTo] = useState<
-    //     typeof window.scrollTo
-    // >()
-    // const [disableScrolling, setDisableScrolling] = useState(false)
-
-    // useEffect(() => {
-    //     if (typeof window !== 'undefined') {
-    //         // Forgive me for what I'm about to do
-    //         setOriginalScrollTo(window.scrollTo)
-    //         window.scrollTo = (...args: any) => {
-    //             if (disableScrolling) {
-    //                 return
-    //             }
-    //             originalScrollTo!.apply(window, args)
-    //         }
-    //     }
-
-    //     return () => {
-    //         if (originalScrollTo && typeof window !== 'undefined') {
-    //             window.scrollTo = originalScrollTo
-    //         }
-    //     }
-    // }, [])
-
+  if (router.pathname.startsWith('/_headless/')) {
     return (
-        <Provider>
-            <Head>
-                <title>{env.longAppName}</title>
-            </Head>
+      <Provider>
+        <Global styles={{ html: { overflow: 'hidden' } }}></Global>
 
-            <Layout>
-                <div css={{ position: 'relative' }}>
-                    <PageTransition
-                        timeout={250}
-                        classNames="page-transition"
-                        monkeyPatchScrolling
-                    >
-                        <div
-                            key={router.route}
-                            // variants={pageFadeVariants}
-                            // initial="hidden"
-                            // animate="visible"
-                            // exit="hidden"
-                            css={
-                                {
-                                    // position: 'absolute',
-                                    // width: '100%',
-                                    // top: 0,
-                                    // left: 0,
-                                }
-                            }
-                        >
-                            <Spacer
-                                css={{
-                                    [responsive.isMobile]: { display: 'none' },
-                                }}
-                            ></Spacer>
-                            <Component {...pageProps} />
-                            <Spacer
-                                css={{
-                                    display: 'none',
-                                    [responsive.isMobile]: { display: 'block' },
-                                }}
-                            ></Spacer>
-                        </div>
-                    </PageTransition>
+        <Component {...pageProps} />
+      </Provider>
+    )
+  }
 
-                    <Global
-                        styles={`
+  // https://github.com/illinois/next-page-transitions/blob/master/src/PageTransition.js
+  // const [originalScrollTo, setOriginalScrollTo] = useState<
+  //     typeof window.scrollTo
+  // >()
+  // const [disableScrolling, setDisableScrolling] = useState(false)
+
+  // useEffect(() => {
+  //     if (typeof window !== 'undefined') {
+  //         // Forgive me for what I'm about to do
+  //         setOriginalScrollTo(window.scrollTo)
+  //         window.scrollTo = (...args: any) => {
+  //             if (disableScrolling) {
+  //                 return
+  //             }
+  //             originalScrollTo!.apply(window, args)
+  //         }
+  //     }
+
+  //     return () => {
+  //         if (originalScrollTo && typeof window !== 'undefined') {
+  //             window.scrollTo = originalScrollTo
+  //         }
+  //     }
+  // }, [])
+
+  return (
+    <Provider>
+      <Head>
+        <title>{env.longAppName}</title>
+      </Head>
+
+      <Layout>
+        <div css={{ position: 'relative' }}>
+          <PageTransition
+            timeout={250}
+            classNames="page-transition"
+            monkeyPatchScrolling
+          >
+            <div
+              key={router.route}
+              // variants={pageFadeVariants}
+              // initial="hidden"
+              // animate="visible"
+              // exit="hidden"
+              css={
+                {
+                  // position: 'absolute',
+                  // width: '100%',
+                  // top: 0,
+                  // left: 0,
+                }
+              }
+            >
+              <Spacer
+                css={{
+                  [responsive.isMobile]: { display: 'none' },
+                }}
+              ></Spacer>
+              <Component {...pageProps} />
+              <Spacer
+                css={{
+                  display: 'none',
+                  [responsive.isMobile]: { display: 'block' },
+                }}
+              ></Spacer>
+            </div>
+          </PageTransition>
+
+          <Global
+            styles={`
                             .page-transition-enter {
                                 opacity: 0;
                             }
@@ -120,11 +120,11 @@ export const MyApp: AppType = ({ Component, pageProps }) => {
                                 transition: opacity 250ms cubic-bezier(0.4, 0.0, 0.2, 1);
                             }
                         `}
-                    ></Global>
-                </div>
-            </Layout>
-        </Provider>
-    )
+          ></Global>
+        </div>
+      </Layout>
+    </Provider>
+  )
 }
 
 export default MyApp

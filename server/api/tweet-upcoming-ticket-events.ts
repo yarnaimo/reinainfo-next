@@ -8,49 +8,49 @@ import { sendCrossNotification } from '../services/integrated'
 import { TwimoClient } from '../services/twitter'
 
 const combineSchedule = async (
-    ticket: ITicket['_D'],
+  ticket: ITicket['_D'],
 ): Promise<SetOptional<ITicketSchedulePair, 'schedule'>> => {
-    const schedule = await dbAdmin.schedules.getDoc({
-        doc: ticket._ref.parent.parent!.id,
-    })
-    return { ticket, schedule }
+  const schedule = await dbAdmin.schedules.getDoc({
+    doc: ticket._ref.parent.parent!.id,
+  })
+  return { ticket, schedule }
 }
 
 const getTickets = async (
-    filterField: 'opensAt' | 'closesAt',
-    since: Dayjs,
-    until: Dayjs,
+  filterField: 'opensAt' | 'closesAt',
+  since: Dayjs,
+  until: Dayjs,
 ) => {
-    const { array } = await dbAdmin.gTickets.getQuery({
-        q: MTimestamp.where({ field: filterField, order: 'asc', since, until }),
-    })
-    const combined = await array.mapAsync(combineSchedule)
-    return combined
-        .toArray()
-        .filter((pair): pair is ITicketSchedulePair => !!pair.schedule)
+  const { array } = await dbAdmin.gTickets.getQuery({
+    q: MTimestamp.where({ field: filterField, order: 'asc', since, until }),
+  })
+  const combined = await array.mapAsync(combineSchedule)
+  return combined
+    .toArray()
+    .filter((pair): pair is ITicketSchedulePair => !!pair.schedule)
 }
 
 export const _tweetUpcomingTicketEvents = async (
-    twimo: TwimoClient,
-    now: Dayjs,
+  twimo: TwimoClient,
+  now: Dayjs,
 ) => {
-    const since = now.startOf('day').add(1, 'day')
-    const until = since.add(1, 'day')
+  const since = now.startOf('day').add(1, 'day')
+  const until = since.add(1, 'day')
 
-    const opTickets = await getTickets('opensAt', since, until)
-    const clTickets = await getTickets('closesAt', since, until)
+  const opTickets = await getTickets('opensAt', since, until)
+  const clTickets = await getTickets('closesAt', since, until)
 
-    const opTextsToTweet = opTickets.map((pair, i) => {
-        return MSchedule.buildNotificationTextOfTicketEvent(pair, 'open')
-    })
-    const clTextsToTweet = clTickets.map((pair, i) => {
-        return MSchedule.buildNotificationTextOfTicketEvent(pair, 'close')
-    })
+  const opTextsToTweet = opTickets.map((pair, i) => {
+    return MSchedule.buildNotificationTextOfTicketEvent(pair, 'open')
+  })
+  const clTextsToTweet = clTickets.map((pair, i) => {
+    return MSchedule.buildNotificationTextOfTicketEvent(pair, 'close')
+  })
 
-    const { tweetResults, webhookResults } = await sendCrossNotification(
-        twimo,
-        [...clTextsToTweet, ...opTextsToTweet],
-    )
+  const { tweetResults, webhookResults } = await sendCrossNotification(twimo, [
+    ...clTextsToTweet,
+    ...opTextsToTweet,
+  ])
 
-    return { tweetResults, webhookResults }
+  return { tweetResults, webhookResults }
 }

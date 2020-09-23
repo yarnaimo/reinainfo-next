@@ -20,84 +20,84 @@ const url = 'https://t.co'
 let twimo: TwimoClient
 
 beforeEach(async () => {
-    twimo = await getTwimoClient()
+  twimo = await getTwimoClient()
 
-    await prepareWebhookDoc()
+  await prepareWebhookDoc()
 })
 
 const o = {
-    category: 'live' as const,
-    customIcon: null,
-    ribbonColors: null,
-    hasTime: true,
-    url,
-    parts: [],
-    venue: null,
-    // way: null,
-    hasTickets: false,
-    thumbUrl: null,
+  category: 'live' as const,
+  customIcon: null,
+  ribbonColors: null,
+  hasTime: true,
+  url,
+  parts: [],
+  venue: null,
+  // way: null,
+  hasTickets: false,
+  thumbUrl: null,
 }
 beforeEach(async () => {
-    const schedule: ISchedule['_E'] = {
-        active: true,
-        isSerial: false,
-        title: 'live0',
-        date: scheduleDate.toDate(),
-        ...o,
-    }
-    const scheduleDoc = await dbInstanceAdmin
-        .collection('schedules')
-        .add(schedule)
+  const schedule: ISchedule['_E'] = {
+    active: true,
+    isSerial: false,
+    title: 'live0',
+    date: scheduleDate.toDate(),
+    ...o,
+  }
+  const scheduleDoc = await dbInstanceAdmin
+    .collection('schedules')
+    .add(schedule)
 
-    const tickets = prray<ITicket['_E']>([
-        {
-            label: 'ticket0',
-            opensAt: day0End.toDate(),
-            closesAt: null,
-        },
-        {
-            label: 'ticket1-open',
-            opensAt: day1Noon.toDate(),
-            closesAt: day2Start.toDate(),
-        },
-        {
-            label: 'ticket1-close',
-            opensAt: null,
-            closesAt: day1.toDate(),
-        },
-        {
-            label: 'ticket2',
-            opensAt: null,
-            closesAt: day2Start.toDate(),
-        },
-    ])
+  const tickets = prray<ITicket['_E']>([
+    {
+      label: 'ticket0',
+      opensAt: day0End.toDate(),
+      closesAt: null,
+    },
+    {
+      label: 'ticket1-open',
+      opensAt: day1Noon.toDate(),
+      closesAt: day2Start.toDate(),
+    },
+    {
+      label: 'ticket1-close',
+      opensAt: null,
+      closesAt: day1.toDate(),
+    },
+    {
+      label: 'ticket2',
+      opensAt: null,
+      closesAt: day2Start.toDate(),
+    },
+  ])
 
-    await tickets.mapAsync(t => scheduleDoc.collection('tickets').add(t))
+  await tickets.mapAsync((t) => scheduleDoc.collection('tickets').add(t))
 })
 
 test('daily', async () => {
-    // start
+  // start
 
-    const result = await _tweetUpcomingTicketEvents(twimo, now)
+  const result = await _tweetUpcomingTicketEvents(twimo, now)
 
-    // end
+  // end
 
-    const expectedTweets = [
-        `⚠ チケットの申込期限が近づいています [明日 22:00 まで]
+  const expectedTweets = [
+    `⚠ チケットの申込期限が近づいています [明日 22:00 まで]
 
 2/27 (水) live0
 📌 ticket1-close
 
 ${url}`,
-        `🚩 チケットの受付が始まります [明日 12:00 から]
+    `🚩 チケットの受付が始まります [明日 12:00 から]
 
 2/27 (水) live0
 📌 ticket1-open
 
 ${url}`,
-    ].map(t => ({ full_text: t }))
+  ].map((t) => ({ full_text: t }))
 
-    expectObjectArrayContaining(result.tweetResults, 2, expectedTweets)
+  expectObjectArrayContaining(result.tweetResults, 2, expectedTweets)
 
-    expect(send).toHaveBeenCalledTimes(2)
+  expect(send).toHaveBeenCalledTimes(2)
 })

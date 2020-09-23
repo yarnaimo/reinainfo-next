@@ -10,21 +10,21 @@ import { TwitterSearch } from '../models/TwitterSearch'
 import { Webhook } from '../models/Webhook'
 
 export const createCollections = <F extends Blue.Firestore>(instance: F) => {
-    return {
-        appEnvs: AppEnv(instance),
-        webhooks: Webhook(instance),
-        twitterSearches: TwitterSearch(instance),
-        twitterCollections: TwitterCollection(instance),
+  return {
+    appEnvs: AppEnv(instance),
+    webhooks: Webhook(instance),
+    twitterSearches: TwitterSearch(instance),
+    twitterCollections: TwitterCollection(instance),
 
-        scheduleTweetLogs: ScheduleTweetLog(instance),
-        topics: Topic(instance),
+    scheduleTweetLogs: ScheduleTweetLog(instance),
+    topics: Topic(instance),
 
-        schedules: Schedule(instance),
-        _schedulesIn: Schedule,
-        gSchedulesActive: GScheduleActive(instance),
-        serials: Serial(instance),
+    schedules: Schedule(instance),
+    _schedulesIn: Schedule,
+    gSchedulesActive: GScheduleActive(instance),
+    serials: Serial(instance),
 
-        _ticketsIn: Ticket,
-        gTickets: GTicket(instance),
-    }
+    _ticketsIn: Ticket,
+    gTickets: GTicket(instance),
+  }
 }

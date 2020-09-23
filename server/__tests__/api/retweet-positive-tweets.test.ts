@@ -9,73 +9,73 @@ import { prepareWebhookDoc, send } from '../__mocks__/@slack/webhook'
 let twimo: TwimoClient
 
 beforeEach(async () => {
-    twimo = await getTwimoClient()
+  twimo = await getTwimoClient()
 
-    await prepareWebhookDoc()
-    await prepareTwitterCollectionDoc()
+  await prepareWebhookDoc()
+  await prepareTwitterCollectionDoc()
 })
 
 test('retweetPositiveTweets', async () => {
-    const query = 'query'
-    await dbAdmin.twitterSearches.create('default', {
-        query,
-        prevTweetId: null,
-    })
+  const query = 'query'
+  await dbAdmin.twitterSearches.create('default', {
+    query,
+    prevTweetId: null,
+  })
 
-    // await dbAdmin.webhooks.create(null, {
-    //     service: 'slack',
-    //     url: 'url',
-    // })
+  // await dbAdmin.webhooks.create(null, {
+  //     service: 'slack',
+  //     url: 'url',
+  // })
 
-    const expectedMessages = [
-        '⚡ 1 件リツイートしました\nhttps://twitter.com/screenName/status/0',
-        '⚡ 1 件リツイートしました\nhttps://twitter.com/screenName/status/2',
-    ]
+  const expectedMessages = [
+    '⚡ 1 件リツイートしました\nhttps://twitter.com/screenName/status/0',
+    '⚡ 1 件リツイートしました\nhttps://twitter.com/screenName/status/2',
+  ]
 
-    // start
+  // start
 
-    const result1 = await _retweetPositiveTweets(
-        twimo,
-        now,
-        t => t.id_str !== '3',
-    )
+  const result1 = await _retweetPositiveTweets(
+    twimo,
+    now,
+    (t) => t.id_str !== '3',
+  )
 
-    // end
+  // end
 
-    expect(result1.tweetResults).toHaveLength(1)
-    expect(result1.tweetResults).toMatchObject([{ id_str: '0' }])
-    expect(send).toHaveBeenNthCalledWith(
-        1,
-        // expect.objectContaining({ service: 'slack', url: 'url' }),
-        { text: expectedMessages[0] },
-    )
+  expect(result1.tweetResults).toHaveLength(1)
+  expect(result1.tweetResults).toMatchObject([{ id_str: '0' }])
+  expect(send).toHaveBeenNthCalledWith(
+    1,
+    // expect.objectContaining({ service: 'slack', url: 'url' }),
+    { text: expectedMessages[0] },
+  )
 
-    const search1 = await dbAdmin.twitterSearches.getDoc({ doc: 'default' })
-    expect(search1).toMatchObject({ query, prevTweetId: '1' })
+  const search1 = await dbAdmin.twitterSearches.getDoc({ doc: 'default' })
+  expect(search1).toMatchObject({ query, prevTweetId: '1' })
 
-    const { array: topics } = await dbAdmin.topics.getQuery({})
-    expectObjectArrayContaining(topics, 1, [{ type: 'retweet', tweetId: '0' }])
+  const { array: topics } = await dbAdmin.topics.getQuery({})
+  expectObjectArrayContaining(topics, 1, [{ type: 'retweet', tweetId: '0' }])
 
-    // start
+  // start
 
-    const result2 = await _retweetPositiveTweets(
-        twimo,
-        now,
-        t => t.id_str !== '3',
-    )
+  const result2 = await _retweetPositiveTweets(
+    twimo,
+    now,
+    (t) => t.id_str !== '3',
+  )
 
-    // end
+  // end
 
-    expect(result2.tweetResults).toHaveLength(1)
-    expect(result2.tweetResults).toMatchObject([{ id_str: '2' }])
-    expect(send).toHaveBeenNthCalledWith(
-        2,
-        // expect.objectContaining({ service: 'slack', url: 'url' }),
-        { text: expectedMessages[1] },
-    )
+  expect(result2.tweetResults).toHaveLength(1)
+  expect(result2.tweetResults).toMatchObject([{ id_str: '2' }])
+  expect(send).toHaveBeenNthCalledWith(
+    2,
+    // expect.objectContaining({ service: 'slack', url: 'url' }),
+    { text: expectedMessages[1] },
+  )
 
-    const search2 = await dbAdmin.twitterSearches.getDoc({ doc: 'default' })
-    expect(search2).toMatchObject({ query, prevTweetId: '3' })
+  const search2 = await dbAdmin.twitterSearches.getDoc({ doc: 'default' })
+  expect(search2).toMatchObject({ query, prevTweetId: '3' })
 
-    expect(send).toHaveBeenCalledTimes(2)
+  expect(send).toHaveBeenCalledTimes(2)
 })

@@ -6,46 +6,45 @@ import { getEnv } from './firebase-admin'
 export type ListInfo = { id_str: string; name: string }
 
 export const getTwimoClient = async () => {
-    const env = await getEnv()
+  const env = await getEnv()
 
-    const twimo = TwimoClient(env.twitter)
-    return {
-        ...twimo,
+  const twimo = TwimoClient(env.twitter)
+  return {
+    ...twimo,
 
-        lookupTweets: (ids: string[]) =>
-            twimo.get<IStatus[]>('statuses/lookup', {
-                ...twimo.defaultParams,
-                id: ids.join(),
-            }),
+    lookupTweets: (ids: string[]) =>
+      twimo.get<IStatus[]>('statuses/lookup', {
+        ...twimo.defaultParams,
+        id: ids.join(),
+      }),
 
-        getLists: () => twimo.get<ListInfo[]>('lists/list'),
+    getLists: () => twimo.get<ListInfo[]>('lists/list'),
 
-        getListTweets: (listId: string) =>
-            twimo.get<IStatus[]>('lists/statuses', {
-                list_id: listId,
-                count: 100,
-            }),
+    getListTweets: (listId: string) =>
+      twimo.get<IStatus[]>('lists/statuses', {
+        list_id: listId,
+        count: 100,
+      }),
 
-        getMutedIds: async () => {
-            const { ids } = await twimo.get<{ ids: string[] }>(
-                'mutes/users/ids',
-                { stringify_ids: true },
-            )
-            return new Set(ids)
-        },
+    getMutedIds: async () => {
+      const { ids } = await twimo.get<{ ids: string[] }>('mutes/users/ids', {
+        stringify_ids: true,
+      })
+      return new Set(ids)
+    },
 
-        addTweetToCollection: ({
-            collectionId,
-            tweetId,
-        }: {
-            collectionId: string
-            tweetId: string
-        }) =>
-            twimo.post('collections/entries/add', {
-                id: collectionId,
-                tweet_id: tweetId,
-            }),
-    }
+    addTweetToCollection: ({
+      collectionId,
+      tweetId,
+    }: {
+      collectionId: string
+      tweetId: string
+    }) =>
+      twimo.post('collections/entries/add', {
+        id: collectionId,
+        tweet_id: tweetId,
+      }),
+  }
 }
 
 export type TwimoClient = PromiseReturnType<typeof getTwimoClient>

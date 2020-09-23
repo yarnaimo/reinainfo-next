@@ -7,39 +7,36 @@ import { nowMorning } from '../__fixtures__/date'
 let twimo: TwimoClient
 
 beforeEach(async () => {
-    twimo = await getTwimoClient()
+  twimo = await getTwimoClient()
 })
 
 test('retweetScheduleTweetsOfPrevNight', async () => {
-    await prray([
-        {
-            _createdAt: new Date('2018-08-01T22:00'),
-            // type: 'upcomingSchedule' as const,
-            // tweetId: '0',
-        },
-        // {
-        //     _createdAt: new Date('2018-08-02T22:00'),
-        //     type: 'retweet' as const,
-        //     tweetId: '2',
-        // },
-        {
-            _createdAt: new Date('2018-08-02T22:00'),
-            // type: 'upcomingSchedule' as const,
-            // tweetId: '4',
-        },
-    ]).mapAsync((log, i) =>
-        dbInstanceAdmin
-            .collection('scheduleTweetLogs')
-            .doc(String(i))
-            .set(log),
-    )
+  await prray([
+    {
+      _createdAt: new Date('2018-08-01T22:00'),
+      // type: 'upcomingSchedule' as const,
+      // tweetId: '0',
+    },
+    // {
+    //     _createdAt: new Date('2018-08-02T22:00'),
+    //     type: 'retweet' as const,
+    //     tweetId: '2',
+    // },
+    {
+      _createdAt: new Date('2018-08-02T22:00'),
+      // type: 'upcomingSchedule' as const,
+      // tweetId: '4',
+    },
+  ]).mapAsync((log, i) =>
+    dbInstanceAdmin.collection('scheduleTweetLogs').doc(String(i)).set(log),
+  )
 
-    // start
+  // start
 
-    const result = await _retweetScheduleTweetsOfPrevNight(twimo, nowMorning)
+  const result = await _retweetScheduleTweetsOfPrevNight(twimo, nowMorning)
 
-    // end
+  // end
 
-    expect(result).toHaveLength(1)
-    expect(result).toMatchObject([{ retweeted_status: { id_str: '1' } }])
+  expect(result).toHaveLength(1)
+  expect(result).toMatchObject([{ retweeted_status: { id_str: '1' } }])
 })

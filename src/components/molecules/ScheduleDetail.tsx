@@ -16,82 +16,82 @@ const cardMotionIn = transition('dec', ['transform'])
 const cardMotionOut = transition('acc', ['transform'])
 
 type Props = {
-    schedule: IScheduleSerialized
-    compact?: boolean
-    open: boolean
-    onClose?: () => void
+  schedule: IScheduleSerialized
+  compact?: boolean
+  open: boolean
+  onClose?: () => void
 }
 
 export const ScheduleDetail = memo(
-    forwardRef<any, Props>(
-        ({ schedule: s, compact = false, open, onClose, ...props }, ref) => {
-            const [tickets, setTickets] = useState<ITicket['_D'][]>()
+  forwardRef<any, Props>(
+    ({ schedule: s, compact = false, open, onClose, ...props }, ref) => {
+      const [tickets, setTickets] = useState<ITicket['_D'][]>()
 
-            useEffectOnce(() => {
-                if (s.hasTickets && env.isBrowser) {
-                    db._ticketsIn(dbInstance.doc(s._path))
-                        .getQuery({
-                            q: q => q.orderBy('opensAt'),
-                        })
-                        .then(({ array }) => setTickets(array))
-                }
+      useEffectOnce(() => {
+        if (s.hasTickets && env.isBrowser) {
+          db._ticketsIn(dbInstance.doc(s._path))
+            .getQuery({
+              q: (q) => q.orderBy('opensAt'),
             })
+            .then(({ array }) => setTickets(array))
+        }
+      })
 
-            return (
-                <SolidColumn
-                    jc="center"
-                    ai="center"
-                    css={{
-                        zIndex: 7,
-                        ...fixedFit,
+      return (
+        <SolidColumn
+          jc="center"
+          ai="center"
+          css={{
+            zIndex: 7,
+            ...fixedFit,
 
-                        ...fadeMotion,
-                        opacity: open ? 1 : 0,
-                        visibility: open ? 'visible' : 'hidden',
-                    }}
-                >
-                    <div
-                        onClick={() => onClose?.()}
-                        css={{
-                            ...fixedFit,
-                            zIndex: -1,
-                            cursor: 'pointer',
-                            // [responsive.isMobile]: {
-                            //     display: 'none',
-                            // },
+            ...fadeMotion,
+            opacity: open ? 1 : 0,
+            visibility: open ? 'visible' : 'hidden',
+          }}
+        >
+          <div
+            onClick={() => onClose?.()}
+            css={{
+              ...fixedFit,
+              zIndex: -1,
+              cursor: 'pointer',
+              // [responsive.isMobile]: {
+              //     display: 'none',
+              // },
 
-                            background: color.black(0.3),
-                        }}
-                    ></div>
+              background: color.black(0.3),
+            }}
+          ></div>
 
-                    <Container
-                        css={[
-                            cardMotionIn,
-                            open ? cardMotionIn : cardMotionOut,
-                            {
-                                transform: open
-                                    ? 'translateY(0px) scale(1)'
-                                    : 'translateY(16px) scale(0.95)',
-                            },
-                        ]}
-                    >
-                        <ScheduleDetailContent
-                            schedule={s}
-                            tickets={tickets}
-                            compact={compact}
-                            css={{
-                                ...margin({ x: -1 }),
+          <Container
+            css={[
+              cardMotionIn,
+              open ? cardMotionIn : cardMotionOut,
+              {
+                transform: open
+                  ? 'translateY(0px) scale(1)'
+                  : 'translateY(16px) scale(0.95)',
+              },
+            ]}
+          >
+            <ScheduleDetailContent
+              schedule={s}
+              tickets={tickets}
+              compact={compact}
+              css={{
+                ...margin({ x: -1 }),
 
-                                borderRadius: 11,
-                                overflow: 'hidden',
-                                boxShadow: dialogShadow(color.black(0.2)),
-                                background: color.white(),
-                            }}
-                        ></ScheduleDetailContent>
-                    </Container>
-                </SolidColumn>
-            )
-        },
-    ),
-    (a, b) => MSpark.isEqual(a.schedule, b.schedule) && a.open === b.open,
+                borderRadius: 11,
+                overflow: 'hidden',
+                boxShadow: dialogShadow(color.black(0.2)),
+                background: color.white(),
+              }}
+            ></ScheduleDetailContent>
+          </Container>
+        </SolidColumn>
+      )
+    },
+  ),
+  (a, b) => MSpark.isEqual(a.schedule, b.schedule) && a.open === b.open,
 )

@@ -9,36 +9,36 @@ import { login, logout } from '../../services/firebase'
 
 type Props = {}
 
-const AdminLoginPage: NextPage<Props> = props => {
-    const router = useRouter()
+const AdminLoginPage: NextPage<Props> = (props) => {
+  const router = useRouter()
 
-    return (
-        <Container>
-            <Title title="ログイン" path="login"></Title>
+  return (
+    <Container>
+      <Title title="ログイン" path="login"></Title>
 
-            <Section>
-                <Button
-                    unelevated
-                    label="ログイン"
-                    onClick={async () => {
-                        await login()
-                        router.push('/_admin')
-                        // router.push((router.query.referrerPath as string) || '/')
-                    }}
-                ></Button>
-            </Section>
+      <Section>
+        <Button
+          unelevated
+          label="ログイン"
+          onClick={async () => {
+            await login()
+            router.push('/_admin')
+            // router.push((router.query.referrerPath as string) || '/')
+          }}
+        ></Button>
+      </Section>
 
-            <Section>
-                <Button
-                    unelevated
-                    label="ログアウト"
-                    onClick={async () => {
-                        await logout()
-                    }}
-                ></Button>
-            </Section>
-        </Container>
-    )
+      <Section>
+        <Button
+          unelevated
+          label="ログアウト"
+          onClick={async () => {
+            await logout()
+          }}
+        ></Button>
+      </Section>
+    </Container>
+  )
 }
 
 // Login.getInitialProps = async ({ req }) => {

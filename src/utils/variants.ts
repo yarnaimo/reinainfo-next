@@ -1,41 +1,41 @@
 import { Variants } from 'framer-motion'
 
 export const pageFadeVariants: Variants = {
-    hidden: {
-        opacity: 0,
-        transition: { duration: 0.25 },
-    },
-    visible: {
-        opacity: 1,
-        transition: { duration: 0.25 },
-    },
+  hidden: {
+    opacity: 0,
+    transition: { duration: 0.25 },
+  },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.25 },
+  },
 }
 
 export const cardVariants: Variants = {
-    initial: {
-        y: 8,
-        opacity: 0,
-        scale: 0.98,
-        transition: {
-            y: { stiffness: 100 },
-        },
+  initial: {
+    y: 8,
+    opacity: 0,
+    scale: 0.98,
+    transition: {
+      y: { stiffness: 100 },
     },
-    enter: {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        transition: {
-            y: { stiffness: 100, velocity: -100 },
-        },
+  },
+  enter: {
+    y: 0,
+    opacity: 1,
+    scale: 1,
+    transition: {
+      y: { stiffness: 100, velocity: -100 },
     },
-    exit: {
-        y: 8,
-        opacity: 0,
-        scale: 0.98,
-        transition: {
-            y: { stiffness: 100 },
-        },
+  },
+  exit: {
+    y: 8,
+    opacity: 0,
+    scale: 0.98,
+    transition: {
+      y: { stiffness: 100 },
     },
+  },
 }
 
 // export const tabItemVariants: Variants = {

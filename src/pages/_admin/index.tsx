@@ -16,173 +16,160 @@ import { ISerial } from '../../models/Serial'
 import { callable, db } from '../../services/firebase'
 
 const RetweetSection: FC<{}> = () => {
-    const [tweetIdField, setTweetIdField] = useState('')
-    const [retweetTargets, setRetweetTargets] = useState<
-        { screenName: string; id: string }[]
-    >([])
+  const [tweetIdField, setTweetIdField] = useState('')
+  const [retweetTargets, setRetweetTargets] = useState<
+    { screenName: string; id: string }[]
+  >([])
 
-    const retweet = async (isMyTweet: boolean) => {
-        if (
-            window.confirm(
-                isMyTweet ? 'トピックに追加しますか?' : 'リツイートしますか?',
-            )
-        ) {
-            return callable<typeof _retweetManually>('retweetManually', {
-                ids: retweetTargets.map(t => t.id),
-                isMyTweet,
-            })
-        }
-
-        return
+  const retweet = async (isMyTweet: boolean) => {
+    if (
+      window.confirm(
+        isMyTweet ? 'トピックに追加しますか?' : 'リツイートしますか?',
+      )
+    ) {
+      return callable<typeof _retweetManually>('retweetManually', {
+        ids: retweetTargets.map((t) => t.id),
+        isMyTweet,
+      })
     }
 
-    return (
-        <PageSection>
-            <Heading2 text="Retweet" marginY={16} noColor></Heading2>
+    return
+  }
 
-            <Section>
-                {!!retweetTargets.length && (
-                    <List>
-                        {retweetTargets.map(({ screenName, id }, i) => (
-                            <SimpleListItem
-                                key={i}
-                                text={`${screenName}/${id}`}
-                                metaIcon={{
-                                    icon: 'close',
-                                    onClick: () => {
-                                        setRetweetTargets(pre =>
-                                            pre.filter((_, _i) => i !== _i),
-                                        )
-                                    },
-                                }}
-                            />
-                        ))}
-                    </List>
-                )}
+  return (
+    <PageSection>
+      <Heading2 text="Retweet" marginY={16} noColor></Heading2>
 
-                <TextField
-                    label="Paste Tweet URL"
-                    onPaste={e => {
-                        const text: string = e.clipboardData.getData('text')
-                        const twitterMatch = text.match(
-                            /twitter.com\/([\w]+)\/status\/(\d+)/,
-                        )
+      <Section>
+        {!!retweetTargets.length && (
+          <List>
+            {retweetTargets.map(({ screenName, id }, i) => (
+              <SimpleListItem
+                key={i}
+                text={`${screenName}/${id}`}
+                metaIcon={{
+                  icon: 'close',
+                  onClick: () => {
+                    setRetweetTargets((pre) => pre.filter((_, _i) => i !== _i))
+                  },
+                }}
+              />
+            ))}
+          </List>
+        )}
 
-                        if (twitterMatch) {
-                            const [, screenName, id] = twitterMatch
+        <TextField
+          label="Paste Tweet URL"
+          onPaste={(e) => {
+            const text: string = e.clipboardData.getData('text')
+            const twitterMatch = text.match(
+              /twitter.com\/([\w]+)\/status\/(\d+)/,
+            )
 
-                            if (!retweetTargets.some(t => t.id === id)) {
-                                setRetweetTargets(pre => [
-                                    ...pre,
-                                    {
-                                        screenName,
-                                        id,
-                                    },
-                                ])
-                            }
-                        }
+            if (twitterMatch) {
+              const [, screenName, id] = twitterMatch
 
-                        setTweetIdField('')
-                    }}
-                    value={tweetIdField}
-                    onChange={() => {}}
-                ></TextField>
-            </Section>
+              if (!retweetTargets.some((t) => t.id === id)) {
+                setRetweetTargets((pre) => [
+                  ...pre,
+                  {
+                    screenName,
+                    id,
+                  },
+                ])
+              }
+            }
 
-            <Section>
-                <Button
-                    label="トピックに追加"
-                    css={{ marginRight: 12 }}
-                    onClick={() => {
-                        retweet(true).then(res => {
-                            if (res) {
-                                setRetweetTargets([])
-                                window.alert(
-                                    `${res.retweetCount} 件追加しました`,
-                                )
-                            }
-                        })
-                    }}
-                ></Button>
-                <Button
-                    label="リツイート"
-                    unelevated
-                    onClick={() => {
-                        retweet(false).then(res => {
-                            if (res) {
-                                setRetweetTargets([])
-                                window.alert(
-                                    `${res.retweetCount} 件リツイートしました`,
-                                )
-                            }
-                        })
-                    }}
-                ></Button>
-            </Section>
-        </PageSection>
-    )
+            setTweetIdField('')
+          }}
+          value={tweetIdField}
+          onChange={() => {}}
+        ></TextField>
+      </Section>
+
+      <Section>
+        <Button
+          label="トピックに追加"
+          css={{ marginRight: 12 }}
+          onClick={() => {
+            retweet(true).then((res) => {
+              if (res) {
+                setRetweetTargets([])
+                window.alert(`${res.retweetCount} 件追加しました`)
+              }
+            })
+          }}
+        ></Button>
+        <Button
+          label="リツイート"
+          unelevated
+          onClick={() => {
+            retweet(false).then((res) => {
+              if (res) {
+                setRetweetTargets([])
+                window.alert(`${res.retweetCount} 件リツイートしました`)
+              }
+            })
+          }}
+        ></Button>
+      </Section>
+    </PageSection>
+  )
 }
 
 const serialTableKeys: typeof useSerialForm._K[] = ['active', 'label']
 
 const SerialSection: FC<{}> = () => {
-    const serialForm = useSerialForm()
+  const serialForm = useSerialForm()
 
-    const serials = useSCollection({
-        model: db.serials,
-        q: q => q.where('active', '==', true),
-        decoder: (r: ISerial['_D']) => ({
-            ...r,
-            tableRow: serialForm.tableRow(r, serialTableKeys, [
-                <Link
-                    href="/_admin/serials/[id]"
-                    as={`/_admin/serials/${r._id}`}
-                    passHref
-                >
-                    <Button
-                        tag="a"
-                        label="開く"
-                        css={{ margin: '0 -8px' }}
-                    ></Button>
-                </Link>,
-            ]),
-        }),
-    })
+  const serials = useSCollection({
+    model: db.serials,
+    q: (q) => q.where('active', '==', true),
+    decoder: (r: ISerial['_D']) => ({
+      ...r,
+      tableRow: serialForm.tableRow(r, serialTableKeys, [
+        <Link
+          href="/_admin/serials/[id]"
+          as={`/_admin/serials/${r._id}`}
+          passHref
+        >
+          <Button tag="a" label="開く" css={{ margin: '0 -8px' }}></Button>
+        </Link>,
+      ]),
+    }),
+  })
 
-    return (
-        <PageSection>
-            <Heading2 text="Serials" marginY={16} noColor></Heading2>
+  return (
+    <PageSection>
+      <Heading2 text="Serials" marginY={16} noColor></Heading2>
 
-            <Section>
-                {serialForm.renderDialog()}
-                {serialForm.renderAddButton(() =>
-                    serialForm.editDoc(
-                        db.serials.collectionRef.doc(),
-                        db.serials.create,
-                    ),
-                )}
-            </Section>
+      <Section>
+        {serialForm.renderDialog()}
+        {serialForm.renderAddButton(() =>
+          serialForm.editDoc(db.serials.collectionRef.doc(), db.serials.create),
+        )}
+      </Section>
 
-            <AdminDataTable
-                header={serialForm.tableHeader(serialTableKeys, [''])}
-                data={serials.array}
-            ></AdminDataTable>
-        </PageSection>
-    )
+      <AdminDataTable
+        header={serialForm.tableHeader(serialTableKeys, [''])}
+        data={serials.array}
+      ></AdminDataTable>
+    </PageSection>
+  )
 }
 
 type Props = {}
 
 const AdminIndexPage: NextPage<Props> = () => {
-    return (
-        <AdminLayout>
-            <Title title="Admin - Schedules" path={null}></Title>
+  return (
+    <AdminLayout>
+      <Title title="Admin - Schedules" path={null}></Title>
 
-            <RetweetSection></RetweetSection>
-            <SerialSection></SerialSection>
-            <ScheduleSection></ScheduleSection>
-        </AdminLayout>
-    )
+      <RetweetSection></RetweetSection>
+      <SerialSection></SerialSection>
+      <ScheduleSection></ScheduleSection>
+    </AdminLayout>
+  )
 }
 
 export default AdminIndexPage

@@ -4,30 +4,30 @@ import { retweetWithLoggingAndNotification } from '../services/integrated'
 import { getTwimoClient } from '../services/twitter'
 
 export const _retweetManually = createCallable<
-    'retweetManually',
-    { ids: string[]; isMyTweet: boolean },
-    { retweetCount: number }
+  'retweetManually',
+  { ids: string[]; isMyTweet: boolean },
+  { retweetCount: number }
 >(async (data, ctx) => {
-    if (!ctx.auth) {
-        throw new https.HttpsError('unauthenticated', '')
-    }
+  if (!ctx.auth) {
+    throw new https.HttpsError('unauthenticated', '')
+  }
 
-    const isAdmin = await dbInstanceAdmin
-        .collection('admins')
-        .doc(ctx.auth.uid)
-        .get()
-        .then(snap => snap.exists)
+  const isAdmin = await dbInstanceAdmin
+    .collection('admins')
+    .doc(ctx.auth.uid)
+    .get()
+    .then((snap) => snap.exists)
 
-    if (!isAdmin) {
-        throw new https.HttpsError('permission-denied', '')
-    }
+  if (!isAdmin) {
+    throw new https.HttpsError('permission-denied', '')
+  }
 
-    const twimo = await getTwimoClient()
-    const results = await retweetWithLoggingAndNotification(
-        twimo,
-        data.ids,
-        data.isMyTweet,
-    )
+  const twimo = await getTwimoClient()
+  const results = await retweetWithLoggingAndNotification(
+    twimo,
+    data.ids,
+    data.isMyTweet,
+  )
 
-    return { retweetCount: results.tweetResults.length }
+  return { retweetCount: results.tweetResults.length }
 })

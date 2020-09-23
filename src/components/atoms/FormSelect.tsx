@@ -6,26 +6,26 @@ import { SetRequired } from 'type-fest'
 import { FieldFn } from '../templates/Form'
 
 type Props = SetRequired<
-    SelectProps &
-        ReturnType<FieldFn<any>> & {
-            register: ReturnType<typeof useForm>['register']
-            setValue: (key: string, value: any) => void
-        },
-    'options'
+  SelectProps &
+    ReturnType<FieldFn<any>> & {
+      register: ReturnType<typeof useForm>['register']
+      setValue: (key: string, value: any) => void
+    },
+  'options'
 >
 
 export const FormSelect: FC<Props> = ({
-    name,
-    register,
-    setValue,
-    ...props
+  name,
+  register,
+  setValue,
+  ...props
 }) => {
-    return (
-        <RHFInput
-            as={<Select {...props} />}
-            register={register}
-            setValue={setValue}
-            name={name}
-        />
-    )
+  return (
+    <RHFInput
+      as={<Select {...props} />}
+      register={register}
+      setValue={setValue}
+      name={name}
+    />
+  )
 }

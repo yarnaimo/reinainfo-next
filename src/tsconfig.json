@@ -3,23 +3,12 @@
   "compilerOptions": {
     "declaration": false,
     "outDir": "dist",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "es2018"
-    ],
+    "lib": ["dom", "dom.iterable", "es2018"],
     "baseUrl": ".",
     "paths": {
-      "*": [
-        "node_modules/@types/*",
-        "src/@types/*"
-      ]
+      "*": ["node_modules/@types/*", "src/@types/*"]
     },
-    "types": [
-      "@types/node",
-      "@types/jest",
-      "@emotion/core"
-    ],
+    "types": ["@types/node", "@types/jest", "@emotion/core"],
     "allowJs": true,
     "noEmit": true,
     "noEmitOnError": false,
@@ -28,10 +17,6 @@
     "isolatedModules": true,
     "jsx": "preserve"
   },
-  "include": [
-    "**/*"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["**/*"],
+  "exclude": ["node_modules"]
 }
