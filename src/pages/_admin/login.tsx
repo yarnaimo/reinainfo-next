@@ -5,7 +5,7 @@ import { Button } from 'rmwc'
 import { Container } from '../../components/blocks/Container'
 import { Section } from '../../components/blocks/Section'
 import { Title } from '../../components/templates/Title'
-import { login, logout } from '../../services/firebase'
+import { login, logout } from '../../services/firebase-auth'
 
 type Props = {}
 

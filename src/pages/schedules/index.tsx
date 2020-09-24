@@ -14,18 +14,20 @@ import {
   IScheduleWithDayjs,
   MSchedule,
 } from '../../models/Schedule'
-import { db } from '../../services/firebase'
 import { color } from '../../utils/color'
 import { margin, transition } from '../../utils/css'
 import { dayjs } from '../../utils/date'
 import { useBool } from '../../utils/hooks'
 import { cardVariants } from '../../utils/variants'
 
-const getGSchedulesSerialized = () =>
-  db.gSchedulesActive.getQuery({
+const getGSchedulesSerialized = async () => {
+  const { db } = await import('../../services/firebase')
+
+  return db.gSchedulesActive.getQuery({
     q: MSchedule.whereSinceNow(),
     decoder: MSchedule.serialize,
   })
+}
 
 const variants: Variants = {
   initial: {

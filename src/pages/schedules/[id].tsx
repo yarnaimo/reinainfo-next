@@ -7,10 +7,11 @@ import { MainContainer } from '../../components/blocks/Container'
 import { ScheduleDetail } from '../../components/molecules/ScheduleDetail'
 import { Title } from '../../components/templates/Title'
 import { IScheduleSerialized, MSchedule } from '../../models/Schedule'
-import { db } from '../../services/firebase'
 
-const getSchedule = async (id: string) =>
-  db.schedules.getDoc({ doc: id, decoder: MSchedule.serialize })
+const getSchedule = async (id: string) => {
+  const { db } = await import('../../services/firebase')
+  return db.schedules.getDoc({ doc: id, decoder: MSchedule.serialize })
+}
 
 type Props = { schedule: IScheduleSerialized | null }
 

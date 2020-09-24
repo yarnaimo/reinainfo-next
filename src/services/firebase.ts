@@ -1,8 +1,6 @@
 import firebase, { firestore } from 'firebase/app'
-import 'firebase/auth'
 import 'firebase/firestore'
 import 'firebase/functions'
-import { useAuthState } from 'react-firebase-hooks/auth'
 import { JsonObject } from 'type-fest'
 import { firebaseConfig } from '../.config/firebase-web'
 import { env } from '../env'
@@ -13,17 +11,6 @@ export { firestore }
 export const app = firebase.apps.length
   ? firebase.app()
   : firebase.initializeApp(firebaseConfig)
-
-export const login = () => app.auth().signInWithPopup(authProvider)
-export const logout = () => app.auth().signOut()
-
-export const authProvider = new firebase.auth.GoogleAuthProvider()
-
-export const useAuth = (auth: firebase.auth.Auth) => {
-  const [user, loading, error] = useAuthState(auth)
-  const notLoggedIn = !loading && !user
-  return { user, loading, notLoggedIn, error }
-}
 
 export const dbInstance = app.firestore()
 

@@ -10,11 +10,12 @@ import {
   ITwitterCollectionSerialized,
   MTwitterCollection,
 } from '../models/TwitterCollection'
-import { db } from '../services/firebase'
 
 type Props = { twitterCollection: ITwitterCollectionSerialized | null }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
+  const { db } = await import('../services/firebase')
+
   const twitterCollection =
     (await db.twitterCollections.getDoc({
       doc: 'topics',

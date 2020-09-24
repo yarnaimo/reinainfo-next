@@ -1,14 +1,8 @@
 import Link from 'next/link'
-import Router, { useRouter } from 'next/router'
-import React, { FC, memo, ReactNode } from 'react'
+import { useRouter } from 'next/router'
+import React, { memo, PropsWithChildren } from 'react'
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
   Icon,
-  List,
-  ListItem,
   ThemeProvider,
   TopAppBar,
   TopAppBarActionItem,
@@ -16,27 +10,21 @@ import {
   TopAppBarRow,
 } from 'rmwc'
 import { env } from '../../env'
-import { logout } from '../../services/firebase'
 import { openTweetDialog } from '../../services/twitter'
 import { appbarShadow, color } from '../../utils/color'
 import {
   appbarHeight,
-  important,
   margin,
   responsive,
   size,
   transition,
 } from '../../utils/css'
-import { useBool } from '../../utils/hooks'
 import { micon } from '../../utils/icon'
 import { AppBarSection } from '../blocks/AppBarSection'
 import { Container } from '../blocks/Container'
 import { Liquid, Solid } from '../blocks/Flex'
 
-type Props = {
-  appbarItems?: ReactNode
-  appbarAlwaysAtTop?: boolean
-}
+type Props = PropsWithChildren<{}>
 
 const tabs = [
   {
@@ -127,7 +115,7 @@ const Tabs = () => {
   )
 }
 
-const AppBar: FC<{ openDrawer: () => void }> = memo(({ openDrawer }) => {
+const AppBar = memo(() => {
   return (
     <TopAppBar
       fixed
@@ -202,44 +190,10 @@ const AppBar: FC<{ openDrawer: () => void }> = memo(({ openDrawer }) => {
   )
 })
 
-export const Layout: FC<Props> = ({
-  children,
-  appbarItems,
-  appbarAlwaysAtTop,
-}) => {
-  // const { isMobile, isNarrow, appbarHeight } = useResponsive()
-  // const appbarAtTop = !isMobile || appbarAlwaysAtTop
-  const drawer = useBool(false)
-
-  const Drawer_ = (
-    <Drawer css={{ top: 0 }} modal open={drawer.state} onClose={drawer.off}>
-      <DrawerHeader css={{ background: color.primary(0.9) }}>
-        <DrawerTitle css={{ color: important(color.background()) }}>
-          {env.appName}
-        </DrawerTitle>
-      </DrawerHeader>
-
-      <DrawerContent>
-        <List>
-          <ListItem onClick={() => Router.push('/')}>{'ホーム'}</ListItem>
-          <ListItem onClick={() => Router.push('/feed-settings')}>
-            {'Feed ソースの一覧'}
-          </ListItem>
-          <ListItem onClick={() => Router.push('/tweet-settings')}>
-            {'Tweet ソースの一覧'}
-          </ListItem>
-          <ListItem onClick={logout}>{'ログアウト'}</ListItem>
-        </List>
-      </DrawerContent>
-    </Drawer>
-  )
-
+export const Layout = ({ children }: Props) => {
   return (
     <>
-      <AppBar openDrawer={drawer.on}></AppBar>
-
-      {Drawer_}
-
+      <AppBar></AppBar>
       {children}
     </>
   )
