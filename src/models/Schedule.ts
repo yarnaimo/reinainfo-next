@@ -11,6 +11,7 @@ import {
 } from 'bluespark'
 import dayjs, { Dayjs } from 'dayjs'
 import { Merge } from 'type-fest'
+import { config } from '../.config/default'
 import { env } from '../env'
 import { hsl } from '../utils/color'
 import { toTimeStr, toWDateStr } from '../utils/date'
@@ -221,7 +222,7 @@ export class MSchedule {
     return MTimestamp.where({
       field: 'date',
       order: 'asc',
-      since: dayjs(env.isDev ? 0 : undefined),
+      since: dayjs(env.isDev || !config.isLive ? 0 : undefined),
     })
   }
 
