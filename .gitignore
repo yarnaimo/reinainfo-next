@@ -33,3 +33,5 @@ dist/**/*
 node_modules
 precache.*.*.js
 sw.*
+
+.vercel
