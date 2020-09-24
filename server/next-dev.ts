@@ -11,7 +11,6 @@ const options = {
 
 const nextServer = next({
   dev: true,
-  dir: 'src',
 })
 
 const handle = nextServer.getRequestHandler()

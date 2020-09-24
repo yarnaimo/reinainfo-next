@@ -11,7 +11,9 @@ const nextConfig = {
     publicDirectory: true,
   },
   sassLoaderOptions: {
-    includePaths: [resolve(__dirname, '../node_modules')],
+    sassOptions: {
+      includePaths: [resolve(__dirname, './node_modules')],
+    },
   },
 }
 
