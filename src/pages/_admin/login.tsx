@@ -41,8 +41,4 @@ const AdminLoginPage: NextPage<Props> = (props) => {
   )
 }
 
-// Login.getInitialProps = async ({ req }) => {
-//     return {}
-// }
-
 export default AdminLoginPage

@@ -1,15 +1,13 @@
 import { ComponentProps } from '@rmwc/types'
 import { motion, Variants } from 'framer-motion'
-import { NextPage } from 'next'
-import React, { FC, Fragment, useContext } from 'react'
-import { useEffectOnce } from 'react-use'
+import { GetStaticProps, NextPage } from 'next'
+import React, { FC, Fragment } from 'react'
 import { Heading2 } from '../../components/atoms/Heading2'
 import { MainContainer } from '../../components/blocks/Container'
 import { Solid } from '../../components/blocks/Flex'
 import { PageSection } from '../../components/blocks/PageSection'
 import { Section } from '../../components/blocks/Section'
 import { ScheduleCard } from '../../components/molecules/ScheduleCard'
-import { Store } from '../../components/templates/Store'
 import { Title } from '../../components/templates/Title'
 import {
   IScheduleSerialized,
@@ -76,7 +74,7 @@ const ScheduleList: FC<{ chunkedSchedules: ScheduleChunks }> = ({
 }) => {
   return (
     <motion.div initial="initial" animate="enter" variants={variants}>
-      {chunkedSchedules.map(chunk => (
+      {chunkedSchedules.map((chunk) => (
         <Fragment key={chunk.label}>
           <motion.h5
             // style={props}
@@ -89,7 +87,7 @@ const ScheduleList: FC<{ chunkedSchedules: ScheduleChunks }> = ({
             {chunk.label}
           </motion.h5>
 
-          {chunk.schedules.map(s => (
+          {chunk.schedules.map((s) => (
             <ScheduleCard
               key={s._id}
               // style={props}
@@ -103,21 +101,24 @@ const ScheduleList: FC<{ chunkedSchedules: ScheduleChunks }> = ({
   )
 }
 
-type Props = { schedules?: IScheduleSerialized[] }
+type Props = { schedules: IScheduleSerialized[] }
 
-const SchedulesPage: NextPage<Props> = ({ schedules: pSchedules }) => {
-  const global = useContext(Store)
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const { array: schedules } = await getGSchedulesSerialized()
 
-  useEffectOnce(() => {
-    global.listenSchedules()
-  })
+  return {
+    props: {
+      schedules,
+    },
+    revalidate: 60 * 5,
+  }
+}
 
-  const schedules = global.schedules.array || pSchedules || []
-
+const Page: NextPage<Props> = ({ schedules }) => {
   const excludeSerials = useBool(false)
 
   const filteredSchedules = schedules.filter(
-    s => !excludeSerials.state || !s.isSerial,
+    (s) => !excludeSerials.state || !s.isSerial,
   )
 
   const chunkedSchedules = filteredSchedules
@@ -168,13 +169,4 @@ const SchedulesPage: NextPage<Props> = ({ schedules: pSchedules }) => {
   )
 }
 
-SchedulesPage.getInitialProps = async ctx => {
-  if (ctx.req) {
-    const { array: schedules } = await getGSchedulesSerialized()
-    return { schedules }
-  } else {
-    return { schedules: undefined }
-  }
-}
-
-export default SchedulesPage
+export default Page

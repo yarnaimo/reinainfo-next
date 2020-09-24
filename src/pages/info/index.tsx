@@ -19,23 +19,23 @@ const InfoPage: NextPage<Props> = (props) => {
         <Heading2 text="Info"></Heading2>
 
         <Section>
-          <p>上田麗奈さん非公式info</p>
+          <p>{'上田麗奈さん非公式info'}</p>
           <p>
-            Twitter アカウント -{' '}
+            {'Twitter アカウント - '}
             <ExternalLink href="https://twitter.com/Unoffishama">
-              @Unoffishama
+              {'@Unoffishama'}
             </ExternalLink>
           </p>
           <p>
-            管理者 -{' '}
+            {'管理者 - '}
             <ExternalLink href="https://twitter.com/yarnaimo">
-              @yarnaimo
+              {'@yarnaimo'}
             </ExternalLink>
           </p>
           <p>
-            Github リポジトリ -{' '}
+            {'Github リポジトリ - '}
             <ExternalLink href="https://github.com/yarnaimo/reinainfo-next">
-              yarnaimo/reinainfo-next
+              {'yarnaimo/reinainfo-next'}
             </ExternalLink>
           </p>
         </Section>
@@ -43,9 +43,5 @@ const InfoPage: NextPage<Props> = (props) => {
     </MainContainer>
   )
 }
-
-// InfoPage.getInitialProps = async ctx => {
-//     return {  }
-// }
 
 export default InfoPage

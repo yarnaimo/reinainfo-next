@@ -1,4 +1,4 @@
-import { NextPage } from 'next'
+import { GetStaticProps, NextPage } from 'next'
 import React from 'react'
 import { Heading2 } from '../components/atoms/Heading2'
 import { MainContainer } from '../components/blocks/Container'
@@ -12,9 +12,24 @@ import {
 } from '../models/TwitterCollection'
 import { db } from '../services/firebase'
 
-type Props = { twitterCollection?: ITwitterCollectionSerialized }
+type Props = { twitterCollection: ITwitterCollectionSerialized | null }
 
-const TopicsPage: NextPage<Props> = ({ twitterCollection }) => {
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const twitterCollection =
+    (await db.twitterCollections.getDoc({
+      doc: 'topics',
+      decoder: MTwitterCollection.serialize,
+    })) ?? null
+
+  return {
+    props: {
+      twitterCollection,
+    },
+    revalidate: 60 * 60,
+  }
+}
+
+const Page: NextPage<Props> = ({ twitterCollection }) => {
   return (
     <MainContainer>
       <Title title="Topics" path="topics"></Title>
@@ -32,12 +47,4 @@ const TopicsPage: NextPage<Props> = ({ twitterCollection }) => {
   )
 }
 
-TopicsPage.getInitialProps = async (ctx) => {
-  const twitterCollection = await db.twitterCollections.getDoc({
-    doc: 'topics',
-    decoder: MTwitterCollection.serialize,
-  })
-  return { twitterCollection }
-}
-
-export default TopicsPage
+export default Page

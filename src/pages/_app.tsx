@@ -9,29 +9,28 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { config } from '../.config/default'
 import { Layout } from '../components/templates/Layout'
-import { Provider } from '../components/templates/Store'
 import { env } from '../env'
 import '../styles/style.scss'
 import { appbarHeight, responsive } from '../utils/css'
 import { useGA } from '../utils/ga'
-const { PageTransition } = require('next-page-transitions')
+const { PageTransition } = require('next-page-transitions') // eslint-disable-line
 
 const Spacer = styled.div({
   height: appbarHeight.default + 4,
   [responsive.isMobile]: { height: appbarHeight.mobile + 4 },
 })
 
-export const MyApp: AppType = ({ Component, pageProps }) => {
+const MyApp: AppType = ({ Component, pageProps }) => {
   const router = useRouter()
   useGA(config.trackingId)
 
   if (router.pathname.startsWith('/_headless/')) {
     return (
-      <Provider>
+      <>
         <Global styles={{ html: { overflow: 'hidden' } }}></Global>
 
         <Component {...pageProps} />
-      </Provider>
+      </>
     )
   }
 
@@ -61,9 +60,13 @@ export const MyApp: AppType = ({ Component, pageProps }) => {
   // }, [])
 
   return (
-    <Provider>
+    <>
       <Head>
         <title>{env.longAppName}</title>
+        <meta
+          name="viewport"
+          content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, viewport-fit=cover"
+        />
       </Head>
 
       <Layout>
@@ -123,7 +126,7 @@ export const MyApp: AppType = ({ Component, pageProps }) => {
           ></Global>
         </div>
       </Layout>
-    </Provider>
+    </>
   )
 }
 

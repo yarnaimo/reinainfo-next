@@ -1,41 +1,48 @@
-import { NextPage } from 'next'
-import React, { useContext, useState } from 'react'
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
+import { useRouter } from 'next/router'
+import React from 'react'
 import {} from 'rmwc'
+import { LoadingSpinner } from '../../components/atoms/LoadingSpinner'
 import { MainContainer } from '../../components/blocks/Container'
 import { ScheduleDetail } from '../../components/molecules/ScheduleDetail'
-import { Store } from '../../components/templates/Store'
 import { Title } from '../../components/templates/Title'
 import { IScheduleSerialized, MSchedule } from '../../models/Schedule'
 import { db } from '../../services/firebase'
-import { useQueryParams } from '../../utils/hooks'
-
-type Props = { schedule?: IScheduleSerialized }
 
 const getSchedule = async (id: string) =>
   db.schedules.getDoc({ doc: id, decoder: MSchedule.serialize })
 
-const SchedulePage: NextPage<Props> = ({ schedule: pSchedule }) => {
-  const global = useContext(Store)
-  const { map } = global.schedules
-  // const router = useRouter()
-  const { params, router } = useQueryParams({
-    id: '',
-  })
+type Props = { schedule: IScheduleSerialized | null }
 
-  const [_schedule, _setSchedule] = useState<IScheduleSerialized>()
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  const { id } = params as { id: string }
+  const schedule = (await getSchedule(id)) ?? null
 
-  const schedule = map?.get(params.id) ?? pSchedule ?? _schedule
+  return {
+    props: {
+      schedule,
+    },
+    revalidate: 60 * 5,
+  }
+}
 
-  // useEffectOnce(() => {
-  //     router.prefetch('/schedules')
-  // })
-  // console.log(router)
+export const getStaticPaths: GetStaticPaths = async () => {
+  return {
+    paths: [],
+    fallback: true,
+  }
+}
 
-  // useEffect(() => {
-  //     if (!globalState.schedulesPageAccessed && !pSchedule) {
-  //         getSchedule(params.id).then(s => _setSchedule(s))
-  //     }
-  // }, [globalState.schedulesPageAccessed, pSchedule, _setSchedule])
+const Page: NextPage<Props> = ({ schedule }) => {
+  const router = useRouter()
+
+  if (router.isFallback) {
+    return (
+      <MainContainer>
+        <LoadingSpinner></LoadingSpinner>
+      </MainContainer>
+    )
+  }
 
   if (!schedule) {
     return <></>
@@ -52,19 +59,10 @@ const SchedulePage: NextPage<Props> = ({ schedule: pSchedule }) => {
       <ScheduleDetail
         schedule={schedule}
         open={true}
-        onClose={() => router.push('/schedules', undefined)}
+        onClose={() => router.push('/schedules')}
       ></ScheduleDetail>
     </MainContainer>
   )
 }
 
-SchedulePage.getInitialProps = async (ctx) => {
-  if (ctx.req) {
-    const params = ctx.query as { id: string }
-    return { schedule: await getSchedule(params.id) }
-  } else {
-    return { schedule: undefined }
-  }
-}
-
-export default SchedulePage
+export default Page

@@ -1,5 +1,5 @@
 import { Global } from '@emotion/core'
-import { NextPage } from 'next'
+import { GetServerSideProps, NextPage } from 'next'
 import React, { useState } from 'react'
 import { useEffectOnce } from 'react-use'
 import {} from 'rmwc'
@@ -9,12 +9,29 @@ import { IScheduleSerialized, MSchedule } from '../../../models/Schedule'
 import { ITicket } from '../../../models/Ticket'
 import { db, dbInstance } from '../../../services/firebase'
 
-type Props = { schedule: IScheduleSerialized }
-
 const getSchedule = async (id: string) =>
   db.schedules.getDoc({ doc: id, decoder: MSchedule.serialize })
 
-const HeadlessSchedulePage: NextPage<Props> = ({ schedule: s }) => {
+type Props = { schedule: IScheduleSerialized }
+
+export const getServerSideProps: GetServerSideProps<Props> = async ({
+  params,
+}) => {
+  const { id } = params as { id: string }
+
+  const schedule = await getSchedule(id)
+  if (!schedule) {
+    throw new Error('schedule not found')
+  }
+
+  return {
+    props: {
+      schedule,
+    },
+  }
+}
+
+const Page: NextPage<Props> = ({ schedule: s }) => {
   const [tickets, setTickets] = useState<ITicket['_D'][]>()
 
   useEffectOnce(() => {
@@ -58,15 +75,4 @@ const HeadlessSchedulePage: NextPage<Props> = ({ schedule: s }) => {
   )
 }
 
-HeadlessSchedulePage.getInitialProps = async (ctx) => {
-  const params = ctx.query as { id: string }
-
-  const schedule = await getSchedule(params.id)
-  if (!schedule) {
-    throw new Error('schedule not found')
-  }
-
-  return { schedule }
-}
-
-export default HeadlessSchedulePage
+export default Page
