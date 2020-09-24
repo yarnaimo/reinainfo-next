@@ -9,7 +9,9 @@ let serviceAccount: any
 
 try {
   serviceAccount = require(serviceAccountPath)
-} catch (error) {}
+} catch (error) {
+  null
+}
 
 export const appAdmin = admin.apps.length
   ? admin.app()

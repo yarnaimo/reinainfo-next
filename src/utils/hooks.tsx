@@ -375,7 +375,7 @@ export const useFormDialog = <
             onClose.current(null)
           }}
         >
-          キャンセル
+          {'キャンセル'}
         </DialogButton>
 
         <DialogButton
@@ -409,7 +409,7 @@ export const useFormDialog = <
             // })
           }}
         >
-          保存
+          {'保存'}
         </DialogButton>
       </DialogActions>
     </Dialog>

@@ -9,7 +9,9 @@ const lastMigrationFile = join('server/.config/last-migration')
 let lastMigration = ''
 try {
   lastMigration = readFileSync(join(lastMigrationFile), 'utf8').trim()
-} catch (error) {}
+} catch (error) {
+  null
+}
 
 const migrationFiles = readdirSync(migrationsDir).sort()
 

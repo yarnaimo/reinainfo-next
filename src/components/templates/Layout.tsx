@@ -221,14 +221,14 @@ export const Layout: FC<Props> = ({
 
       <DrawerContent>
         <List>
-          <ListItem onClick={() => Router.push('/')}>ホーム</ListItem>
+          <ListItem onClick={() => Router.push('/')}>{'ホーム'}</ListItem>
           <ListItem onClick={() => Router.push('/feed-settings')}>
-            Feed ソースの一覧
+            {'Feed ソースの一覧'}
           </ListItem>
           <ListItem onClick={() => Router.push('/tweet-settings')}>
-            Tweet ソースの一覧
+            {'Tweet ソースの一覧'}
           </ListItem>
-          <ListItem onClick={logout}>ログアウト</ListItem>
+          <ListItem onClick={logout}>{'ログアウト'}</ListItem>
         </List>
       </DrawerContent>
     </Drawer>

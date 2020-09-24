@@ -269,7 +269,7 @@ export class MSchedule {
         [
           p.name || '',
           ...[p.gatherBy, p.opensAt, p.startsAt].map(
-            (s) => s?.replace(/\:/, '') || '',
+            (s) => s?.replace(/:/, '') || '',
           ),
         ].join('.'),
       )
