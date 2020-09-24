@@ -4,6 +4,8 @@ import React from 'react'
 import {} from 'rmwc'
 import { LoadingSpinner } from '../../components/atoms/LoadingSpinner'
 import { MainContainer } from '../../components/blocks/Container'
+import { PageSection } from '../../components/blocks/PageSection'
+import { Section } from '../../components/blocks/Section'
 import { ScheduleDetail } from '../../components/molecules/ScheduleDetail'
 import { Title } from '../../components/templates/Title'
 import { IScheduleSerialized, MSchedule } from '../../models/Schedule'
@@ -57,11 +59,11 @@ const Page: NextPage<Props> = ({ schedule }) => {
         thumbUrl={schedule.thumbUrl || undefined}
       ></Title>
 
-      <ScheduleDetail
-        schedule={schedule}
-        open={true}
-        onClose={() => router.push('/schedules')}
-      ></ScheduleDetail>
+      <PageSection>
+        <Section>
+          <ScheduleDetail schedule={schedule}></ScheduleDetail>
+        </Section>
+      </PageSection>
     </MainContainer>
   )
 }

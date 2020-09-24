@@ -71,40 +71,40 @@ const MyApp: AppType = ({ Component, pageProps }) => {
 
       <Layout>
         <div css={{ position: 'relative' }}>
-          <PageTransition
+          {/* <PageTransition
             timeout={250}
             classNames="page-transition"
             monkeyPatchScrolling
-          >
-            <div
-              key={router.route}
-              // variants={pageFadeVariants}
-              // initial="hidden"
-              // animate="visible"
-              // exit="hidden"
-              css={
-                {
-                  // position: 'absolute',
-                  // width: '100%',
-                  // top: 0,
-                  // left: 0,
-                }
+          > */}
+          <div
+            key={router.route}
+            // variants={pageFadeVariants}
+            // initial="hidden"
+            // animate="visible"
+            // exit="hidden"
+            css={
+              {
+                // position: 'absolute',
+                // width: '100%',
+                // top: 0,
+                // left: 0,
               }
-            >
-              <Spacer
-                css={{
-                  [responsive.isMobile]: { display: 'none' },
-                }}
-              ></Spacer>
-              <Component {...pageProps} />
-              <Spacer
-                css={{
-                  display: 'none',
-                  [responsive.isMobile]: { display: 'block' },
-                }}
-              ></Spacer>
-            </div>
-          </PageTransition>
+            }
+          >
+            <Spacer
+              css={{
+                [responsive.isMobile]: { display: 'none' },
+              }}
+            ></Spacer>
+            <Component {...pageProps} />
+            <Spacer
+              css={{
+                display: 'none',
+                [responsive.isMobile]: { display: 'block' },
+              }}
+            ></Spacer>
+          </div>
+          {/* </PageTransition> */}
 
           <Global
             styles={`

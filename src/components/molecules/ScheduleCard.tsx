@@ -1,16 +1,14 @@
 import { ComponentProps } from '@rmwc/types'
 import { MSpark } from 'bluespark'
-import { motion, MotionProps } from 'framer-motion'
-import { useRouter } from 'next/router'
-import React, { forwardRef, memo, useMemo, useState } from 'react'
+import { MotionProps } from 'framer-motion'
+import Link from 'next/link'
+import React, { forwardRef, memo, useMemo } from 'react'
 import { Icon, Ripple } from 'rmwc'
 import { IScheduleSerialized, MSchedule } from '../../models/Schedule'
 import { cardGradient, cardShadow, color } from '../../utils/color'
 import { ellipsis, margin, padding, size } from '../../utils/css'
 import { micon } from '../../utils/icon'
 import { Liquid, Solid, SolidColumn } from '../blocks/Flex'
-import { Title } from '../templates/Title'
-import { ScheduleDetail } from './ScheduleDetail'
 
 type Props = ComponentProps &
   MotionProps & {
@@ -19,10 +17,6 @@ type Props = ComponentProps &
 
 export const ScheduleCard = memo(
   forwardRef<any, Props>(({ schedule: s, ...props }, ref) => {
-    const router = useRouter()
-
-    const [modalOpen, setModalOpen] = useState(false)
-
     const category = MSchedule.getCategory(s.category)
 
     const [textColor, background, boxShadow] = useMemo(
@@ -151,36 +145,12 @@ export const ScheduleCard = memo(
     )
 
     return (
-      <>
-        {modalOpen && (
-          <Title title={s.title} path={`schedules/${s._id}`}></Title>
-        )}
-        <ScheduleDetail
-          schedule={s}
-          open={modalOpen}
-          onClose={() => {
-            setModalOpen(false)
-
-            setTimeout(() => {
-              router.push('/schedules', `/schedules`, {
-                shallow: true,
-              })
-            }, 350)
-          }}
-        ></ScheduleDetail>
-
-        <motion.a
-          href={s.isSerial ? undefined : `/schedules/${s._id}`}
-          onClick={(e) => {
-            setModalOpen(true)
-            e.preventDefault()
-
-            setTimeout(() => {
-              router.push('/schedules', `/schedules/${s._id}`, {
-                shallow: true,
-              })
-            }, 350)
-          }}
+      <Link
+        href={s.isSerial ? '' : `/schedules/${s._id}`}
+        passHref
+        scroll={false}
+      >
+        <a
           ref={ref as any}
           {...props}
           css={{
@@ -188,14 +158,6 @@ export const ScheduleCard = memo(
             ...margin({ y: 12, x: -1 }),
           }}
         >
-          {/* <Link
-                        key={s._id}
-                        href={{ query: { id: s._id } }}
-                        as={`/schedules/${s._id}`}
-                        passHref
-                        shallow
-                        scroll={false}
-                    > */}
           <Ripple
             css={{
               '&::before, &::after': {
@@ -210,9 +172,8 @@ export const ScheduleCard = memo(
           >
             {Content_}
           </Ripple>
-          {/* </Link> */}
-        </motion.a>
-      </>
+        </a>
+      </Link>
     )
   }),
   (a, b) => MSpark.isEqual(a.schedule, b.schedule),

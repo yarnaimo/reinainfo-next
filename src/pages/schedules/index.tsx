@@ -1,5 +1,5 @@
 import { ComponentProps } from '@rmwc/types'
-import { motion, Variants } from 'framer-motion'
+import { Variants } from 'framer-motion'
 import { GetStaticProps, NextPage } from 'next'
 import React, { FC, Fragment } from 'react'
 import { Heading2 } from '../../components/atoms/Heading2'
@@ -18,7 +18,6 @@ import { color } from '../../utils/color'
 import { margin, transition } from '../../utils/css'
 import { dayjs } from '../../utils/date'
 import { useBool } from '../../utils/hooks'
-import { cardVariants } from '../../utils/variants'
 
 const getGSchedulesSerialized = async () => {
   const { db } = await import('../../services/firebase')
@@ -75,31 +74,29 @@ const ScheduleList: FC<{ chunkedSchedules: ScheduleChunks }> = ({
   chunkedSchedules,
 }) => {
   return (
-    <motion.div initial="initial" animate="enter" variants={variants}>
+    <div>
       {chunkedSchedules.map((chunk) => (
         <Fragment key={chunk.label}>
-          <motion.h5
+          <h5
             // style={props}
-            variants={cardVariants}
             css={{
               ...margin({ top: 24, bottom: 12 }),
               color: color.brown(0.75),
             }}
           >
             {chunk.label}
-          </motion.h5>
+          </h5>
 
           {chunk.schedules.map((s) => (
             <ScheduleCard
               key={s._id}
               // style={props}
-              variants={cardVariants}
               schedule={s}
             ></ScheduleCard>
           ))}
         </Fragment>
       ))}
-    </motion.div>
+    </div>
   )
 }
 
