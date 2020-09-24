@@ -1,3 +1,4 @@
+process.env.TZ = 'Asia/Tokyo'
 import { Global } from '@emotion/core'
 import styled from '@emotion/styled'
 import '@mdi/font/css/materialdesignicons.css'
