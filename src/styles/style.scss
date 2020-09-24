@@ -5,26 +5,26 @@ $mdc-theme-on-primary: $mdc-theme-background;
 $mdc-theme-secondary: hsl(35, 20, 55);
 $mdc-theme-on-secondary: $mdc-theme-background;
 
-$black: rgba(black, 0.7);
+$black: rgba(black, 0.87);
 $mdc-theme-on-surface: $black;
 $mdc-chip-ink-color-default: $black;
 
 // 87,54,38
 $mdc-theme-text-colors: (
-    dark: (
-        primary: rgba(black, 0.7),
-        secondary: rgba(black, 0.45),
-        hint: rgba(black, 0.3),
-        disabled: rgba(black, 0.3),
-        icon: rgba(black, 0.3),
-    ),
-    light: (
-        primary: white,
-        secondary: rgba(white, 0.7),
-        hint: rgba(white, 0.5),
-        disabled: rgba(white, 0.5),
-        icon: rgba(white, 0.5),
-    ),
+  dark: (
+    primary: rgba(black, 0.87),
+    secondary: rgba(black, 0.45),
+    hint: rgba(black, 0.3),
+    disabled: rgba(black, 0.3),
+    icon: rgba(black, 0.3),
+  ),
+  light: (
+    primary: white,
+    secondary: rgba(white, 0.87),
+    hint: rgba(white, 0.5),
+    disabled: rgba(white, 0.5),
+    icon: rgba(white, 0.5),
+  ),
 );
 
 // $mdc-ripple-dark-ink-opacities: (
@@ -36,41 +36,16 @@ $mdc-theme-text-colors: (
 // );
 
 $mdc-typography-font-family: 'Ubuntu', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', 'BIZ UDPゴシック', sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji', 'Segoe UI Symbol';
+  'Segoe UI', 'BIZ UDPゴシック', sans-serif, 'Apple Color Emoji',
+  'Segoe UI Emoji', 'Segoe UI Symbol';
 
 @import '~material-components-web/material-components-web';
 @import '~@rmwc/circular-progress/circular-progress';
 @import '~@rmwc/avatar/avatar';
 @import '~@rmwc/data-table/data-table';
 
-html {
-    width: 100%;
-    height: 100%;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    touch-action: manipulation;
-    font-size: 15px;
-    line-height: 1.3;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    overflow-wrap: break-word;
-    color: var(--mdc-theme-text-primary-on-background);
-}
-
-body {
-    margin: 0;
-}
-
-body {
-    font-family: $mdc-typography-font-family;
-    letter-spacing: 0.375px;
-    text-transform: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
 .mdc-dialog-scroll-lock {
-    overflow: unset;
+  overflow: unset;
 }
 
 // .mdc-dialog__content {
@@ -78,52 +53,34 @@ body {
 // }
 
 .mdc-button__label {
-    text-transform: none;
+  text-transform: none;
 }
 
 code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-        monospace;
-}
-
-a {
-    color: hsl(211, 41, 57);
-    // color: var(--md-brown-300);
-    text-decoration: none;
-}
-
-h1,
-h2 {
-    font-family: 'Cabin', $mdc-typography-font-family;
-    font-weight: 600;
-    letter-spacing: 0.75px;
-}
-
-h4,
-h5 {
-    font-weight: 500;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
 }
 
 .mdc-top-app-bar__title {
-    font-family: unset;
+  font-family: unset;
 }
 
 .mdc-fab__icon {
-    color: $mdc-theme-on-secondary;
+  color: $mdc-theme-on-secondary;
 }
 
 // .material-icons {
 //     display: block;
 
 .mdi {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-    &::before {
-        display: flex;
-        line-height: 1;
-    }
+  &::before {
+    display: flex;
+    line-height: 1;
+  }
 }
 // }
 // .material-icons {
@@ -143,118 +100,6 @@ h5 {
 // }
 
 .mdc-text-field:not(.mdc-text-field--disabled):not(.mdc-text-field--outlined):not(.mdc-text-field--textarea)
-    .mdc-text-field__input {
-    border-bottom-color: rgba(0, 0, 0, 0.25);
-}
-
-.tweet {
-    margin: 0 -18px !important;
-    padding: 8px 18px !important;
-    max-width: unset !important;
-    font-size: 13px !important;
-    line-height: 19px !important;
-
-    .retweet-text,
-    .retweet-text > a,
-    .username,
-    .time > a {
-        color: var(--md-grey-500) !important;
-    }
-    .tweet-context > svg > path {
-        fill: var(--md-grey-500) !important;
-    }
-
-    .ProfileTweet-actionCount {
-        color: var(--md-grey-500) !important;
-    }
-    .IconContainer > svg > path {
-        fill: var(--md-grey-500) !important;
-    }
-
-    .tweet,
-    .fullname,
-    .tweet-text {
-        color: rgba(black, 0.9) !important;
-    }
-
-    .context {
-        margin: 0px 0px 4px 32px !important;
-    }
-
-    .content {
-        position: relative;
-        margin-left: 54px !important;
-
-        .header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 2px;
-
-            .account-group {
-                flex: 1;
-                display: flex;
-                align-items: center;
-                text-overflow: ellipsis;
-                overflow: hidden;
-                white-space: nowrap;
-
-                .avatar {
-                    position: absolute;
-                    top: 3px !important;
-                    left: -54px !important;
-                    margin: 0 !important;
-                    width: 40px !important;
-                    height: 40px !important;
-                    border-radius: 20px !important;
-                }
-                .fullname {
-                    text-overflow: ellipsis;
-                    overflow: hidden;
-                    white-space: nowrap;
-                }
-                .username {
-                    margin-left: 2px;
-                    margin-right: 6px;
-                }
-            }
-            .username,
-            .tweet-timestamp {
-                font-size: 11px !important;
-            }
-            .time + a {
-                display: none;
-                // position: absolute;
-                // right: 0;
-            }
-        }
-        .tweet-text {
-            .emoji {
-                transform: translateY(2px);
-            }
-        }
-        .AdaptiveMedia-photoContainer {
-            img {
-                top: unset !important;
-                height: 100%;
-                object-fit: cover;
-            }
-        }
-        .footer {
-            // opacity: 0.6;
-            .ProfileTweet-actionList {
-                margin-left: -2px !important;
-                // margin-bottom: 0 !important;
-
-                .ProfileTweet-actionButton {
-                    display: inline-flex !important;
-                    align-items: center !important;
-
-                    svg,
-                    .IconTextContainer {
-                        display: flex !important;
-                    }
-                }
-            }
-        }
-    }
+  .mdc-text-field__input {
+  border-bottom-color: rgba(0, 0, 0, 0.25);
 }

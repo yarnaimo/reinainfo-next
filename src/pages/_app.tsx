@@ -8,6 +8,7 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { config } from '../.config/default'
+import { GlobalStyle } from '../components/styles/GlobalStyle'
 import { Layout } from '../components/templates/Layout'
 import { env } from '../env'
 import '../styles/style.scss'
@@ -27,6 +28,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
   if (router.pathname.startsWith('/_headless/')) {
     return (
       <>
+        <GlobalStyle></GlobalStyle>
         <Global styles={{ html: { overflow: 'hidden' } }}></Global>
 
         <Component {...pageProps} />
@@ -61,6 +63,8 @@ const MyApp: AppType = ({ Component, pageProps }) => {
 
   return (
     <>
+      <GlobalStyle></GlobalStyle>
+
       <Head>
         <title>{env.longAppName}</title>
         <meta
