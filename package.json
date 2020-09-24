@@ -12,16 +12,16 @@
     "deploy": "ts-node server/scripts/migrate.ts && firebase deploy",
     "lint": "eslint --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'",
     "logs": "firebase functions:log",
-    "next:build": "NODE_ENV=production rm -r src/.next src/public/_next && next build src && cp -r src/.next src/public/_next",
+    "next:build": "NODE_ENV=production next build",
     "next:debug": "node -r ts-node/register --inspect server/next-dev",
-    "next:dev": "ts-node server/next-dev",
+    "next:dev": "TS_NODE_PROJECT=tsconfig.server.json ts-node server/next-dev",
     "np": "np --yolo --no-publish",
-    "prepare": "sed -i -e 's#type BlueValue = string#type BlueValue = Blue.IO<any, any> | string#' node_modules/bluespark/dist/blue-types.d.ts",
+    "prepare": "./fix-bluespark.sh",
     "serve": "firebase serve --only firestore",
     "serve:functions": "tsc && firebase serve --only firestore,functions",
     "shell": "tsc && firebase functions:shell",
     "test": "NODE_ENV=test jest",
-    "ts-node": "ts-node"
+    "ts-node": "TS_NODE_PROJECT=tsconfig.server.json ts-node"
   },
   "dependencies": {
     "@emotion/babel-preset-css-prop": "^10.0.23",
