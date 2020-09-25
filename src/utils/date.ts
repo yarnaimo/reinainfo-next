@@ -28,8 +28,10 @@ export const toFormDate = (date: Dayjs | Date) =>
 export const toTableDate = (date: Dayjs | Date) =>
   dayjs(date).format('YYYY-MM-DD HH:mm')
 
+export const wDateBase = () => dayjs()
+
 export const toWDateStr = (date: Dayjs, omitSpace = false) => {
-  const now = dayjs()
+  const now = wDateBase()
 
   const template = date.isSame(now, 'year') ? 'M/D' : 'YYYY/M/D'
 

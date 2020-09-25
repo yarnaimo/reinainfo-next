@@ -9,7 +9,7 @@ export let dbAdmin: ReturnType<typeof createCollections>
 
 beforeEach(() => {
   provider.next()
-  dbInstanceAdmin = provider.getFirestoreWithAuth() as any
+  dbInstanceAdmin = provider.getAdminFirestore() as any
   dbAdmin = createCollections(dbInstanceAdmin) as any
 })
 
