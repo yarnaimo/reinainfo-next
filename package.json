@@ -17,8 +17,8 @@
     "next:dev": "TS_NODE_PROJECT=tsconfig.server.json ts-node server/next-dev",
     "np": "np --yolo --no-publish",
     "prepare": "./fix-bluespark.sh",
-    "serve": "firebase serve --only firestore",
-    "serve:functions": "tsc && firebase serve --only firestore,functions",
+    "serve": "firebase emulators:start --only firestore",
+    "serve:functions": "tsc && firebase emulators:start --only firestore,functions",
     "shell": "tsc && firebase functions:shell",
     "test": "NODE_ENV=test jest",
     "ts-node": "TS_NODE_PROJECT=tsconfig.server.json ts-node"
