@@ -11,6 +11,7 @@ import { _retweetPositiveTweets } from './api/retweet-positive-tweets'
 import { _retweetScheduleTweetsOfPrevNight } from './api/retweet-schedule-tweets-of-prev-night'
 import { _tweetUpcomingSchedules } from './api/tweet-upcoming-schedules'
 import { _tweetUpcomingTicketEvents } from './api/tweet-upcoming-ticket-events'
+import { _updateCalendar } from './api/update-calendar'
 import { getTwimoClient } from './services/twitter'
 
 const getTime = () => dayjs().format('HHmm')
@@ -46,6 +47,13 @@ const run = <T extends any>(name: string, fn: () => Promise<T>) => {
   console.log(`⚡ ${name}`)
   return fn()
 }
+
+export const updateCalendar = defaultBuilder.pubsub
+  .schedule('0 */12 * * *')
+  .timeZone(timezone)
+  .onRun(async () => {
+    await _updateCalendar()
+  })
 
 export const defaultBuilderFunctions = defaultBuilder.pubsub
   .schedule('*/15 * * * *')

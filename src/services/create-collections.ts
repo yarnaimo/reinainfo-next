@@ -1,5 +1,6 @@
 import { Blue } from 'bluespark'
 import { AppEnv } from '../models/AppEnv'
+import { Calendar } from '../models/Calendar'
 import { GScheduleActive, Schedule } from '../models/Schedule'
 import { ScheduleTweetLog } from '../models/ScheduleTweetLog'
 import { Serial } from '../models/Serial'
@@ -13,6 +14,7 @@ export const createCollections = <F extends Blue.Firestore>(instance: F) => {
   return {
     appEnvs: AppEnv(instance),
     webhooks: Webhook(instance),
+    calendars: Calendar(instance),
     twitterSearches: TwitterSearch(instance),
     twitterCollections: TwitterCollection(instance),
 

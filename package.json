@@ -41,6 +41,7 @@
     "firebase-admin": "^8.9.0",
     "firebase-functions": "^3.3.0",
     "framer-motion": "^1.7.0",
+    "ical-generator": "^1.15.0",
     "lazy.js": "^0.5.1",
     "material-colors": "^1.2.6",
     "modern-normalize": "^0.5.0",
