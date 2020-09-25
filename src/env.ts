@@ -6,9 +6,7 @@ export const env = {
   isDev,
   isBrowser,
   port,
-  origin: isDev
-    ? `https://localhost:${port()}`
-    : 'https://reinainfo-next.web.app',
+  origin: isDev ? `https://localhost:${port()}` : 'https://reina.one',
   appName: 'ReinaInfo Next',
   longAppName: 'ReinaInfo Next',
   description: '上田麗奈さん非公式info',
