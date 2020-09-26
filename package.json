@@ -7,7 +7,7 @@
   "author": "yamaimo <yarnaimo@gmail.com>",
   "main": "dist/server/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -P tsconfig.server.json",
     "debug": "node -r ts-node/register --inspect-brk",
     "deploy": "ts-node server/scripts/migrate.ts && firebase deploy",
     "lint": "eslint --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'",
