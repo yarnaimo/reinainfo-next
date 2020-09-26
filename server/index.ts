@@ -4,7 +4,6 @@ process.env.TZ = timezone
 import * as functions from 'firebase-functions'
 import { TweetClassifier } from '../learn'
 import { dayjs } from '../src/utils/date'
-import { _next } from './api/next'
 import { _onScheduleWrite } from './api/on-schedule-write'
 import { _retweetManually } from './api/retweet-manually'
 import { _retweetPositiveTweets } from './api/retweet-positive-tweets'
@@ -17,12 +16,7 @@ import { getTwimoClient } from './services/twitter'
 const getTime = () => dayjs().format('HHmm')
 
 const defaultRegion = functions.region('asia-northeast1')
-const usRegion = functions.region('us-central1')
 
-const nextBuilder = usRegion.runWith({
-  timeoutSeconds: 15,
-  memory: '256MB',
-})
 const defaultBuilder = defaultRegion.runWith({
   timeoutSeconds: 30,
   memory: '256MB',
@@ -31,8 +25,6 @@ const puppeteerBuilder = defaultRegion.runWith({
   timeoutSeconds: 30,
   memory: '1GB',
 })
-
-export const next = nextBuilder.https.onRequest(_next)
 
 export const retweetManually = defaultBuilder.https.onCall(_retweetManually)
 
