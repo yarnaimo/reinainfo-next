@@ -24,6 +24,10 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /calendars/{calendar} {
+      allow read;
+    }
+
     match /topics/{topic} {
       allow read;
     }
