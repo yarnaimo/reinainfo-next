@@ -1,6 +1,6 @@
 import { plusOne } from '@yarnaimo/twimo'
-import dayjs, { Dayjs } from 'dayjs'
 import { Status } from 'twitter-d'
+import { dayjs, Dayjs } from '../../src/utils/date'
 import { dbAdmin } from '../services/firebase-admin'
 import { retweetWithLoggingAndNotification } from '../services/integrated'
 import { TwimoClient } from '../services/twitter'

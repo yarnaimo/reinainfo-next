@@ -7,13 +7,18 @@ const config = {
     project: './tsconfig.json',
   },
   rules: {
-    // 'no-restricted-imports': [
-    //   'error',
-    //   {
-    //     paths: ['firebase', 'remeda', 'runtypes', 'dayjs'],
-    //     patterns: ['**/__mocks__/**'],
-    //   },
-    // ],
+    'no-restricted-imports': [
+      'error',
+      {
+        paths: [
+          // 'firebase',
+          // 'remeda',
+          // 'runtypes',
+          'dayjs',
+        ],
+        patterns: ['**/__mocks__/**'],
+      },
+    ],
   },
 }
 

@@ -1,11 +1,12 @@
+process.env.TZ = 'Asia/Tokyo'
 import is from '@sindresorhus/is'
-import dayjs, { Dayjs } from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs' // eslint-disable-line
 import 'dayjs/locale/ja'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 dayjs.extend(customParseFormat)
 dayjs.locale('ja')
 
-export { dayjs }
+export { dayjs, Dayjs }
 
 // export const formatDate = (date: Dayjs) =>
 //     date.format(date.isSame(dayjs(), 'day') ? 'H:mm' : 'D日 H:mm')

@@ -1,4 +1,4 @@
-import { Dayjs } from 'dayjs'
+import { Dayjs } from '../../src/utils/date'
 import { dbAdmin } from '../services/firebase-admin'
 import { TwimoClient } from '../services/twitter'
 

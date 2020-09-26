@@ -1,8 +1,7 @@
 import { Rstring } from '@yarnaimo/rain'
 import { Blue, Spark, SparkQuery } from 'bluespark'
-import dayjs, { Dayjs } from 'dayjs'
 import { env } from '../env'
-import { toWDateStr, toWDateTimeStr } from '../utils/date'
+import { dayjs, Dayjs, toWDateStr, toWDateTimeStr } from '../utils/date'
 
 export type ITicket = Blue.Interface<{
   label: string

@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is'
-import { Dayjs } from 'dayjs'
 import React from 'react'
 import { Button, TextField } from 'rmwc'
 import { ISerial } from '../../../models/Serial'
 import {
   createSerialDates,
+  Dayjs,
   formDatePattern,
   parseFormDateNullable,
   toFormDate,

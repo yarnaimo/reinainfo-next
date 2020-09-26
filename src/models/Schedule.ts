@@ -9,12 +9,11 @@ import {
   SparkQuery,
   SparkSerialized,
 } from 'bluespark'
-import dayjs, { Dayjs } from 'dayjs'
 import { Merge } from 'type-fest'
 import { config } from '../.config/default'
 import { env } from '../env'
 import { hsl } from '../utils/color'
-import { toTimeStr, toWDateStr } from '../utils/date'
+import { dayjs, Dayjs, toTimeStr, toWDateStr } from '../utils/date'
 import { ITicket } from './Ticket'
 
 const colorSet = {
