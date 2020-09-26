@@ -1,10 +1,18 @@
-process.env.TZ = 'Asia/Tokyo'
 import is from '@sindresorhus/is'
-import dayjs, { Dayjs } from 'dayjs' // eslint-disable-line
+import _dayjs, { Dayjs } from 'dayjs' // eslint-disable-line
 import 'dayjs/locale/ja'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
-dayjs.extend(customParseFormat)
-dayjs.locale('ja')
+import timezonePlugin from 'dayjs/plugin/timezone'
+import utcPlugin from 'dayjs/plugin/utc'
+_dayjs.extend(customParseFormat)
+_dayjs.extend(utcPlugin)
+_dayjs.extend(timezonePlugin)
+_dayjs.locale('ja')
+
+const timezone = 'Asia/Tokyo'
+
+const dayjs = ((...args: any[]) =>
+  _dayjs(...args).tz(timezone)) as typeof _dayjs
 
 export { dayjs, Dayjs }
 
