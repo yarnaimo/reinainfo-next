@@ -23,25 +23,14 @@ export const _updateCalendar = async () => {
     q: MTimestamp.where({ field: 'date', order: 'asc' }),
   })
 
-  const oneshotSchedules = schedules.array.filter((s) => !s.isSerial)
-  const serialSchedules = schedules.array.filter((s) => s.isSerial)
-
-  const oneshotEvents = oneshotSchedules.map(scheduleToEventData)
-  const serialEvents = serialSchedules.map(scheduleToEventData)
+  const events = schedules.array.map(scheduleToEventData)
 
   const mainCal = ical({
     domain,
-    name: 'ReinaInfo Calendar (Main)',
+    name: '🌸 ReinaInfo Calendar',
     timezone,
-    events: oneshotEvents,
-  })
-  const subCal = ical({
-    domain,
-    name: 'ReinaInfo Calendar (Sub)',
-    timezone,
-    events: serialEvents,
+    events,
   })
 
   await dbAdmin.calendars.create('main', { content: mainCal.toString() })
-  await dbAdmin.calendars.create('sub', { content: subCal.toString() })
 }
