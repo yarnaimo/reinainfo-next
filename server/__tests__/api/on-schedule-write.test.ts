@@ -78,8 +78,7 @@ test('created', async () => {
 
   const expectedText = `🎉 スケジュールが登録されました
 
-1/20 (日)
-🎫 live2
+1/20 (日) live2
 
 ${scheduleUrl}
 ${pageUrlBase}/live2`

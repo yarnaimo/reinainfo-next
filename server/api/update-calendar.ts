@@ -1,7 +1,7 @@
 import { MTimestamp } from 'bluespark'
 import ical from 'ical-generator'
 import { env } from '../../src/env'
-import { ISchedule, MSchedule } from '../../src/models/Schedule'
+import { ISchedule } from '../../src/models/Schedule'
 import { dayjs } from '../../src/utils/date'
 import { dbAdmin } from '../services/firebase-admin'
 
@@ -10,7 +10,7 @@ const scheduleToEventData = (s: ISchedule['_D']): ical.EventData => ({
   allDay: !s.hasTime,
   start: s.date.toDate(),
   end: dayjs(s.date.toDate()).add(30, 'minute').toDate(),
-  summary: `${MSchedule.getCategory(s.category).emoji} ${s.title}`,
+  summary: s.title,
   location: s.venue ?? undefined,
   url: s.url,
 })

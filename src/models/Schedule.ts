@@ -357,9 +357,6 @@ export class MSchedule {
       Rstring.joinOnlyStrings(' ')([
         withDate && formattedDate.wdateString,
         formattedDate.timeString,
-      ]),
-      Rstring.joinOnlyStrings(' ')([
-        MSchedule.getCategory(s.category).emoji,
         s.title,
       ]),
       '',

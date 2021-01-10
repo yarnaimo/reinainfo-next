@@ -28,8 +28,7 @@ test('daily', async () => {
 
   const expectedText = `明日 1/19 (土) の予定
 
-22:00
-🎫 up1
+22:00 up1
 
 ${scheduleUrl}`
 
@@ -57,21 +56,18 @@ test('weekly', async () => {
   const expectedTweets = [
     `1/19 (土) - 1/25 (金) の予定 [1/3]
 
-1/19 (土) 22:00
-🎫 up1
+1/19 (土) 22:00 up1
 
 ${scheduleUrl}`,
     `1/19 (土) - 1/25 (金) の予定 [2/3]
 
-1/20 (日)
-🎫 live2
+1/20 (日) live2
 
 ${scheduleUrl}
 ${pageUrlBase}/live2`,
     `1/19 (土) - 1/25 (金) の予定 [3/3]
 
-1/25 (金) 23:59
-🎫 live7
+1/25 (金) 23:59 live7
 
 ${scheduleUrl}
 ${pageUrlBase}/live7`,
